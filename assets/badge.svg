@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 64 64" role="img" aria-label="Klasso">
+  
+  <g  fill="none" stroke="#f4fff7" stroke-width="6" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M20 17V47"/>
+    <path d="M43 18 29 30.5a2 2 0 0 0 0 3L44 47"/>
+  </g>
+  
+</svg>
