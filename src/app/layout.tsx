@@ -17,10 +17,9 @@ export const metadata: Metadata = {
     statusBarStyle: "black-translucent",
   },
   formatDetection: { telephone: false, date: false, address: false, email: false },
-  icons: {
-    icon: [{ url: "/favicon.png", type: "image/png" }],
-    apple: [{ url: "/icons/apple-touch-icon.png", sizes: "180x180" }],
-  },
+  // No `icons` block on purpose: declaring one suppresses Next's file
+  // conventions. src/app/icon.svg (transparent tab favicon) and
+  // src/app/apple-icon.png (opaque home-screen icon) are wired automatically.
 };
 
 export const viewport: Viewport = {
