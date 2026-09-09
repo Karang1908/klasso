@@ -1,0 +1,725 @@
+{
+  "app": "Klasso",
+  "version": 2,
+  "exported_at": "2026-09-09T06:18:34.901Z",
+  "data": {
+    "subjects": [
+      {
+        "id": "s0",
+        "user_id": "u",
+        "name": "Data Structures",
+        "short_name": "DSA",
+        "color": "#497563",
+        "teacher": "Dr. Rao",
+        "room": "LT-3",
+        "min_attendance": 75,
+        "created_at": ""
+      },
+      {
+        "id": "s1",
+        "user_id": "u",
+        "name": "Digital Electronics",
+        "short_name": "DE",
+        "color": "#527d91",
+        "teacher": "Prof. Iyer",
+        "room": "B-12",
+        "min_attendance": 75,
+        "created_at": ""
+      },
+      {
+        "id": "s2",
+        "user_id": "u",
+        "name": "Discrete Maths",
+        "short_name": "DM",
+        "color": "#8a8a4c",
+        "teacher": "Dr. Menon",
+        "room": "LT-1",
+        "min_attendance": 75,
+        "created_at": ""
+      },
+      {
+        "id": "s3",
+        "user_id": "u",
+        "name": "Physics Lab",
+        "short_name": "LAB",
+        "color": "#b38a42",
+        "teacher": "Ms. Fernandes",
+        "room": "Lab 4",
+        "min_attendance": 75,
+        "created_at": ""
+      },
+      {
+        "id": "f090da0a-8656-46ee-bb63-63e979006fa1",
+        "user_id": "u",
+        "created_at": "",
+        "short_name": null,
+        "color": "#497563",
+        "teacher": null,
+        "room": null,
+        "min_attendance": 75,
+        "name": "UI test subject"
+      }
+    ],
+    "slots": [
+      {
+        "id": "slot0",
+        "user_id": "u",
+        "subject_id": "s0",
+        "weekday": 3,
+        "start_time": "08:43",
+        "end_time": "09:38",
+        "room": "LT-3",
+        "kind": "lecture",
+        "created_at": ""
+      },
+      {
+        "id": "slot1",
+        "user_id": "u",
+        "subject_id": "s1",
+        "weekday": 3,
+        "start_time": "09:43",
+        "end_time": "10:38",
+        "room": "B-12",
+        "kind": "lecture",
+        "created_at": ""
+      },
+      {
+        "id": "slot2",
+        "user_id": "u",
+        "subject_id": "s2",
+        "weekday": 3,
+        "start_time": "12:13",
+        "end_time": "13:08",
+        "room": "LT-1",
+        "kind": "lecture",
+        "created_at": ""
+      },
+      {
+        "id": "slot3",
+        "user_id": "u",
+        "subject_id": "s3",
+        "weekday": 3,
+        "start_time": "13:18",
+        "end_time": "15:08",
+        "room": "Lab 4",
+        "kind": "lab",
+        "created_at": ""
+      },
+      {
+        "id": "slot4",
+        "user_id": "u",
+        "subject_id": "s2",
+        "weekday": 4,
+        "start_time": "08:43",
+        "end_time": "09:38",
+        "room": "LT-1",
+        "kind": "lecture",
+        "created_at": ""
+      },
+      {
+        "id": "slot5",
+        "user_id": "u",
+        "subject_id": "s0",
+        "weekday": 4,
+        "start_time": "10:43",
+        "end_time": "11:38",
+        "room": "LT-3",
+        "kind": "lecture",
+        "created_at": ""
+      },
+      {
+        "id": "slot6",
+        "user_id": "u",
+        "subject_id": "s1",
+        "weekday": 5,
+        "start_time": "09:13",
+        "end_time": "10:08",
+        "room": "B-12",
+        "kind": "lecture",
+        "created_at": ""
+      },
+      {
+        "id": "slot7",
+        "user_id": "u",
+        "subject_id": "s3",
+        "weekday": 5,
+        "start_time": "10:18",
+        "end_time": "12:08",
+        "room": "Lab 4",
+        "kind": "lab",
+        "created_at": ""
+      },
+      {
+        "id": "slot8",
+        "user_id": "u",
+        "subject_id": "s0",
+        "weekday": 6,
+        "start_time": "08:43",
+        "end_time": "09:38",
+        "room": "LT-3",
+        "kind": "lecture",
+        "created_at": ""
+      },
+      {
+        "id": "32f4999b-4a83-4f6d-bd1f-277fd71fbd6b",
+        "user_id": "u",
+        "created_at": "2026-09-09T06:18:28.300Z",
+        "subject_id": "f090da0a-8656-46ee-bb63-63e979006fa1",
+        "weekday": 1,
+        "start_time": "09:00",
+        "end_time": "10:00",
+        "room": null,
+        "kind": "lecture"
+      }
+    ],
+    "overrides": [],
+    "events": [
+      {
+        "id": "e1",
+        "user_id": "u",
+        "title": "Digital Electronics Midterm",
+        "kind": "exam",
+        "subject_id": "s1",
+        "on_date": "2026-09-13",
+        "start_time": "10:00:00",
+        "end_time": "12:00:00",
+        "location": "Exam Hall B",
+        "notes": null,
+        "created_at": "",
+        "syllabus": "Logic gates and Boolean algebra\nKarnaugh maps\nCombinational circuits\nFlip-flops and latches\nCounters and registers"
+      },
+      {
+        "id": "e2",
+        "user_id": "u",
+        "title": "DSA Assignment 3",
+        "kind": "assignment",
+        "subject_id": "s0",
+        "on_date": "2026-09-10",
+        "start_time": null,
+        "end_time": null,
+        "location": null,
+        "notes": null,
+        "created_at": "",
+        "syllabus": "Balanced BSTs\nGraph traversal\nShortest paths"
+      },
+      {
+        "id": "e3",
+        "user_id": "u",
+        "title": "Founders Day",
+        "kind": "holiday",
+        "subject_id": null,
+        "on_date": "2026-09-18",
+        "start_time": null,
+        "end_time": null,
+        "location": null,
+        "notes": null,
+        "created_at": ""
+      },
+      {
+        "id": "23de32ea-07dc-4b00-b7d7-863922fae96a",
+        "user_id": "u",
+        "created_at": "2026-09-09T06:18:30.034Z",
+        "kind": "exam",
+        "subject_id": null,
+        "start_time": null,
+        "end_time": null,
+        "location": null,
+        "notes": null,
+        "title": "UI practice exam",
+        "on_date": "2026-09-09",
+        "syllabus": null
+      }
+    ],
+    "tasks": [
+      {
+        "id": "daily1",
+        "user_id": "u",
+        "title": "Review notes before the electronics lab",
+        "notes": null,
+        "list_kind": "daily",
+        "planned_date": "2026-09-09",
+        "subject_id": "s1",
+        "due_date": "2026-09-09",
+        "due_time": null,
+        "priority": 1,
+        "done": false,
+        "done_at": null,
+        "position": 0,
+        "created_at": ""
+      },
+      {
+        "id": "daily2",
+        "user_id": "u",
+        "title": "Work through the practice problems",
+        "notes": null,
+        "list_kind": "daily",
+        "planned_date": "2026-09-09",
+        "subject_id": "s2",
+        "due_date": "2026-09-09",
+        "due_time": null,
+        "priority": 2,
+        "done": false,
+        "done_at": null,
+        "position": 1,
+        "created_at": ""
+      },
+      {
+        "id": "daily3",
+        "user_id": "u",
+        "title": "Read chapter 6 for Data Structures",
+        "notes": null,
+        "list_kind": "daily",
+        "planned_date": "2026-09-09",
+        "subject_id": "s0",
+        "due_date": "2026-09-09",
+        "due_time": null,
+        "priority": 0,
+        "done": true,
+        "done_at": "",
+        "position": 2,
+        "created_at": ""
+      },
+      {
+        "id": "t1",
+        "user_id": "u",
+        "title": "Finish linked-list assignment",
+        "notes": "Sections 3 and 4",
+        "subject_id": "s0",
+        "due_date": "2026-09-09",
+        "due_time": "18:00:00",
+        "priority": 2,
+        "done": false,
+        "done_at": null,
+        "position": 0,
+        "created_at": ""
+      },
+      {
+        "id": "t2",
+        "user_id": "u",
+        "title": "Read chapter 7 before the lab",
+        "notes": null,
+        "subject_id": "s3",
+        "due_date": "2026-09-10",
+        "due_time": null,
+        "priority": 1,
+        "done": false,
+        "done_at": null,
+        "position": 1,
+        "created_at": ""
+      },
+      {
+        "id": "t3",
+        "user_id": "u",
+        "title": "Submit fee receipt",
+        "notes": null,
+        "subject_id": null,
+        "due_date": "2026-09-08",
+        "due_time": null,
+        "priority": 1,
+        "done": false,
+        "done_at": null,
+        "position": 2,
+        "created_at": ""
+      },
+      {
+        "id": "1d80150a-a136-4ab5-ab97-14523a2078ee",
+        "user_id": "u",
+        "created_at": "2026-09-09T06:18:16.745Z",
+        "notes": null,
+        "subject_id": null,
+        "due_date": "2026-09-09",
+        "due_time": null,
+        "list_kind": "daily",
+        "planned_date": "2026-09-09",
+        "priority": 1,
+        "done": true,
+        "done_at": "2026-09-09T06:18:17.201Z",
+        "position": -1788934696745,
+        "title": "UI daily task"
+      },
+      {
+        "id": "f932acf5-d100-4097-9059-e01eb0e185f0",
+        "user_id": "u",
+        "created_at": "2026-09-09T06:18:18.936Z",
+        "notes": null,
+        "subject_id": null,
+        "due_date": null,
+        "due_time": null,
+        "list_kind": "daily",
+        "planned_date": "2026-09-09",
+        "priority": 1,
+        "done": false,
+        "done_at": null,
+        "position": -1788934698936,
+        "title": "UI renamed permanent task"
+      }
+    ],
+    "blocks": [
+      {
+        "id": "pb1",
+        "user_id": "u",
+        "title": "Karnaugh maps",
+        "on_date": "2026-09-09",
+        "start_time": "17:00:00",
+        "end_time": "18:00:00",
+        "subject_id": "s1",
+        "event_id": "e1",
+        "notes": null,
+        "done": false,
+        "done_at": null,
+        "position": 0,
+        "created_at": ""
+      },
+      {
+        "id": "pb2",
+        "user_id": "u",
+        "title": "Logic gates and Boolean algebra",
+        "on_date": "2026-09-09",
+        "start_time": "19:30:00",
+        "end_time": "20:30:00",
+        "subject_id": "s1",
+        "event_id": "e1",
+        "notes": null,
+        "done": true,
+        "done_at": "",
+        "position": 1,
+        "created_at": ""
+      },
+      {
+        "id": "pb3",
+        "user_id": "u",
+        "title": "Balanced BSTs",
+        "on_date": "2026-09-10",
+        "start_time": "16:00:00",
+        "end_time": "17:30:00",
+        "subject_id": "s0",
+        "event_id": "e2",
+        "notes": null,
+        "done": false,
+        "done_at": null,
+        "position": 2,
+        "created_at": ""
+      },
+      {
+        "id": "pb4",
+        "user_id": "u",
+        "title": "Rewrite lab notes",
+        "on_date": "2026-09-11",
+        "start_time": null,
+        "end_time": null,
+        "subject_id": "s3",
+        "event_id": null,
+        "notes": null,
+        "done": false,
+        "done_at": null,
+        "position": 3,
+        "created_at": ""
+      }
+    ],
+    "attendance": [
+      {
+        "id": "a0",
+        "user_id": "u",
+        "subject_id": "s0",
+        "slot_id": "slot0",
+        "occurrence_key": "slot:slot0",
+        "on_date": "2026-09-08",
+        "status": "present",
+        "created_at": ""
+      },
+      {
+        "id": "a1",
+        "user_id": "u",
+        "subject_id": "s0",
+        "slot_id": "slot0",
+        "occurrence_key": "slot:slot0",
+        "on_date": "2026-09-07",
+        "status": "present",
+        "created_at": ""
+      },
+      {
+        "id": "a2",
+        "user_id": "u",
+        "subject_id": "s0",
+        "slot_id": "slot0",
+        "occurrence_key": "slot:slot0",
+        "on_date": "2026-09-06",
+        "status": "present",
+        "created_at": ""
+      },
+      {
+        "id": "a3",
+        "user_id": "u",
+        "subject_id": "s0",
+        "slot_id": "slot0",
+        "occurrence_key": "slot:slot0",
+        "on_date": "2026-09-05",
+        "status": "present",
+        "created_at": ""
+      },
+      {
+        "id": "a4",
+        "user_id": "u",
+        "subject_id": "s0",
+        "slot_id": "slot0",
+        "occurrence_key": "slot:slot0",
+        "on_date": "2026-09-04",
+        "status": "present",
+        "created_at": ""
+      },
+      {
+        "id": "a5",
+        "user_id": "u",
+        "subject_id": "s0",
+        "slot_id": "slot0",
+        "occurrence_key": "slot:slot0",
+        "on_date": "2026-09-03",
+        "status": "present",
+        "created_at": ""
+      },
+      {
+        "id": "a6",
+        "user_id": "u",
+        "subject_id": "s0",
+        "slot_id": "slot0",
+        "occurrence_key": "slot:slot0",
+        "on_date": "2026-09-02",
+        "status": "present",
+        "created_at": ""
+      },
+      {
+        "id": "a7",
+        "user_id": "u",
+        "subject_id": "s0",
+        "slot_id": "slot0",
+        "occurrence_key": "slot:slot0",
+        "on_date": "2026-09-01",
+        "status": "present",
+        "created_at": ""
+      },
+      {
+        "id": "a8",
+        "user_id": "u",
+        "subject_id": "s0",
+        "slot_id": "slot0",
+        "occurrence_key": "slot:slot0",
+        "on_date": "2026-08-31",
+        "status": "present",
+        "created_at": ""
+      },
+      {
+        "id": "ax",
+        "user_id": "u",
+        "subject_id": "s0",
+        "slot_id": "slot0",
+        "occurrence_key": "slot:slot0",
+        "on_date": "2026-08-29",
+        "status": "absent",
+        "created_at": ""
+      },
+      {
+        "id": "b0",
+        "user_id": "u",
+        "subject_id": "s1",
+        "slot_id": "slot1",
+        "occurrence_key": "slot:slot1",
+        "on_date": "2026-09-08",
+        "status": "present",
+        "created_at": ""
+      },
+      {
+        "id": "b1",
+        "user_id": "u",
+        "subject_id": "s1",
+        "slot_id": "slot1",
+        "occurrence_key": "slot:slot1",
+        "on_date": "2026-09-07",
+        "status": "present",
+        "created_at": ""
+      },
+      {
+        "id": "b2",
+        "user_id": "u",
+        "subject_id": "s1",
+        "slot_id": "slot1",
+        "occurrence_key": "slot:slot1",
+        "on_date": "2026-09-06",
+        "status": "present",
+        "created_at": ""
+      },
+      {
+        "id": "b3",
+        "user_id": "u",
+        "subject_id": "s1",
+        "slot_id": "slot1",
+        "occurrence_key": "slot:slot1",
+        "on_date": "2026-09-05",
+        "status": "present",
+        "created_at": ""
+      },
+      {
+        "id": "b4",
+        "user_id": "u",
+        "subject_id": "s1",
+        "slot_id": "slot1",
+        "occurrence_key": "slot:slot1",
+        "on_date": "2026-09-04",
+        "status": "present",
+        "created_at": ""
+      },
+      {
+        "id": "b5",
+        "user_id": "u",
+        "subject_id": "s1",
+        "slot_id": "slot1",
+        "occurrence_key": "slot:slot1",
+        "on_date": "2026-09-03",
+        "status": "present",
+        "created_at": ""
+      },
+      {
+        "id": "c0",
+        "user_id": "u",
+        "subject_id": "s1",
+        "slot_id": "slot1",
+        "occurrence_key": "slot:slot1",
+        "on_date": "2026-09-01",
+        "status": "absent",
+        "created_at": ""
+      },
+      {
+        "id": "c1",
+        "user_id": "u",
+        "subject_id": "s1",
+        "slot_id": "slot1",
+        "occurrence_key": "slot:slot1",
+        "on_date": "2026-08-31",
+        "status": "absent",
+        "created_at": ""
+      },
+      {
+        "id": "c2",
+        "user_id": "u",
+        "subject_id": "s1",
+        "slot_id": "slot1",
+        "occurrence_key": "slot:slot1",
+        "on_date": "2026-08-30",
+        "status": "absent",
+        "created_at": ""
+      },
+      {
+        "id": "c3",
+        "user_id": "u",
+        "subject_id": "s1",
+        "slot_id": "slot1",
+        "occurrence_key": "slot:slot1",
+        "on_date": "2026-08-29",
+        "status": "absent",
+        "created_at": ""
+      },
+      {
+        "id": "d0",
+        "user_id": "u",
+        "subject_id": "s2",
+        "slot_id": "slot2",
+        "occurrence_key": "slot:slot2",
+        "on_date": "2026-09-08",
+        "status": "present",
+        "created_at": ""
+      },
+      {
+        "id": "d1",
+        "user_id": "u",
+        "subject_id": "s2",
+        "slot_id": "slot2",
+        "occurrence_key": "slot:slot2",
+        "on_date": "2026-09-07",
+        "status": "present",
+        "created_at": ""
+      },
+      {
+        "id": "d2",
+        "user_id": "u",
+        "subject_id": "s2",
+        "slot_id": "slot2",
+        "occurrence_key": "slot:slot2",
+        "on_date": "2026-09-06",
+        "status": "present",
+        "created_at": ""
+      },
+      {
+        "id": "d3",
+        "user_id": "u",
+        "subject_id": "s2",
+        "slot_id": "slot2",
+        "occurrence_key": "slot:slot2",
+        "on_date": "2026-09-05",
+        "status": "present",
+        "created_at": ""
+      },
+      {
+        "id": "d4",
+        "user_id": "u",
+        "subject_id": "s2",
+        "slot_id": "slot2",
+        "occurrence_key": "slot:slot2",
+        "on_date": "2026-09-04",
+        "status": "present",
+        "created_at": ""
+      },
+      {
+        "id": "d5",
+        "user_id": "u",
+        "subject_id": "s2",
+        "slot_id": "slot2",
+        "occurrence_key": "slot:slot2",
+        "on_date": "2026-09-03",
+        "status": "present",
+        "created_at": ""
+      },
+      {
+        "id": "d6",
+        "user_id": "u",
+        "subject_id": "s2",
+        "slot_id": "slot2",
+        "occurrence_key": "slot:slot2",
+        "on_date": "2026-09-02",
+        "status": "present",
+        "created_at": ""
+      }
+    ],
+    "profile": {
+      "id": "u",
+      "display_name": "Karan",
+      "timezone": "Asia/Dubai",
+      "created_at": ""
+    },
+    "prefs": {
+      "user_id": "u",
+      "class_enabled": false,
+      "class_lead_minutes": [
+        10
+      ],
+      "day_summary_enabled": true,
+      "day_summary_time": "07:30:00",
+      "task_enabled": true,
+      "task_lead_minutes": [
+        60
+      ],
+      "task_allday_time": "09:00:00",
+      "exam_enabled": true,
+      "exam_lead_days": [
+        7,
+        3,
+        1
+      ],
+      "exam_lead_minutes": [
+        60
+      ],
+      "quiet_enabled": false,
+      "quiet_start": "23:00:00",
+      "quiet_end": "07:00:00",
+      "updated_at": ""
+    }
+  }
+}
