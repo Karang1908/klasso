@@ -267,6 +267,33 @@ function WeekGrid({
   );
 }
 
+/**
+ * One subject can meet at different times on different days — Physics on Monday
+ * morning and again Thursday afternoon. So the sheet collects a list of
+ * (days + time) rows rather than applying a single time across a set of days.
+ */
+type SlotRow = {
+  key: string;
+  weekdays: number[];
+  start: string;
+  end: string;
+  room: string;
+  kind: SlotKind;
+};
+
+const newRow = (weekday: number, from?: SlotRow): SlotRow => ({
+  key: crypto.randomUUID(),
+  weekdays: [weekday],
+  start: from?.end ?? "09:00",
+  end: from ? addHour(from.end) : "10:00",
+  room: from?.room ?? "",
+  kind: from?.kind ?? "lecture",
+});
+
+function addHour(hhmm: string): string {
+  return toTimeString(parseTime(hhmm) + 60);
+}
+
 function SlotSheet({
   state, onClose,
 }: {
@@ -278,19 +305,52 @@ function SlotSheet({
 
   const [form, setForm] = useState(() => blank(state));
   const [key, setKey] = useState("");
-  // Reset the form whenever the sheet opens on a different slot.
   const signature = `${state.open}:${editing?.id ?? "new"}:${state.weekday}`;
   if (key !== signature) {
     setKey(signature);
     setForm(blank(state));
   }
 
-  const valid = form.subject_id && form.start && form.end > form.start && form.weekdays.length > 0;
-  const clashDays = form.weekdays.filter((day) => data.slots.some((slot) =>
-    slot.id !== editing?.id && slot.weekday === day
-    && parseTime(slot.start_time) < parseTime(form.end)
-    && parseTime(slot.end_time) > parseTime(form.start)));
-  const overlaps = clashDays.length > 0;
+  const setRow = (rowKey: string, patch: Partial<SlotRow>) =>
+    setForm({ ...form, rows: form.rows.map((r) => (r.key === rowKey ? { ...r, ...patch } : r)) });
+
+  const rowValid = (r: SlotRow) => r.weekdays.length > 0 && r.start && r.end > r.start;
+  const valid = Boolean(form.subject_id) && form.rows.length > 0 && form.rows.every(rowValid);
+  const totalClasses = form.rows.reduce((n, r) => n + r.weekdays.length, 0);
+
+  // Clashes are per row and per day: the same subject at two different times
+  // is normal, two things at once is not.
+  const clashes = form.rows.flatMap((r) =>
+    rowValid(r)
+      ? r.weekdays.filter((day) => data.slots.some((slot) =>
+          slot.id !== editing?.id && slot.weekday === day
+          && parseTime(slot.start_time) < parseTime(r.end)
+          && parseTime(slot.end_time) > parseTime(r.start)))
+      : []);
+  const clashDays = [...new Set(clashes)].sort((a, b) => a - b);
+
+  const save = () => {
+    const rows = form.rows;
+    if (editing) {
+      const r = rows[0];
+      void updateSlot(editing.id, {
+        subject_id: form.subject_id, weekday: r.weekdays[0],
+        start_time: r.start, end_time: r.end, room: r.room || null, kind: r.kind,
+      });
+    } else {
+      void (async () => {
+        for (const r of rows) {
+          for (const day of [...r.weekdays].sort((a, b) => a - b)) {
+            await addSlot({
+              subject_id: form.subject_id, weekday: day,
+              start_time: r.start, end_time: r.end, room: r.room || null, kind: r.kind,
+            } as Parameters<typeof addSlot>[0]);
+          }
+        }
+      })();
+    }
+    onClose();
+  };
 
   return (
     <Sheet
@@ -300,47 +360,19 @@ function SlotSheet({
       footer={
         <div className="flex gap-2">
           {editing && (
-            <Button
-              variant="danger"
-              onClick={() => { void removeSlot(editing.id); onClose(); }}
-            >
+            <Button variant="danger" onClick={() => { void removeSlot(editing.id); onClose(); }}>
               Delete
             </Button>
           )}
-          <Button
-            variant="primary"
-            className="flex-1"
-            disabled={!valid}
-            onClick={() => {
-              const base = {
-                subject_id: form.subject_id,
-                start_time: form.start,
-                end_time: form.end,
-                room: form.room || null,
-                kind: form.kind,
-              };
-              if (editing) {
-                void updateSlot(editing.id, { ...base, weekday: form.weekdays[0] });
-              } else {
-                void (async () => {
-                  for (const day of [...form.weekdays].sort((a, b) => a - b)) {
-                    await addSlot({ ...base, weekday: day } as Parameters<typeof addSlot>[0]);
-                  }
-                })();
-              }
-              onClose();
-            }}
-          >
+          <Button variant="primary" className="flex-1" disabled={!valid} onClick={save}>
             {editing
               ? "Save changes"
-              : form.weekdays.length > 1
-                ? `Add ${form.weekdays.length} classes`
-                : "Add class"}
+              : totalClasses > 1 ? `Add ${totalClasses} classes` : "Add class"}
           </Button>
         </div>
       }
     >
-      <div className="flex flex-col gap-4">
+      <div className="grid gap-4">
         <Field label="Subject">
           <Dropdown
             aria-label="Subject"
@@ -351,110 +383,119 @@ function SlotSheet({
           />
         </Field>
 
-        <Field
-          label={editing ? "Day" : "Days"}
-          hint={editing ? undefined : "Pick every day this class runs — one entry covers them all."}
-        >
-          <div className="grid grid-cols-7 gap-1">
-            {WEEK_ORDER.map((d) => {
-              const on = form.weekdays.includes(d);
-              return (
-                <button
-                  key={d}
-                  type="button"
-                  aria-pressed={on}
-                  aria-label={WEEKDAY_NAMES[d]}
-                  onClick={() => setForm({
-                    ...form,
-                    weekdays: editing
-                      ? [d]
-                      : on
-                        ? form.weekdays.filter((x) => x !== d)
-                        : [...form.weekdays, d],
-                  })}
-                  className={cx(
-                    "min-h-11 rounded-lg text-xs font-bold transition",
-                    on ? "bg-brand text-bg" : "bg-surface-2 text-dim hover:text-ink",
-                  )}
-                >
-                  {WEEKDAY_SHORT[d]}
-                </button>
-              );
-            })}
-          </div>
-          {!editing && (
-            <div className="mt-2 flex flex-wrap gap-2">
-              <button type="button" className="text-xs font-semibold text-brand"
-                      onClick={() => setForm({ ...form, weekdays: [1, 2, 3, 4, 5] })}>
-                Weekdays
-              </button>
-              <span className="text-xs text-faint">·</span>
-              <button type="button" className="text-xs font-semibold text-brand"
-                      onClick={() => setForm({ ...form, weekdays: [...WEEK_ORDER] })}>
-                Every day
-              </button>
-              {form.weekdays.length > 0 && (
-                <>
-                  <span className="text-xs text-faint">·</span>
-                  <button type="button" className="text-xs font-semibold text-dim"
-                          onClick={() => setForm({ ...form, weekdays: [] })}>
-                    Clear
+        {form.rows.map((row, index) => (
+          <div key={row.key} className="slot-row">
+            {!editing && (
+              <div className="slot-row-head">
+                <span>{index === 0 ? "When it meets" : `Also meets`}</span>
+                {form.rows.length > 1 && (
+                  <button
+                    type="button"
+                    aria-label={`Remove time ${index + 1}`}
+                    onClick={() => setForm({ ...form, rows: form.rows.filter((r) => r.key !== row.key) })}
+                  >
+                    <Icon name="close" size={15} />
                   </button>
-                </>
-              )}
-            </div>
-          )}
-        </Field>
+                )}
+              </div>
+            )}
 
-        <div className="flex gap-3">
-          <Field label="Starts">
-            <Input type="time" value={form.start}
-                   onChange={(e) => setForm({ ...form, start: e.target.value })} />
-          </Field>
-          <Field label="Ends">
-            <Input type="time" value={form.end}
-                   onChange={(e) => setForm({ ...form, end: e.target.value })} />
-          </Field>
-        </div>
-        {form.end <= form.start && (
-          <Banner tone="danger">The end time has to be after the start time.</Banner>
+            <div className="grid grid-cols-7 gap-1">
+              {WEEK_ORDER.map((d) => {
+                const on = row.weekdays.includes(d);
+                return (
+                  <button
+                    key={d}
+                    type="button"
+                    aria-pressed={on}
+                    aria-label={`${WEEKDAY_NAMES[d]}${editing ? "" : ` for time ${index + 1}`}`}
+                    onClick={() => setRow(row.key, {
+                      weekdays: editing
+                        ? [d]
+                        : on ? row.weekdays.filter((x) => x !== d) : [...row.weekdays, d],
+                    })}
+                    className={cx(
+                      "min-h-11 rounded-lg text-xs font-bold transition",
+                      on ? "bg-brand text-bg" : "bg-surface-2 text-dim hover:text-ink",
+                    )}
+                  >
+                    {WEEKDAY_SHORT[d]}
+                  </button>
+                );
+              })}
+            </div>
+
+            <div className="flex flex-wrap gap-3">
+              <Field label="Starts">
+                <Input type="time" value={row.start}
+                       onChange={(e) => setRow(row.key, { start: e.target.value })} />
+              </Field>
+              <Field label="Ends">
+                <Input type="time" value={row.end}
+                       onChange={(e) => setRow(row.key, { end: e.target.value })} />
+              </Field>
+            </div>
+            {row.end <= row.start && (
+              <Banner tone="danger">The end time has to be after the start time.</Banner>
+            )}
+
+            <div className="flex flex-wrap gap-3">
+              <Field label="Room" hint="Optional">
+                <Input value={row.room} placeholder="e.g. LT-3"
+                       onChange={(e) => setRow(row.key, { room: e.target.value })} />
+              </Field>
+              <Field label="Type">
+                <Dropdown
+                  aria-label={`Class type${editing ? "" : ` for time ${index + 1}`}`}
+                  value={row.kind}
+                  onChange={(v) => setRow(row.key, { kind: v as SlotKind })}
+                  options={KINDS.map((k) => ({ value: k.value, label: k.label }))}
+                />
+              </Field>
+            </div>
+          </div>
+        ))}
+
+        {!editing && (
+          <Button
+            variant="secondary"
+            onClick={() => setForm({
+              ...form,
+              rows: [...form.rows, newRow(state.weekday, form.rows[form.rows.length - 1])],
+            })}
+          >
+            <Icon name="plus" size={16} />Add another day and time
+          </Button>
         )}
-        {valid && overlaps && (
+
+        {valid && clashDays.length > 0 && (
           <Banner tone="warn">
-            Overlaps an existing class on {clashDays.sort((a, b) => a - b).map((d) => WEEKDAY_NAMES[d]).join(", ")}.
+            Overlaps an existing class on {clashDays.map((d) => WEEKDAY_NAMES[d]).join(", ")}.
             You can still save if that is intentional.
           </Banner>
         )}
-
-        <Field label="Room" hint="Optional — shown on the Today screen and in reminders.">
-          <Input value={form.room} placeholder="e.g. LT-3"
-                 onChange={(e) => setForm({ ...form, room: e.target.value })} />
-        </Field>
-
-        <Field label="Type">
-          <Dropdown
-            aria-label="Class type"
-            value={form.kind}
-            onChange={(v) => setForm({ ...form, kind: v as SlotKind })}
-            options={KINDS.map((k) => ({ value: k.value, label: k.label }))}
-          />
-        </Field>
       </div>
     </Sheet>
   );
 }
 
+
 function blank(state: { slot: TimetableSlot | null; weekday: number }) {
   const s = state.slot;
   return {
     subject_id: s?.subject_id ?? "",
-    // Editing touches exactly one slot; creating can place the same class on
-    // several days at once, which is how a college timetable actually repeats.
-    weekdays: s ? [s.weekday] : [state.weekday],
-    start: s ? toTimeString(parseTime(s.start_time)) : "09:00",
-    end: s ? toTimeString(parseTime(s.end_time)) : "10:00",
-    room: s?.room ?? "",
-    kind: (s?.kind ?? "lecture") as SlotKind,
+    rows: [
+      s
+        ? {
+            key: s.id,
+            weekdays: [s.weekday],
+            start: toTimeString(parseTime(s.start_time)),
+            end: toTimeString(parseTime(s.end_time)),
+            room: s.room ?? "",
+            kind: (s.kind ?? "lecture") as SlotKind,
+          }
+        : newRow(state.weekday),
+    ] as SlotRow[],
   };
 }
 
