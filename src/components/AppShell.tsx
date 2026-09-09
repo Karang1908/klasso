@@ -62,11 +62,11 @@ export function AppShell({ children, screen }: { children: ReactNode; screen?: s
   const initials = name.split(/\s+/).slice(0, 2).map((word) => word[0]).join("").toUpperCase();
   return <div className="app-shell">
     <a className="skip-link" href="#main-content">Skip to content</a>
-    <aside className="app-sidebar nav-surface">
+    <aside className="app-sidebar">
       <Brand />
       <nav aria-label="Main navigation"><Navigation active={active} /></nav>
       <div className="mt-auto border-t border-line pt-4">
-        <Link href={href("/settings")} className="nav-item" aria-current={active === "settings" ? "page" : undefined}><Icon name="settings" />Settings</Link>
+        <Link href={href("/settings")} className="nav-item" aria-current={active === "settings" ? "page" : undefined}>{active === "settings" && <span className="nav-pill" />}<Icon name="settings" />Settings</Link>
         <div className="mt-5 flex items-center gap-3 px-3"><span className="avatar">{initials}</span><div className="min-w-0"><p className="truncate text-sm font-semibold">{name}</p><p className="mt-0.5 text-xs text-dim">Your college, organized.</p></div></div>
       </div>
     </aside>
