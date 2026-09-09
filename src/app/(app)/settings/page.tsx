@@ -6,7 +6,7 @@ import { useAppearance } from "@/components/Appearance";
 import { PreviewContext, useAppHref } from "@/components/AppShell";
 import { Icon } from "@/components/icons";
 
-import { Banner, Button, Card, Field, Input, Dropdown, Spinner, Toggle, cx } from "@/components/ui";
+import { Banner, Button, Card, Field, Input, Dropdown, Spinner, Slider, Toggle, cx } from "@/components/ui";
 import {
   currentSubscription, detectEnvironment, disablePush, enablePush, sendTestPush,
   type PushState,
@@ -287,6 +287,46 @@ export default function SettingsPage() {
               </Card>
             )}
           </section>
+
+          {/* ------------------------------ study, activities and meetings */}
+          {([
+            { key: "study", title: "Study sessions", icon: "book",
+              blurb: "Before revision you have planned on the Planning tab.", fallback: 10 },
+            { key: "activity", title: "Activities", icon: "sun",
+              blurb: "Sport, societies, anything you have put on a day.", fallback: 30 },
+            { key: "meeting", title: "Meetings", icon: "clock",
+              blurb: "Group work, office hours, anything with other people.", fallback: 15 },
+          ] as const).map((item) => {
+            const enabled = prefs[`${item.key}_enabled`] ?? true;
+            const lead = prefs[`${item.key}_lead_minutes`] ?? item.fallback;
+            return (
+              <section key={item.key} className="flex flex-col gap-2">
+                <h2 className="section-heading">{item.title}</h2>
+                <Card className="px-4 py-1">
+                  <Toggle
+                    checked={enabled}
+                    onChange={(v) => void updatePrefs({ [`${item.key}_enabled`]: v })}
+                    label={`${item.title} reminders`}
+                    description={item.blurb}
+                  />
+                </Card>
+                {enabled && (
+                  <Card className="p-4">
+                    <Slider
+                      label="Remind me this long before"
+                      value={lead}
+                      min={0} max={120} step={5}
+                      onChange={(v) => void updatePrefs({ [`${item.key}_lead_minutes`]: v })}
+                      format={(v) =>
+                        v === 0 ? "At the start" : v >= 60
+                          ? `${v / 60} hr${v >= 120 ? "s" : ""}${v % 60 ? ` ${v % 60} min` : ""}`
+                          : `${v} min`}
+                    />
+                  </Card>
+                )}
+              </section>
+            );
+          })}
 
           {/* ------------------------------------------------ quiet hours */}
           <section className="flex flex-col gap-2">
