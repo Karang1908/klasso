@@ -194,6 +194,41 @@ try {
   }
   await page.evaluate(() => { document.documentElement.style.fontSize = ""; });
 
+  // The in-app mark is transparent and takes its colour from the theme: green
+  // on light, white on dark. It also renders more than once per page, so each
+  // copy needs its own gradient id — a shared one resolved to the copy inside
+  // the hidden sidebar and the tile silently disappeared.
+  for (const [scheme, expected] of [["light", "rgb(33, 98, 76)"], ["dark", "rgb(255, 255, 255)"]]) {
+    await go("today");
+    // Drive the app's own theme attribute: an explicit choice overrides the
+    // media query, which is exactly what a user toggling Appearance does.
+    await page.evaluate((s) => { document.documentElement.dataset.theme = s; }, scheme);
+    await pause(200);
+    const mark = await page.evaluate(() => {
+      const visible = [...document.querySelectorAll(".brandmark")].find((m) => m.getBoundingClientRect().width > 0);
+      if (!visible) return { stroke: "no mark", tile: true };
+      return { stroke: getComputedStyle(visible.querySelector(".bm-arc")).stroke, tile: Boolean(visible.querySelector("rect")) };
+    });
+    check(`brand mark is ${scheme === "light" ? "green on light" : "white on dark"}`, mark.stroke === expected, mark.stroke);
+    check(`brand mark stays transparent in ${scheme}`, mark.tile === false, `tile rendered: ${mark.tile}`);
+  }
+  await page.evaluate(() => { document.documentElement.dataset.theme = "light"; });
+
+  // The shell was capped at 1600px and centred, so on a wide viewport — which
+  // is what low browser zoom produces — the app drifted inward and the fixed
+  // sidebar drifted with it, leaving dead space down the left edge.
+  for (const width of [1280, 1600, 1920, 2560]) {
+    await page.setViewport({ width, height: 900 });
+    await go("today");
+    const left = await page.evaluate(() => {
+      const el = document.querySelector(".app-sidebar");
+      return el && getComputedStyle(el).display !== "none"
+        ? Math.round(el.getBoundingClientRect().left) : null;
+    });
+    check(`sidebar stays pinned left at ${width}px`, left !== null && left <= 24, `left=${left}`);
+  }
+  await page.setViewport({ width: 390, height: 844, isMobile: true, hasTouch: true });
+
   check("no uncaught browser errors", errors.length === 0, errors.join(" | "));
 } catch (error) { failed++; console.error("FAIL  interaction sequence:", error); }
 finally { await browser.close(); }
