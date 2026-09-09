@@ -1,4 +1,4 @@
-import type { SVGProps } from "react";
+import { useId, type SVGProps } from "react";
 
 const paths = {
   today: "M3 10.5 12 3l9 7.5M5 9v11h5v-6h4v6h5V9",
@@ -36,14 +36,62 @@ export function Icon({ name, size = 20, ...props }: SVGProps<SVGSVGElement> & { 
 
 
 /** The Klasso K: an open spine and two folded leaves, with one gold point of focus. */
-export function AnimatedBrandMark({ size = 96, animate = true, loading = false }: { size?: number; animate?: boolean; loading?: boolean }) {
-  return <svg width={size} height={size} viewBox="0 0 64 64" fill="none" className={`brandmark ${animate ? "brandmark-anim" : ""} ${loading ? "brandmark-loading" : ""}`} role="img" aria-label="Klasso">
-    <rect x="2" y="2" width="60" height="60" rx="18" fill="var(--hero-dark)" />
-    <path d="M20 17V47M43 18 29 30.5a2 2 0 0 0 0 3L44 47" stroke="var(--hero-ink)" strokeOpacity=".2" strokeWidth="6" strokeLinecap="round" strokeLinejoin="round" />
-    <path d="M20 17V47" className="bm-spine" stroke="var(--hero-ink)" strokeWidth="6" strokeLinecap="round" pathLength="1" />
-    <path d="M43 18 29 30.5a2 2 0 0 0 0 3L44 47" className="bm-fold" stroke="var(--hero-ink)" strokeWidth="6" strokeLinecap="round" strokeLinejoin="round" pathLength="1" />
-    <circle cx="43" cy="18" r="3.5" className="bm-dot" fill="var(--gold)" />
-  </svg>;
+/**
+ * The app mark: a day as a ring (how much of it has gone), the schedule inside
+ * it, and a gold marker for "now". Identical geometry to the home-screen icon
+ * in assets/logo.svg, so the launch screen, the sidebar and the installed icon
+ * all read as one thing.
+ *
+ * Animated with CSS only, so it paints on the first frame with no JS.
+ */
+export function AnimatedBrandMark({
+  size = 96, animate = true, loading = false, tile = false,
+}: { size?: number; animate?: boolean; loading?: boolean; tile?: boolean }) {
+  // Unique per instance: a shared id resolves to whichever copy comes first in
+  // the document, which may be inside a hidden container.
+  const gradientId = `bm-tile-${useId().replace(/:/g, "")}`;
+  return (
+    <svg
+      width={size} height={size} viewBox="0 0 64 64" fill="none"
+      className={`brandmark ${animate ? "brandmark-anim" : ""} ${loading ? "brandmark-loading" : ""}`}
+      role="img" aria-label="Klasso"
+    >
+      {tile && (
+        <>
+          <defs>
+            <linearGradient id={gradientId} x1="0.15" y1="0" x2="0.85" y2="1">
+              <stop offset="0%" stopColor="#4E9376" />
+              <stop offset="52%" stopColor="#2E6C55" />
+              <stop offset="100%" stopColor="#1B4E3B" />
+            </linearGradient>
+          </defs>
+          <rect width="64" height="64" rx="14.25" fill={`url(#${gradientId})`} />
+        </>
+      )}
+
+      {/* the day, as a ring */}
+      <g transform="rotate(-90 32 32)">
+        <circle cx="32" cy="32" r="19" stroke="var(--mark)" strokeOpacity=".18" strokeWidth="3.75" />
+        <circle
+          className="bm-arc" cx="32" cy="32" r="19" stroke="var(--mark)" strokeWidth="3.75"
+          strokeLinecap="round" pathLength={1} strokeDasharray="0.7 1"
+        />
+      </g>
+
+      {/* the schedule inside it */}
+      <g strokeLinecap="round" strokeWidth="3.75" stroke="var(--mark)">
+        <path className="bm-bar bm-bar-1" d="M22.5 25H37.25" strokeOpacity=".55" />
+        <path className="bm-bar bm-bar-2" d="M22.5 32H41.5" />
+        <path className="bm-bar bm-bar-3" d="M22.5 39H33.25" strokeOpacity=".55" />
+      </g>
+
+      {/* "now" — the one accent, riding the ring */}
+      <g className="bm-marker">
+        <circle cx="14" cy="38" r="3.1" fill="var(--bg)" />
+        <circle cx="14" cy="38" r="2.1" fill="var(--gold)" />
+      </g>
+    </svg>
+  );
 }
 
 export function BrandMark({ size = 42 }: { size?: number }) {
