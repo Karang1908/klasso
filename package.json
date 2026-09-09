@@ -1,0 +1,43 @@
+{
+  "name": "klasso",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "eslint",
+    "check:logic": "node scripts/check-logic.mjs",
+    "check:notifications": "node scripts/check-notifications.mjs",
+    "check:ui": "node scripts/verify-ui.mjs",
+    "check:planning": "node scripts/verify-planning.mjs",
+    "check:zoom": "node scripts/verify-zoom.mjs",
+    "icons": "node scripts/build-icons.mjs",
+    "check": "npx tsc --noEmit && eslint src --max-warnings 0 && node scripts/check-logic.mjs && node scripts/check-notifications.mjs && ./scripts/check-schema.sh",
+    "check:schema": "./scripts/check-schema.sh"
+  },
+  "dependencies": {
+    "@fontsource-variable/manrope": "^5.3.0",
+    "@supabase/supabase-js": "^2.116.0",
+    "animejs": "^4.5.0",
+    "gsap": "^3.15.0",
+    "motion": "^13.2.0",
+    "next": "16.3.4",
+    "react": "19.2.8",
+    "react-dom": "19.2.8",
+    "web-push": "^3.6.7"
+  },
+  "devDependencies": {
+    "@tailwindcss/postcss": "^4",
+    "@types/node": "^20",
+    "@types/react": "^19",
+    "@types/react-dom": "^19",
+    "@types/web-push": "^3.6.4",
+    "eslint": "^9",
+    "eslint-config-next": "16.3.4",
+    "puppeteer-core": "^25.10.0",
+    "sharp": "^0.35.4",
+    "tailwindcss": "^4",
+    "typescript": "^5"
+  }
+}
