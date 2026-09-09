@@ -303,6 +303,24 @@ h1 { line-height: 1.22; }
 .week-block-time { display: block; margin-top: 1px; font-size: .625rem; font-variant-numeric: tabular-nums; color: var(--text-dim); white-space: nowrap; }
 .week-block-room { display: block; margin-top: 2px; font-size: .625rem; color: var(--text-dim); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 
+/* --------------------------------------------------- repeating time rows
+   Each row is one "day(s) + time" pairing for the same subject, so a class
+   that meets Monday morning and Thursday afternoon is a single entry. */
+.slot-row {
+  display: flex; flex-direction: column; gap: 12px;
+  padding: 14px; border-radius: var(--r-lg, 16px);
+  border: 1px solid var(--border); background: var(--surface-2);
+}
+.slot-row-head {
+  display: flex; align-items: center; justify-content: space-between; gap: 8px;
+  font-size: .75rem; font-weight: 700; letter-spacing: .02em; color: var(--text-dim);
+}
+.slot-row-head button {
+  display: grid; place-items: center; width: 34px; height: 34px; margin: -6px;
+  border-radius: 50%; color: var(--text-faint);
+}
+.slot-row-head button:hover { color: var(--danger); background: var(--danger-soft); }
+
 .no-bar { scrollbar-width: none; }
 .no-bar::-webkit-scrollbar { display: none; }
 .safe-b { padding-bottom: max(1rem, env(safe-area-inset-bottom, 0px)); }
