@@ -1,9 +1,11 @@
 import { resolveDay } from "./schedule";
 import type {
+  BlockKind,
   CalendarEvent,
   NotificationPrefs,
   ScheduleOverride,
   Subject,
+  StudyBlock,
   Task,
   TimetableSlot,
 } from "./types";
@@ -48,6 +50,7 @@ export type PlanInput = {
   overrides: ScheduleOverride[];
   events: CalendarEvent[];
   tasks: Task[];
+  blocks?: StudyBlock[];
   /**
    * How far back to look for reminders whose minute we may have missed. The
    * dispatcher runs every minute, but a late or skipped cron tick would
@@ -74,6 +77,7 @@ function subjectLabel(s: Subject | null | undefined, fallback = "Class"): string
  */
 export function planNotifications(input: PlanInput): PlannedNotification[] {
   const { now, timezone, prefs, subjects, slots, overrides, events, tasks } = input;
+  const blocks = input.blocks ?? [];
   const catchUp = input.catchUpMinutes ?? 3;
 
   const local = zonedNow(timezone, now);
@@ -176,6 +180,37 @@ export function planNotifications(input: PlanInput): PlannedNotification[] {
         });
       }
     }
+  }
+
+  // ------------------------------------------------- study / activity / meeting
+  // Each kind has its own lead time: a nudge minutes before revision, but
+  // longer before a meeting you have to get to.
+  const blockRules: Record<BlockKind, { on: boolean; lead: number; noun: string }> = {
+    study:    { on: prefs.study_enabled ?? true,    lead: prefs.study_lead_minutes ?? 10,    noun: "Study" },
+    activity: { on: prefs.activity_enabled ?? true, lead: prefs.activity_lead_minutes ?? 30, noun: "Activity" },
+    meeting:  { on: prefs.meeting_enabled ?? true,  lead: prefs.meeting_lead_minutes ?? 15,  noun: "Meeting" },
+  };
+
+  for (const block of blocks) {
+    if (block.done || !block.start_time) continue;
+    const kind = (block.kind ?? "study") as BlockKind;
+    const rule = blockRules[kind];
+    if (!rule?.on) continue;
+    if (!isDue(stamp(block.on_date, parseTime(block.start_time)) - rule.lead)) continue;
+
+    const subject = block.subject_id ? subjectsById.get(block.subject_id) : null;
+    push({
+      dedupeKey: `block:${block.id}:${block.on_date}:m${rule.lead}`,
+      title: rule.lead === 0 ? `${block.title} starting now` : `${block.title} in ${rule.lead} min`,
+      body: [
+        formatMinutes(parseTime(block.start_time)),
+        block.location,
+        block.people,
+        subject?.name,
+      ].filter(Boolean).join(" · ") || rule.noun,
+      url: "/planning",
+      tag: `block-${block.id}`,
+    });
   }
 
   // ------------------------------------------------------- exams & events
