@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 64 64" role="img" aria-label="Klasso">
+  <!-- Transparent browser-tab favicon: no tile, so it sits on any tab colour.
+       The mark re-colours itself for light and dark browser chrome. The
+       installed app icons stay opaque (apple-icon / maskable) because a
+       home-screen icon must be full-bleed. -->
+  <style>
+    .mark { stroke: #2E6C55; }
+    .dim  { stroke: #2E6C55; stroke-opacity: .5; }
+    .now  { fill: #C8912A; }
+    @media (prefers-color-scheme: dark) {
+      .mark { stroke: #7FCBA4; }
+      .dim  { stroke: #7FCBA4; stroke-opacity: .55; }
+      .now  { fill: #EFC873; }
+    }
+  </style>
+
+  <g transform="rotate(-90 32 32)" fill="none" stroke-width="5.5">
+    <circle class="mark" cx="32" cy="32" r="19" stroke-linecap="round" stroke-dasharray="83.57 119.38"/>
+  </g>
+  <g fill="none" stroke-width="5.5" stroke-linecap="round">
+    <path class="dim"  d="M22.5 25H37.25"/>
+    <path class="mark" d="M22.5 32H41.5"/>
+    <path class="dim"  d="M22.5 39H33.25"/>
+  </g>
+  <circle class="now" cx="14" cy="38" r="3"/>
+</svg>
