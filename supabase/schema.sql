@@ -281,3 +281,16 @@ drop trigger if exists on_auth_user_created on auth.users;
 create trigger on_auth_user_created
   after insert on auth.users
   for each row execute function public.handle_new_user();
+
+-- Backfill anyone who signed up before this schema was applied. The trigger
+-- above only fires on new inserts, so an account created first would otherwise
+-- have no profile and no notification preferences, and Settings would sit on
+-- "Loading your preferences…" forever.
+insert into public.profiles (id, display_name)
+select u.id, coalesce(u.raw_user_meta_data->>'display_name', split_part(u.email, '@', 1))
+from auth.users u
+on conflict (id) do nothing;
+
+insert into public.notification_prefs (user_id)
+select u.id from auth.users u
+on conflict (user_id) do nothing;
