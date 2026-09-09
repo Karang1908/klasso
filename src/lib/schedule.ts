@@ -212,3 +212,45 @@ export function attendanceBySubject(
     };
   });
 }
+
+export type Lane<T> = { item: T; lane: number; lanes: number };
+
+/**
+ * Lay overlapping intervals into side-by-side lanes, the way a calendar shows
+ * two classes booked at the same time. Without this they stack and hide each
+ * other.
+ *
+ * Items are grouped into clusters of transitively-overlapping intervals; every
+ * item in a cluster reports the same `lanes` total so their widths match.
+ */
+export function packLanes<T extends { startMin: number; endMin: number }>(items: T[]): Lane<T>[] {
+  const sorted = [...items].sort((a, b) => a.startMin - b.startMin || a.endMin - b.endMin);
+  const out: Lane<T>[] = [];
+  let cluster: Lane<T>[] = [];
+  let clusterEnd = -Infinity;
+  let laneEnds: number[] = [];
+
+  const flush = () => {
+    const lanes = laneEnds.length || 1;
+    for (const entry of cluster) entry.lanes = lanes;
+    out.push(...cluster);
+    cluster = [];
+    laneEnds = [];
+    clusterEnd = -Infinity;
+  };
+
+  for (const item of sorted) {
+    // A gap with everything so far ends the cluster, so unrelated blocks are
+    // not narrowed by an overlap elsewhere in the day.
+    if (item.startMin >= clusterEnd) flush();
+
+    let lane = laneEnds.findIndex((end) => end <= item.startMin);
+    if (lane === -1) { lane = laneEnds.length; laneEnds.push(item.endMin); }
+    else laneEnds[lane] = item.endMin;
+
+    cluster.push({ item, lane, lanes: 1 });
+    clusterEnd = Math.max(clusterEnd, item.endMin);
+  }
+  flush();
+  return out;
+}
