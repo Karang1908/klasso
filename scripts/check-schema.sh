@@ -125,5 +125,21 @@ ck "unsupported plan types are rejected" \
 Q -f "$ROOT/supabase/schema.sql" >/dev/null 2>&1
 ck "schema upgrade preserves activities and meetings" "$(Q -c "select count(*) from study_blocks where kind in ('activity','meeting');")" "2"
 
+# Someone who signed up before the schema was applied (no trigger yet) must be
+# backfilled when the schema is finally run, or Settings never loads for them.
+EARLY=66666666-6666-6666-6666-666666666666
+Q -c "alter table auth.users disable trigger on_auth_user_created;
+      insert into auth.users (id,email) values ('$EARLY','early@example.com');
+      alter table auth.users enable trigger on_auth_user_created;" >/dev/null 2>&1
+ck "a pre-schema signup starts with no profile" \
+  "$(Q -c "select count(*) from profiles where id='$EARLY';")" "0"
+Q -f "$ROOT/supabase/schema.sql" >/dev/null 2>&1
+ck "re-running the schema backfills their profile" \
+  "$(Q -c "select count(*) from profiles where id='$EARLY';")" "1"
+ck "…and their notification preferences" \
+  "$(Q -c "select count(*) from notification_prefs where user_id='$EARLY';")" "1"
+ck "backfill does not duplicate existing profiles" \
+  "$(Q -c "select count(*) from profiles;")" "$(Q -c "select count(*) from auth.users;")"
+
 if [ "$fails" -eq 0 ]; then echo; echo "All schema checks passed."; else echo; echo "$fails schema check(s) FAILED."; fi
 exit $([ "$fails" -eq 0 ] && echo 0 || echo 1)
