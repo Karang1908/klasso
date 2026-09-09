@@ -75,7 +75,15 @@ export function AppShell({ children, screen }: { children: ReactNode; screen?: s
         <div className="desktop-context hidden items-center gap-2 text-sm text-dim"><Icon name="book" size={17} /><span>Your college workspace</span></div>
         <div className="flex items-center gap-3">
           <span title={preview ? "Interactive preview. Sample data saved only in this browser tab." : undefined} className={`${preview ? "flex" : "hidden sm:flex"} items-center gap-1.5 text-[10px] text-dim`}><span className={`h-1.5 w-1.5 rounded-full ${stale || error ? "bg-warn" : "bg-success"}`} />{preview ? "Sample data" : loading ? "Syncing…" : stale ? "Offline" : error ? "Sync needs attention" : "Cloud connected"}</span>
-          <Link className="avatar" href={href("/settings")} aria-label="Profile and settings">{initials}</Link>
+          <Link
+            className="topbar-settings lg:hidden"
+            href={href("/settings")}
+            aria-label="Settings"
+            aria-current={active === "settings" ? "page" : undefined}
+          >
+            <Icon name="settings" size={19} />
+          </Link>
+          <Link className="avatar" href={href("/settings")} aria-label="Your profile">{initials}</Link>
         </div>
       </header>
       {error && <div className="mb-5"><Banner tone={stale ? "warn" : "danger"}><div className="flex items-center justify-between gap-3"><span>{error}</span><Button size="sm" variant="ghost" onClick={() => void refresh()}><Icon name="refresh" size={16} />Retry</Button></div></Banner></div>}
