@@ -9,9 +9,11 @@ import { localDateISO } from "@/lib/time";
 import {
   Banner, Button, Card, EmptyState, Field, Input, Segmented, Dropdown, Sheet, cx,
 } from "@/components/ui";
+import { packLanes } from "@/lib/schedule";
 import { useApp } from "@/lib/store";
+import { useNow } from "@/lib/useNow";
 import {
-  formatMinutes, parseTime, toTimeString, WEEKDAY_NAMES, WEEKDAY_SHORT,
+  formatMinutes, parseTime, toTimeString, WEEK_ORDER, WEEKDAY_NAMES, WEEKDAY_SHORT,
 } from "@/lib/time";
 import type { SlotKind, Subject, TimetableSlot } from "@/lib/types";
 import { Icon } from "@/components/icons";
@@ -164,76 +166,102 @@ function WeekGrid({
   slots, subjects, onPick,
 }: { slots: TimetableSlot[]; subjects: Subject[]; onPick: (s: TimetableSlot) => void }) {
   const byId = new Map(subjects.map((s) => [s.id, s]));
+  const now = useNow(60_000);
+
+  // A timetable is read as a whole week. Showing only the days that happen to
+  // have classes made the columns jump around and hid the free days.
+  const ROW = 56;               // px per hour
   const starts = slots.map((s) => parseTime(s.start_time));
   const ends = slots.map((s) => parseTime(s.end_time));
-  const from = Math.floor(Math.min(...starts) / 60) * 60;
-  const to = Math.ceil(Math.max(...ends) / 60) * 60;
+  const from = slots.length ? Math.floor(Math.min(...starts) / 60) * 60 : 8 * 60;
+  const to = slots.length ? Math.ceil(Math.max(...ends) / 60) * 60 : 17 * 60;
   const hours = Math.max(1, (to - from) / 60);
-  const PX_PER_HOUR = 62;
+  const y = (minutes: number) => ((minutes - from) / 60) * ROW;
 
-  // Only render columns for days that actually have classes.
-  const days = [0, 1, 2, 3, 4, 5, 6].filter((d) => slots.some((s) => s.weekday === d));
+  const showNow = now.minutes >= from && now.minutes <= to;
 
   return (
-    <div className="panel overflow-x-auto p-4">
-      <div className="week-grid flex gap-2">
-        <div className="w-11 shrink-0 pt-7">
-          {Array.from({ length: hours }, (_, i) => (
-            <div key={i} style={{ height: PX_PER_HOUR }} className="relative">
-              <span className="absolute -top-1.5 right-1 text-[10px] font-semibold tabular-nums text-faint">
-                {formatMinutes(from + i * 60, false)}
-              </span>
+    <div className="panel p-0">
+      <div className="week-scroll">
+        <div className="week-grid" style={{ ["--week-rows" as string]: hours }}>
+          {/* header */}
+          <div className="week-corner" />
+          {WEEK_ORDER.map((day) => (
+            <div key={`h${day}`} className={cx("week-head", day === now.weekday && "is-today")}>
+              <span className="week-head-day">{WEEKDAY_SHORT[day]}</span>
             </div>
           ))}
-        </div>
 
-        {days.map((day) => (
-          <div key={day} className="week-column">
-            <div className="pb-1 text-center text-xs font-bold uppercase text-dim">
-              {WEEKDAY_SHORT[day]}
-            </div>
-            <div
-              className="relative rounded-xl border border-line bg-surface"
-              style={{ height: hours * PX_PER_HOUR }}
-            >
-              {Array.from({ length: hours - 1 }, (_, i) => (
-                <div
-                  key={i}
-                  className="absolute inset-x-0 border-t border-line/60"
-                  style={{ top: (i + 1) * PX_PER_HOUR }}
-                />
-              ))}
-              {slots
-                .filter((s) => s.weekday === day)
-                .map((s) => {
-                  const top = ((parseTime(s.start_time) - from) / 60) * PX_PER_HOUR;
-                  const height = ((parseTime(s.end_time) - parseTime(s.start_time)) / 60) * PX_PER_HOUR;
+          {/* hour gutter — labels sit centred on their own line */}
+          <div className="week-axis" style={{ height: hours * ROW }}>
+            {Array.from({ length: hours + 1 }, (_, i) => (
+              <span key={i} className="week-hour" style={{ top: i * ROW }}>
+                {formatMinutes(from + i * 60)}
+              </span>
+            ))}
+          </div>
+
+          {/* day columns */}
+          {WEEK_ORDER.map((day) => {
+            const dayClasses = slots
+              .filter((s) => s.weekday === day)
+              .map((s) => ({ slot: s, startMin: parseTime(s.start_time), endMin: parseTime(s.end_time) }));
+            return (
+              <div
+                key={day}
+                className={cx("week-col", day === now.weekday && "is-today")}
+                style={{ height: hours * ROW }}
+              >
+                {Array.from({ length: hours }, (_, i) => (
+                  <div key={i} className="week-line" style={{ top: (i + 1) * ROW }} />
+                ))}
+
+                {day === now.weekday && showNow && (
+                  <div className="week-now" style={{ top: y(now.minutes) }} aria-hidden />
+                )}
+
+                {dayClasses.length === 0 && <span className="week-empty">—</span>}
+
+                {packLanes(dayClasses).map(({ item, lane, lanes }) => {
+                  const s = item.slot;
                   const subject = s.subject_id ? byId.get(s.subject_id) : null;
+                  const top = y(item.startMin);
+                  const height = Math.max(26, y(item.endMin) - top - 3);
+                  const width = 100 / lanes;
                   return (
                     <button
                       key={s.id}
                       onClick={() => onPick(s)}
-                      title={`${subject?.name ?? "Class"} · ${formatMinutes(parseTime(s.start_time))}`}
-                      className="absolute inset-x-1 overflow-hidden rounded-lg px-2 py-2 text-left text-ink transition hover:brightness-95 active:scale-[0.97]"
+                      className="week-block"
+                      title={`${subject?.name ?? "Class"} · ${formatMinutes(item.startMin)}–${formatMinutes(item.endMin)}`}
                       style={{
-                        top: top + 2,
-                        height: Math.max(24, height - 4),
-                        background: `color-mix(in srgb, ${subject?.color ?? "var(--brand)"} 22%, var(--surface))`,
+                        top: top + 2, height,
+                        left: `calc(${lane * width}% + 3px)`,
+                        width: `calc(${width}% - 6px)`,
+                        // Tint from the subject colour so the block stays
+                        // readable in both themes rather than being flooded.
+                        background: `color-mix(in srgb, ${subject?.color ?? "var(--brand)"} 20%, var(--surface))`,
+                        borderInlineStart: `3px solid ${subject?.color ?? "var(--brand)"}`,
                       }}
                     >
-                      <span className="block truncate text-xs font-bold leading-tight">
+                      <span className="week-block-name">
                         {subject?.short_name || subject?.name || "Class"}
                       </span>
-                      <span className="block truncate text-[10px] leading-tight opacity-85">
-                        {formatMinutes(parseTime(s.start_time), false)}
-                      </span>
-                      {height > 48 && <span className="mt-1 block truncate text-[10px] text-dim">{s.room || subject?.room || s.kind}</span>}
+                      {height > 34 && (
+                        <span className="week-block-time">
+                          {formatMinutes(item.startMin)}–{formatMinutes(item.endMin)}
+                        </span>
+                      )}
+                      {height > 58 && (s.room || subject?.room) && (
+                        <span className="week-block-room">{s.room || subject?.room}</span>
+                      )}
                     </button>
                   );
                 })}
-            </div>
-          </div>
-        ))}
+              </div>
+            );
+          })}
+        </div>
       </div>
     </div>
   );
@@ -257,8 +285,12 @@ function SlotSheet({
     setForm(blank(state));
   }
 
-  const valid = form.subject_id && form.start && form.end > form.start;
-  const overlaps = data.slots.some((slot) => slot.id !== editing?.id && slot.weekday === form.weekday && parseTime(slot.start_time) < parseTime(form.end) && parseTime(slot.end_time) > parseTime(form.start));
+  const valid = form.subject_id && form.start && form.end > form.start && form.weekdays.length > 0;
+  const clashDays = form.weekdays.filter((day) => data.slots.some((slot) =>
+    slot.id !== editing?.id && slot.weekday === day
+    && parseTime(slot.start_time) < parseTime(form.end)
+    && parseTime(slot.end_time) > parseTime(form.start)));
+  const overlaps = clashDays.length > 0;
 
   return (
     <Sheet
@@ -280,20 +312,30 @@ function SlotSheet({
             className="flex-1"
             disabled={!valid}
             onClick={() => {
-              const payload = {
+              const base = {
                 subject_id: form.subject_id,
-                weekday: form.weekday,
                 start_time: form.start,
                 end_time: form.end,
                 room: form.room || null,
                 kind: form.kind,
               };
-              if (editing) void updateSlot(editing.id, payload);
-              else void addSlot(payload as Parameters<typeof addSlot>[0]);
+              if (editing) {
+                void updateSlot(editing.id, { ...base, weekday: form.weekdays[0] });
+              } else {
+                void (async () => {
+                  for (const day of [...form.weekdays].sort((a, b) => a - b)) {
+                    await addSlot({ ...base, weekday: day } as Parameters<typeof addSlot>[0]);
+                  }
+                })();
+              }
               onClose();
             }}
           >
-            {editing ? "Save changes" : "Add class"}
+            {editing
+              ? "Save changes"
+              : form.weekdays.length > 1
+                ? `Add ${form.weekdays.length} classes`
+                : "Add class"}
           </Button>
         </div>
       }
@@ -309,22 +351,59 @@ function SlotSheet({
           />
         </Field>
 
-        <Field label="Day">
+        <Field
+          label={editing ? "Day" : "Days"}
+          hint={editing ? undefined : "Pick every day this class runs — one entry covers them all."}
+        >
           <div className="grid grid-cols-7 gap-1">
-            {WEEKDAY_SHORT.map((label, d) => (
-              <button
-                key={d}
-                onClick={() => setForm({ ...form, weekday: d })}
-                aria-pressed={form.weekday === d}
-                className={cx(
-                  "rounded-lg py-2 text-xs font-bold transition",
-                  form.weekday === d ? "bg-brand text-bg" : "bg-surface-2 text-dim",
-                )}
-              >
-                {label}
-              </button>
-            ))}
+            {WEEK_ORDER.map((d) => {
+              const on = form.weekdays.includes(d);
+              return (
+                <button
+                  key={d}
+                  type="button"
+                  aria-pressed={on}
+                  aria-label={WEEKDAY_NAMES[d]}
+                  onClick={() => setForm({
+                    ...form,
+                    weekdays: editing
+                      ? [d]
+                      : on
+                        ? form.weekdays.filter((x) => x !== d)
+                        : [...form.weekdays, d],
+                  })}
+                  className={cx(
+                    "min-h-11 rounded-lg text-xs font-bold transition",
+                    on ? "bg-brand text-bg" : "bg-surface-2 text-dim hover:text-ink",
+                  )}
+                >
+                  {WEEKDAY_SHORT[d]}
+                </button>
+              );
+            })}
           </div>
+          {!editing && (
+            <div className="mt-2 flex flex-wrap gap-2">
+              <button type="button" className="text-xs font-semibold text-brand"
+                      onClick={() => setForm({ ...form, weekdays: [1, 2, 3, 4, 5] })}>
+                Weekdays
+              </button>
+              <span className="text-xs text-faint">·</span>
+              <button type="button" className="text-xs font-semibold text-brand"
+                      onClick={() => setForm({ ...form, weekdays: [...WEEK_ORDER] })}>
+                Every day
+              </button>
+              {form.weekdays.length > 0 && (
+                <>
+                  <span className="text-xs text-faint">·</span>
+                  <button type="button" className="text-xs font-semibold text-dim"
+                          onClick={() => setForm({ ...form, weekdays: [] })}>
+                    Clear
+                  </button>
+                </>
+              )}
+            </div>
+          )}
         </Field>
 
         <div className="flex gap-3">
@@ -340,7 +419,12 @@ function SlotSheet({
         {form.end <= form.start && (
           <Banner tone="danger">The end time has to be after the start time.</Banner>
         )}
-        {valid && overlaps && <Banner tone="warn">These times overlap another class. You can still save if the overlap is intentional.</Banner>}
+        {valid && overlaps && (
+          <Banner tone="warn">
+            Overlaps an existing class on {clashDays.sort((a, b) => a - b).map((d) => WEEKDAY_NAMES[d]).join(", ")}.
+            You can still save if that is intentional.
+          </Banner>
+        )}
 
         <Field label="Room" hint="Optional — shown on the Today screen and in reminders.">
           <Input value={form.room} placeholder="e.g. LT-3"
@@ -364,7 +448,9 @@ function blank(state: { slot: TimetableSlot | null; weekday: number }) {
   const s = state.slot;
   return {
     subject_id: s?.subject_id ?? "",
-    weekday: s?.weekday ?? state.weekday,
+    // Editing touches exactly one slot; creating can place the same class on
+    // several days at once, which is how a college timetable actually repeats.
+    weekdays: s ? [s.weekday] : [state.weekday],
     start: s ? toTimeString(parseTime(s.start_time)) : "09:00",
     end: s ? toTimeString(parseTime(s.end_time)) : "10:00",
     room: s?.room ?? "",
