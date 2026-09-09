@@ -12,10 +12,15 @@ export function supabase(): SupabaseClient {
   if (cached) return cached;
 
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
-  const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+  // Vercel's Supabase connector injects PUBLISHABLE_KEY (Supabase's newer name
+  // for the anon key). Accept either so the connector works without renaming.
+  const key =
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ||
+    process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY;
   if (!url || !key) {
     throw new Error(
-      "Missing NEXT_PUBLIC_SUPABASE_URL / NEXT_PUBLIC_SUPABASE_ANON_KEY. " +
+      "Missing NEXT_PUBLIC_SUPABASE_URL and a public key " +
+        "(NEXT_PUBLIC_SUPABASE_ANON_KEY or NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY). " +
         "Copy .env.example to .env.local and fill them in.",
     );
   }
