@@ -131,6 +131,13 @@ export type NotificationPrefs = {
   exam_enabled: boolean;
   exam_lead_days: number[];
   exam_lead_minutes: number[];
+  /** Planned-block reminders. Optional: caches written before these existed. */
+  study_enabled?: boolean;
+  study_lead_minutes?: number;
+  activity_enabled?: boolean;
+  activity_lead_minutes?: number;
+  meeting_enabled?: boolean;
+  meeting_lead_minutes?: number;
   quiet_enabled: boolean;
   quiet_start: string;
   quiet_end: string;
