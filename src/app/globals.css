@@ -204,8 +204,6 @@ h1 { line-height: 1.22; }
      which is what happened at high browser zoom. */
   white-space: nowrap; max-width: 100%; min-width: 0; overflow: hidden; text-overflow: ellipsis; }
 .calendar-cell { min-width: 0; min-height: 2.6rem; padding: 8px 2px; }
-.week-grid { min-width: 100%; }
-.week-column { flex: 1; min-width: 7.5rem; }
 .settings-grid { display: grid; gap: 24px; }
 .settings-grid > section { min-width: 0; }
 .app-dialog { position: fixed; inset: 0; margin: 0; width: 100%; height: 100dvh; max-width: none; max-height: none; padding: 0; border: 0; background: transparent; color: var(--text); overflow: clip; }
@@ -262,6 +260,49 @@ h1 { line-height: 1.22; }
 .picker-help { margin-top: 8px; font-size: .8125rem; line-height: 1.5; color: var(--text-dim); }
 .date-navigation > .temporal-control { width: 10.5rem; }
 @media (max-width: 600px) { .sheet-overlay { align-items: flex-end; padding: 10px; } .sheet-header { padding: 16px 18px 12px; } .sheet-body { padding: 20px 18px; } .sheet-footer { padding: 16px 18px max(20px, env(safe-area-inset-bottom, 0px)); } }
+/* ------------------------------------------------------------- week grid
+   A real calendar: a fixed hour gutter plus seven equal day columns. Hour
+   labels are centred on their own gridline, so the axis and the lines cannot
+   drift apart the way a padding-based layout does. */
+.week-scroll { overflow-x: auto; }
+.week-grid {
+  display: grid;
+  grid-template-columns: 4.5rem repeat(7, minmax(6.5rem, 1fr));
+  min-width: 52rem;
+  padding: 14px 16px 18px;
+}
+.week-corner { border-bottom: 1px solid var(--border); }
+.week-head {
+  padding: 2px 0 9px; text-align: center;
+  border-bottom: 1px solid var(--border);
+  font-size: .6875rem; font-weight: 700; letter-spacing: .06em; text-transform: uppercase;
+  color: var(--text-faint);
+}
+.week-head.is-today { color: var(--brand); }
+.week-axis { position: relative; }
+.week-hour {
+  position: absolute; right: 10px; transform: translateY(-50%);
+  font-size: .625rem; font-weight: 600; font-variant-numeric: tabular-nums;
+  color: var(--text-faint); white-space: nowrap;
+}
+.week-col { position: relative; border-left: 1px solid var(--border); }
+.week-col:last-child { border-right: 1px solid var(--border); }
+.week-col.is-today { background: color-mix(in srgb, var(--brand) 5%, transparent); }
+.week-line { position: absolute; inset-inline: 0; border-top: 1px solid var(--border); opacity: .55; }
+.week-now { position: absolute; inset-inline: 0; height: 2px; background: var(--brand); z-index: 3; }
+.week-now::before { content: ""; position: absolute; left: -3px; top: -3px; width: 8px; height: 8px; border-radius: 50%; background: var(--brand); }
+.week-empty { position: absolute; top: 50%; inset-inline: 0; text-align: center; color: var(--text-faint); font-size: .75rem; }
+.week-block {
+  position: absolute; z-index: 2; overflow: hidden; text-align: left;
+  border-radius: 9px; padding: 5px 8px; color: var(--text);
+  box-shadow: var(--shadow); transition: filter 150ms, transform 150ms;
+}
+.week-block:hover { filter: brightness(1.06); }
+.week-block:active { transform: scale(.985); }
+.week-block-name { display: block; font-size: .75rem; font-weight: 700; line-height: 1.25; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.week-block-time { display: block; margin-top: 1px; font-size: .625rem; font-variant-numeric: tabular-nums; color: var(--text-dim); white-space: nowrap; }
+.week-block-room { display: block; margin-top: 2px; font-size: .625rem; color: var(--text-dim); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
 .no-bar { scrollbar-width: none; }
 .no-bar::-webkit-scrollbar { display: none; }
 .safe-b { padding-bottom: max(1rem, env(safe-area-inset-bottom, 0px)); }
