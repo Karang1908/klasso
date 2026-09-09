@@ -167,6 +167,23 @@ create table if not exists notification_prefs (
   updated_at          timestamptz not null default now()
 );
 
+-- Reminders for planned blocks. Study, activities and meetings are timed very
+-- differently — you want a nudge minutes before revision, but longer before a
+-- meeting you have to walk to — so each carries its own lead time.
+alter table notification_prefs add column if not exists study_enabled boolean not null default true;
+alter table notification_prefs add column if not exists study_lead_minutes int not null default 10;
+alter table notification_prefs add column if not exists activity_enabled boolean not null default true;
+alter table notification_prefs add column if not exists activity_lead_minutes int not null default 30;
+alter table notification_prefs add column if not exists meeting_enabled boolean not null default true;
+alter table notification_prefs add column if not exists meeting_lead_minutes int not null default 15;
+
+do $$ begin
+  alter table notification_prefs add constraint notif_block_leads_sane
+    check (study_lead_minutes between 0 and 240
+       and activity_lead_minutes between 0 and 240
+       and meeting_lead_minutes between 0 and 240);
+exception when duplicate_object then null; end $$;
+
 -- --------------------------------------------- exactly-once delivery ledger
 create table if not exists notification_log (
   id         bigserial primary key,
