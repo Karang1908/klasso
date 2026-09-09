@@ -8,7 +8,7 @@ import { localDateISO } from "./time";
  * A ticking clock for the live "next class in 12m" copy. Re-renders on a
  * klasso rather than every second — the UI only shows whole minutes.
  */
-export function useNow(intervalMs = 15_000): { dateISO: string; minutes: number; at: Date } {
+export function useNow(intervalMs = 15_000): { dateISO: string; minutes: number; weekday: number; at: Date } {
   const [at, setAt] = useState<Date>(() => new Date());
 
   useEffect(() => {
@@ -22,5 +22,10 @@ export function useNow(intervalMs = 15_000): { dateISO: string; minutes: number;
     };
   }, [intervalMs]);
 
-  return { dateISO: localDateISO(at), minutes: at.getHours() * 60 + at.getMinutes(), at };
+  return {
+    dateISO: localDateISO(at),
+    minutes: at.getHours() * 60 + at.getMinutes(),
+    weekday: at.getDay(),
+    at,
+  };
 }
