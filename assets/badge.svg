@@ -1,8 +1,8 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 64 64" role="img" aria-label="Klasso">
-  
-  <g  fill="none" stroke="#f4fff7" stroke-width="6" stroke-linecap="round" stroke-linejoin="round">
-    <path d="M20 17V47"/>
-    <path d="M43 18 29 30.5a2 2 0 0 0 0 3L44 47"/>
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 64 64">
+  <g transform="rotate(-90 32 32)" fill="none" stroke="#FFFFFF" stroke-width="5">
+    <circle cx="32" cy="32" r="19" stroke-linecap="round" stroke-dasharray="83.57 119.38"/>
   </g>
-  
+  <g fill="none" stroke="#FFFFFF" stroke-width="5" stroke-linecap="round">
+    <path d="M22.5 25H37.25"/><path d="M22.5 32H41.5"/><path d="M22.5 39H33.25"/>
+  </g>
 </svg>
