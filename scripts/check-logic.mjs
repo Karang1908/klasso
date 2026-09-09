@@ -269,5 +269,21 @@ eq("end without start is rejected", validatePlan({ ...validPlan, start_time: "" 
 eq("an untimed activity is valid", validatePlan({ ...validPlan, start_time: "", end_time: "" }), null);
 eq("blank titles are rejected", validatePlan({ ...validPlan, title: "   " }), "Give your plan a name.");
 
+// ------------------------------------------------- brand mark stays in sync
+// assets/logo.svg builds every PNG icon (favicon, home screen, maskable);
+// icons.tsx draws the same mark inside the app. They silently diverged once —
+// the favicon kept an old design while the in-app logo changed.
+{
+  const { readFileSync } = await import("node:fs");
+  const svg = readFileSync("assets/logo.svg", "utf8");
+  const tsx = readFileSync("src/components/icons.tsx", "utf8");
+  const geometry = ["M22.5 25H37.25", "M22.5 32H41.5", "M22.5 39H33.25", 'cx="32"', 'r="19"', 'cy="38"'];
+  for (const bit of geometry) {
+    eq(`logo.svg and icons.tsx share "${bit}"`, svg.includes(bit) && tsx.includes(bit), true);
+  }
+  eq("both marks use the same tile radius", svg.includes("14.25") && tsx.includes("14.25"), true);
+  eq("both marks use the same stroke weight", svg.includes("3.75") && tsx.includes("3.75"), true);
+}
+
 console.log(failed === 0 ? "\nAll checks passed." : `\n${failed} check(s) FAILED.`);
 process.exit(failed === 0 ? 0 : 1);
