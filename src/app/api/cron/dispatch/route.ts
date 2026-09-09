@@ -9,6 +9,7 @@ import type {
   NotificationPrefs,
   Profile,
   ScheduleOverride,
+  StudyBlock,
   Subject,
   Task,
   TimetableSlot,
@@ -56,7 +57,7 @@ async function dispatch() {
   const from = addDaysISO(today, -2);
   const to = addDaysISO(today, 400);
 
-  const [profiles, prefs, subjects, slots, overrides, events, tasks] = await Promise.all([
+  const [profiles, prefs, subjects, slots, overrides, events, tasks, blocks] = await Promise.all([
     db.from("profiles").select("*").in("id", userIds),
     db.from("notification_prefs").select("*").in("user_id", userIds),
     db.from("subjects").select("*").in("user_id", userIds),
@@ -66,9 +67,11 @@ async function dispatch() {
     db.from("events").select("*").in("user_id", userIds).gte("on_date", from).lte("on_date", to),
     db.from("tasks").select("*").in("user_id", userIds).eq("done", false)
       .gte("due_date", from).lte("due_date", to),
+    db.from("study_blocks").select("*").in("user_id", userIds).eq("done", false)
+      .gte("on_date", from).lte("on_date", addDaysISO(today, 2)),
   ]);
 
-  for (const [name, res] of Object.entries({ profiles, prefs, subjects, slots, overrides, events, tasks })) {
+  for (const [name, res] of Object.entries({ profiles, prefs, subjects, slots, overrides, events, tasks, blocks })) {
     if (res.error) throw new Error(`${name}: ${res.error.message}`);
   }
 
@@ -90,6 +93,7 @@ async function dispatch() {
   const overridesByUser = groupBy(overrides.data as ScheduleOverride[], (r) => r.user_id);
   const eventsByUser = groupBy(events.data as CalendarEvent[], (r) => r.user_id);
   const tasksByUser = groupBy(tasks.data as Task[], (r) => r.user_id);
+  const blocksByUser = groupBy(blocks.data as StudyBlock[], (r) => r.user_id);
 
   const now = new Date();
   let plannedCount = 0;
@@ -110,6 +114,7 @@ async function dispatch() {
       overrides: overridesByUser.get(userId) ?? [],
       events: eventsByUser.get(userId) ?? [],
       tasks: tasksByUser.get(userId) ?? [],
+      blocks: blocksByUser.get(userId) ?? [],
     });
     if (planned.length === 0) continue;
     plannedCount += planned.length;
