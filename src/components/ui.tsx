@@ -74,6 +74,42 @@ export function Input(props: InputHTMLAttributes<HTMLInputElement>) {
 
 export { Dropdown, type DropdownOption } from "./Dropdown";
 
+/**
+ * Lead-time slider. One value per reminder type, which reads better than a row
+ * of chips when the useful range is continuous rather than a few presets.
+ */
+export function Slider({
+  value, onChange, min = 0, max = 120, step = 5, label, format,
+}: {
+  value: number;
+  onChange: (value: number) => void;
+  min?: number;
+  max?: number;
+  step?: number;
+  label: string;
+  format?: (value: number) => string;
+}) {
+  const show = format ? format(value) : `${value} min`;
+  const pct = max === min ? 0 : ((value - min) / (max - min)) * 100;
+  return (
+    <div className="slider">
+      <div className="slider-head">
+        <span>{label}</span>
+        <strong>{show}</strong>
+      </div>
+      <input
+        type="range"
+        aria-label={label}
+        min={min} max={max} step={step} value={value}
+        onChange={(e) => onChange(Number(e.target.value))}
+        // The filled portion is painted from the value so the track reads at a
+        // glance without a second element to keep in sync.
+        style={{ ["--slider-fill" as string]: `${pct}%` }}
+      />
+    </div>
+  );
+}
+
 export function Textarea(
   props: React.TextareaHTMLAttributes<HTMLTextAreaElement>,
 ) {
