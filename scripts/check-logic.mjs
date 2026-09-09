@@ -14,7 +14,7 @@ execSync(
 writeFileSync(join(out, "package.json"), JSON.stringify({ type: "commonjs" }));
 
 const require = createRequire(import.meta.url);
-const { attendanceBySubject, findGaps, resolveDay, dayStatus } = require(join(out, "schedule.js"));
+const { attendanceBySubject, findGaps, resolveDay, dayStatus, packLanes } = require(join(out, "schedule.js"));
 const { parseTime, weekdayOfISO, zonedNow, daysBetweenISO, toTimeString } = require(join(out, "time.js"));
 const { inTaskScope, tasksForDay, sortTasks } = require(join(out, "tasks.js"));
 const { syllabusTopics, blocksForDay, blockForTopic, examPlans, plannedMinutes, findClashes, blockKind, validatePlan, weekStart } = require(join(out, "planning.js"));
@@ -284,6 +284,26 @@ eq("blank titles are rejected", validatePlan({ ...validPlan, title: "   " }), "G
   eq("both marks use the same tile radius", svg.includes("14.25") && tsx.includes("14.25"), true);
   eq("both marks use the same stroke weight", svg.includes("3.75") && tsx.includes("3.75"), true);
 }
+
+// ------------------------------------------------------------ lane packing
+const iv = (id, s, e) => ({ id, startMin: s, endMin: e });
+const lanes = (items) => packLanes(items).map((l) => [l.item.id, l.lane, l.lanes]);
+eq("classes that never overlap all sit in one lane",
+  lanes([iv("a", 540, 600), iv("b", 600, 660)]), [["a", 0, 1], ["b", 0, 1]]);
+eq("two overlapping classes split into two lanes",
+  lanes([iv("a", 540, 660), iv("b", 600, 720)]), [["a", 0, 2], ["b", 1, 2]]);
+eq("three-way overlap uses three lanes",
+  lanes([iv("a", 540, 660), iv("b", 560, 680), iv("c", 580, 700)]),
+  [["a", 0, 3], ["b", 1, 3], ["c", 2, 3]]);
+eq("a lane is reused once it is free",
+  lanes([iv("a", 540, 600), iv("b", 550, 610), iv("c", 605, 660)]),
+  [["a", 0, 2], ["b", 1, 2], ["c", 0, 2]]);
+eq("a separate cluster is not narrowed by an earlier overlap",
+  lanes([iv("a", 540, 660), iv("b", 600, 720), iv("c", 800, 860)]),
+  [["a", 0, 2], ["b", 1, 2], ["c", 0, 1]]);
+eq("touching intervals do not count as overlapping",
+  lanes([iv("a", 540, 600), iv("b", 600, 660)]), [["a", 0, 1], ["b", 0, 1]]);
+eq("no items yields nothing", packLanes([]), []);
 
 console.log(failed === 0 ? "\nAll checks passed." : `\n${failed} check(s) FAILED.`);
 process.exit(failed === 0 ? 0 : 1);
