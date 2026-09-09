@@ -8,6 +8,12 @@ export const WEEKDAY_NAMES = [
 
 export const WEEKDAY_SHORT = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"] as const;
 
+/**
+ * Weekday indexes in the order a timetable is read: Monday first, Sunday last.
+ * The stored values stay JS-native (0 = Sunday) so date maths is unchanged.
+ */
+export const WEEK_ORDER = [1, 2, 3, 4, 5, 6, 0] as const;
+
 /** Postgres `time` ("HH:MM:SS" or "HH:MM") -> minutes since midnight. */
 export function parseTime(t: string | null | undefined): number {
   if (!t) return 0;
