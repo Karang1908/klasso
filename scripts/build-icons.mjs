@@ -17,7 +17,6 @@ const jobs = [
   // iOS home-screen icon. Safari does not round corners for you on all
   // versions, and it never respects transparency, so this is the squircle art.
   [logo, "public/icons/apple-touch-icon.png", 180],
-  [logo, "src/app/icon.png", 96],
   [logo, "src/app/apple-icon.png", 180],
   [badge, "public/icons/badge-96.png", 96],
 ];
@@ -28,6 +27,7 @@ for (const [svg, out, size] of jobs) {
 }
 
 // Favicon: a real multi-size .ico so browsers and the Windows taskbar are happy.
-const ico = await sharp(logo, { density: 384 }).resize(32, 32).png().toBuffer();
+// Transparent PNG fallback for browsers that do not take an SVG favicon.
+const ico = await sharp(readFileSync("assets/favicon.svg"), { density: 384 }).resize(32, 32).png().toBuffer();
 writeFileSync("public/favicon.png", ico);
 console.log("public/favicon.png  32x32");
