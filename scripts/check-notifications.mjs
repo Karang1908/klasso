@@ -41,6 +41,9 @@ const prefs = {
   day_summary_enabled: true, day_summary_time: "07:30:00",
   task_enabled: true, task_lead_minutes: [60], task_allday_time: "09:00:00",
   exam_enabled: true, exam_lead_days: [7, 1], exam_lead_minutes: [60],
+  study_enabled: true, study_lead_minutes: 10,
+  activity_enabled: true, activity_lead_minutes: 30,
+  meeting_enabled: true, meeting_lead_minutes: 15,
   quiet_enabled: false, quiet_start: "23:00:00", quiet_end: "07:00:00",
   updated_at: "",
 };
@@ -52,7 +55,7 @@ const plan = (o = {}) =>
   planNotifications({
     now: o.now, timezone: TZ, prefs: { ...prefs, ...(o.prefs || {}) },
     subjects, slots: o.slots ?? slots, overrides: o.overrides ?? [],
-    events: o.events ?? [], tasks: o.tasks ?? [],
+    events: o.events ?? [], tasks: o.tasks ?? [], blocks: o.blocks ?? [],
   });
 const keys = (r) => r.map((n) => n.dedupeKey).sort();
 
@@ -159,6 +162,43 @@ const b = plan({ now: atDubai("2026-09-09", 8, 51) })[0].dedupeKey;
 eq("same reminder keeps one dedupe key across catch-up ticks", a === b, true);
 eq("next week's same class gets a different key",
   plan({ now: atDubai("2026-09-16", 8, 50) })[0].dedupeKey !== a, true);
+
+// ------------------------------------- study / activity / meeting reminders
+const blk = (id, kind, start, extra = {}) => ({
+  id, user_id: "u", title: `${kind} block`, kind, on_date: "2026-09-09",
+  start_time: start, end_time: null, subject_id: null, event_id: null,
+  location: null, people: null, notes: null, done: false, done_at: null,
+  position: 0, created_at: "", ...extra,
+});
+
+eq("a study block fires at its own lead time",
+  keys(plan({ now: atDubai("2026-09-09", 16, 50), blocks: [blk("b1", "study", "17:00:00")] })),
+  ["block:b1:2026-09-09:m10"]);
+eq("a study block does not fire at the activity lead",
+  keys(plan({ now: atDubai("2026-09-09", 16, 30), blocks: [blk("b1", "study", "17:00:00")] })), []);
+eq("an activity uses the longer activity lead",
+  keys(plan({ now: atDubai("2026-09-09", 16, 30), blocks: [blk("b2", "activity", "17:00:00")] })),
+  ["block:b2:2026-09-09:m30"]);
+eq("a meeting uses the meeting lead",
+  keys(plan({ now: atDubai("2026-09-09", 16, 45), blocks: [blk("b3", "meeting", "17:00:00")] })),
+  ["block:b3:2026-09-09:m15"]);
+eq("a completed block never fires",
+  keys(plan({ now: atDubai("2026-09-09", 16, 50), blocks: [blk("b1", "study", "17:00:00", { done: true })] })), []);
+eq("an untimed block never fires",
+  keys(plan({ now: atDubai("2026-09-09", 16, 50), blocks: [blk("b1", "study", null)] })), []);
+eq("turning study reminders off silences the study block",
+  keys(plan({ now: atDubai("2026-09-09", 16, 50), prefs: { study_enabled: false },
+    blocks: [blk("b1", "study", "17:00:00"), blk("b4", "meeting", "19:00:00")] })), []);
+eq("a meeting still fires when study is off",
+  keys(plan({ now: atDubai("2026-09-09", 16, 45), prefs: { study_enabled: false },
+    blocks: [blk("b3", "meeting", "17:00:00")] })), ["block:b3:2026-09-09:m15"]);
+eq("a block with no kind is treated as study",
+  keys(plan({ now: atDubai("2026-09-09", 16, 50), blocks: [{ ...blk("b5", "study", "17:00:00"), kind: undefined }] })),
+  ["block:b5:2026-09-09:m10"]);
+eq("a meeting body carries where and who",
+  plan({ now: atDubai("2026-09-09", 16, 45),
+    blocks: [blk("b6", "meeting", "17:00:00", { location: "Library room 2", people: "Aditi" })] })[0].body,
+  "5:00 pm · Library room 2 · Aditi");
 
 console.log(failed === 0 ? "\nAll checks passed." : `\n${failed} check(s) FAILED.`);
 process.exit(failed === 0 ? 0 : 1);
