@@ -321,6 +321,44 @@ h1 { line-height: 1.22; }
 }
 .slot-row-head button:hover { color: var(--danger); background: var(--danger-soft); }
 
+/* ------------------------------------------------------------- slider */
+.slider { display: flex; flex-direction: column; gap: 8px; }
+.slider-head { display: flex; align-items: baseline; justify-content: space-between; gap: 8px; font-size: .8125rem; color: var(--text-dim); }
+.slider-head strong { color: var(--text); font-weight: 700; font-variant-numeric: tabular-nums; }
+.slider input[type="range"] {
+  -webkit-appearance: none; appearance: none; width: 100%; height: 26px;
+  background: transparent; cursor: pointer;
+}
+.slider input[type="range"]::-webkit-slider-runnable-track {
+  height: 6px; border-radius: 999px;
+  background: linear-gradient(to right, var(--brand) var(--slider-fill), var(--surface-2) var(--slider-fill));
+}
+.slider input[type="range"]::-moz-range-track { height: 6px; border-radius: 999px; background: var(--surface-2); }
+.slider input[type="range"]::-moz-range-progress { height: 6px; border-radius: 999px; background: var(--brand); }
+.slider input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none; appearance: none; margin-top: -8px;
+  width: 22px; height: 22px; border-radius: 50%;
+  background: var(--surface); border: 2px solid var(--brand);
+  box-shadow: 0 1px 2px rgb(0 0 0 / .18), 0 4px 10px -6px rgb(0 0 0 / .4);
+}
+.slider input[type="range"]::-moz-range-thumb {
+  width: 22px; height: 22px; border: 2px solid var(--brand); border-radius: 50%;
+  background: var(--surface); box-shadow: 0 1px 2px rgb(0 0 0 / .18);
+}
+.slider input[type="range"]:focus-visible { outline: none; }
+.slider input[type="range"]:focus-visible::-webkit-slider-thumb { outline: 2px solid var(--brand); outline-offset: 3px; }
+
+/* The sidebar carries Settings on desktop; on a phone there is no sidebar, so
+   the topbar needs its own way in. */
+.topbar-settings {
+  display: grid; place-items: center; width: 2.75rem; height: 2.75rem;
+  border-radius: 50%; color: var(--text-dim);
+  background: var(--surface); border: 1px solid var(--border);
+}
+.topbar-settings:hover { color: var(--text); }
+.topbar-settings[aria-current="page"] { color: var(--brand); border-color: var(--brand); }
+@media (min-width: 900px) { .topbar-settings { display: none; } }
+
 .no-bar { scrollbar-width: none; }
 .no-bar::-webkit-scrollbar { display: none; }
 .safe-b { padding-bottom: max(1rem, env(safe-area-inset-bottom, 0px)); }
