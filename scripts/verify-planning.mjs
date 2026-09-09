@@ -97,9 +97,9 @@ try {
   check("sheet survives doubled text", (await geometry()).fit && await page.$eval('.sheet-body', (el) => el.scrollWidth <= el.clientWidth + 1));
   await page.evaluate(() => { document.documentElement.style.fontSize = ""; });
   await go("loading");
-  check("loading screen uses the same animated logo", Boolean(await page.$('.brandmark-loading .bm-fold')) && await page.$eval('.launch', (el) => el.getAttribute("aria-busy") === "true"));
+  check("loading screen uses the same animated logo", Boolean(await page.$('.brandmark-loading .bm-arc')) && await page.$eval('.launch', (el) => el.getAttribute("aria-busy") === "true"));
   await page.emulateMediaFeatures([{ name: "prefers-reduced-motion", value: "reduce" }]);
-  check("reduced motion leaves logo visible", await page.$eval('.bm-fold', (el) => getComputedStyle(el).opacity !== "0"));
+  check("reduced motion leaves logo visible", await page.$eval('.bm-arc', (el) => getComputedStyle(el).opacity !== "0"));
   await go("today");
   check("no OS dropdowns, date or time controls remain", await page.$$eval('select, input[type="date"], input[type="time"]', (els) => els.length === 0));
   check("no uncaught browser errors", errors.length === 0, errors.join(" | "));
