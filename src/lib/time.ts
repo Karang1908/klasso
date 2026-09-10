@@ -128,3 +128,16 @@ export function isValidTimezone(tz: string): boolean {
     return false;
   }
 }
+
+/**
+ * The device's IANA zone, or null if the browser reports something Intl cannot
+ * resolve. Reminders fire on this, so a bad value is worse than no value.
+ */
+export function deviceTimezone(): string | null {
+  try {
+    const tz = Intl.DateTimeFormat().resolvedOptions().timeZone;
+    return tz && isValidTimezone(tz) ? tz : null;
+  } catch {
+    return null;
+  }
+}
