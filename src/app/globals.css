@@ -74,7 +74,7 @@
   --color-success: var(--success); --color-success-soft: var(--success-soft); --color-warn: var(--warn); --color-warn-soft: var(--warn-soft);
   --font-sans: "Manrope Variable", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
 }
-html { scrollbar-gutter: stable; -webkit-text-size-adjust: 100%; scroll-padding-top: 24px; scroll-padding-bottom: calc(110px + env(safe-area-inset-bottom)); }
+html { scrollbar-gutter: stable; -webkit-text-size-adjust: 100%; overscroll-behavior-y: none; scroll-padding-top: 24px; scroll-padding-bottom: calc(110px + env(safe-area-inset-bottom)); }
 body { background: var(--bg); color: var(--text); font-family: var(--font-sans); overscroll-behavior-y: none; }
 body::before {
   content: ""; position: fixed; inset: 0; z-index: -1; pointer-events: none;
@@ -106,6 +106,7 @@ h1 { line-height: 1.22; }
 .btn-primary:hover { filter: brightness(1.08); }
 .control { background: var(--glass); min-height: 46px; }
 .field { min-width: 0; flex: 1; }
+.flex-col > .field { flex: none; }
 .field > span:first-child { color: var(--text-dim); font-size: .8125rem; }
 .segmented { display: flex; flex-wrap: wrap; gap: 4px; padding: 5px; min-width: 0; border: 1px solid var(--glass-line); background: var(--surface-2); border-radius: 15px; }
 .segment { position: relative; flex: 1 1 5rem; min-width: 0; min-height: 2.75rem; padding: 7px 12px; font-size: .8125rem; font-weight: 650; border-radius: 10px; isolation: isolate; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
@@ -208,7 +209,7 @@ h1 { line-height: 1.22; }
 .settings-grid > section { min-width: 0; }
 .app-dialog { position: fixed; inset: 0; margin: 0; width: 100%; height: 100dvh; max-width: none; max-height: none; padding: 0; border: 0; background: transparent; color: var(--text); overflow: clip; }
 .app-dialog::backdrop { background: transparent; }
-.sheet-overlay { display: flex; align-items: center; justify-content: center; height: 100%; padding: clamp(12px, 3vw, 32px); background: rgb(9 29 20 / .42); }
+.sheet-overlay { display: flex; align-items: center; justify-content: center; height: 100%; padding: max(clamp(12px, 3vw, 32px), env(safe-area-inset-top, 0px)) max(clamp(12px, 3vw, 32px), env(safe-area-inset-right, 0px)) max(clamp(12px, 3vw, 32px), env(safe-area-inset-bottom, 0px)) max(clamp(12px, 3vw, 32px), env(safe-area-inset-left, 0px)); background: rgb(9 29 20 / .42); }
 .sheet-panel { position: relative; display: flex; flex-direction: column; min-width: 0; max-height: 100%; width: min(100%, 36rem); overflow: hidden; border-radius: 28px; background: var(--glass-nav); box-shadow: 0 24px 80px -24px rgb(9 29 20 / .4); }
 .sheet-header { display: flex; flex: none; align-items: center; justify-content: space-between; gap: 16px; padding: 20px 24px 16px; border-bottom: 1px solid var(--border); }
 .sheet-header h2 { min-width: 0; font-size: 1.2rem; font-weight: 750; letter-spacing: -.025em; line-height: 1.35; overflow-wrap: anywhere; outline: none; }
@@ -219,8 +220,8 @@ h1 { line-height: 1.22; }
 .sheet-footer > div { flex-wrap: wrap; }
 .sheet-footer .btn { min-height: 46px; }
 .sheet-body .field > span:first-child { font-size: .875rem; }
-.sheet-body .flex:has(> .field) { flex-wrap: wrap; }
-.sheet-body .flex > .field { flex-basis: 10rem; }
+.sheet-body .flex:not(.flex-col):has(> .field) { flex-wrap: wrap; }
+.sheet-body .flex:not(.flex-col) > .field { flex-basis: 10rem; }
 .dropdown-trigger { display: flex; align-items: center; gap: 10px; width: 100%; min-height: 46px; padding: 10px 12px; text-align: left; border: 1px solid var(--border); border-radius: 12px; color: var(--text); font-size: 1rem; }
 .dropdown-trigger:disabled { opacity: .5; }
 .dropdown-value { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
@@ -257,9 +258,13 @@ h1 { line-height: 1.22; }
 .temporal-popup footer button { min-height: 40px; padding: 8px 12px; font-size: .8125rem; color: var(--text-dim); border-radius: 10px; }
 .picker-time-options { display: grid; grid-template-columns: repeat(4,minmax(0,1fr)); gap: 6px; margin-top: 14px; }
 .picker-time-options button { min-height: 40px; border: 1px solid var(--border); border-radius: 10px; font-size: .8125rem; }
-.picker-help { margin-top: 8px; font-size: .8125rem; line-height: 1.5; color: var(--text-dim); }
+.picker-readout { margin-top: 10px; font-size: 1.75rem; font-weight: 680; letter-spacing: -.02em; font-variant-numeric: tabular-nums; color: var(--text); }
+.picker-sliders { display: grid; gap: 14px; margin-top: 12px; }
+.picker-sliders .slider-head { font-size: .75rem; }
+.picker-sliders .slider-head strong { font-variant-numeric: tabular-nums; }
+.picker-time-options { margin-top: 16px; padding-top: 14px; border-top: 1px solid var(--border); }
 .date-navigation > .temporal-control { width: 10.5rem; }
-@media (max-width: 600px) { .sheet-overlay { align-items: flex-end; padding: 10px; } .sheet-header { padding: 16px 18px 12px; } .sheet-body { padding: 20px 18px; } .sheet-footer { padding: 16px 18px max(20px, env(safe-area-inset-bottom, 0px)); } }
+@media (max-width: 600px) { .sheet-overlay { align-items: flex-end; padding: max(10px, env(safe-area-inset-top, 0px)) max(14px, env(safe-area-inset-right, 0px)) max(10px, env(safe-area-inset-bottom, 0px)) max(14px, env(safe-area-inset-left, 0px)); } .sheet-header { padding: 16px 18px 12px; } .sheet-body { padding: 20px 18px; } .sheet-footer { padding: 16px 18px max(20px, env(safe-area-inset-bottom, 0px)); } }
 /* ------------------------------------------------------------- week grid
    A real calendar: a fixed hour gutter plus seven equal day columns. Hour
    labels are centred on their own gridline, so the axis and the lines cannot
@@ -582,3 +587,10 @@ button.agenda-title { min-height: 30px; margin-top: -5px; }
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { scroll-behavior: auto !important; animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; }
 }
+
+/* Google sign-in sits on the card, so it needs its own edge to read as a
+   control rather than as part of the card surface. */
+.oauth-btn { background: var(--surface); color: var(--text); border: 1px solid var(--border); box-shadow: var(--shadow); }
+.oauth-btn:hover:not(:disabled) { background: var(--surface-2); }
+.or-rule { display: flex; align-items: center; gap: .75rem; margin-block: 1.15rem; font-size: .75rem; color: var(--text-dim); }
+.or-rule::before, .or-rule::after { content: ""; flex: 1; height: 1px; background: var(--border); }
