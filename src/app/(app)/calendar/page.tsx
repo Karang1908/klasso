@@ -206,7 +206,7 @@ export default function CalendarPage() {
         key={editing === null ? "closed" : editing === "new" ? `new:${draftDate ?? selected}` : editing.id}
         target={editing}
         dateISO={draftDate ?? selected ?? now.dateISO}
-        onClose={() => { setEditing(null); setDraftDate(null); }}
+        onClose={() => { setEditing(null); setDraftDate(null); setSelected(null); }}
       />
       {planDraft && <PlanEditor key={planDraft.id ?? `new:${planDraft.on_date}`} initial={planDraft} onClose={() => setPlanDraft(null)} />}
     </div>
