@@ -1,6 +1,7 @@
 "use client";
 import { cx, Button, Dropdown } from "./ui";
 import { Icon } from "./icons";
+import { haptic } from "@/lib/haptics";
 import { formatMinutes } from "@/lib/time";
 import type { AttendanceStatus, ClassOccurrence } from "@/lib/types";
 
@@ -24,7 +25,7 @@ export function ClassRow({ occurrence: c, state, attendance, onAttendance, onCan
         triggerClassName={cx("attendance-control flex items-center justify-between gap-1",
           attendance === "present" && "is-present", attendance === "absent" && "is-absent")}
         value={attendance ?? ""}
-        onChange={(value) => { if (value && value !== attendance) onAttendance(value as AttendanceStatus); else if (!value && attendance) onAttendance(attendance); }}
+        onChange={(value) => { haptic("select"); if (value && value !== attendance) onAttendance(value as AttendanceStatus); else if (!value && attendance) onAttendance(attendance); }}
         options={[{ value: "", label: "Mark" }, { value: "present", label: "Present" }, { value: "absent", label: "Absent" }, { value: "cancelled", label: "Off" }]}
       />}
     {action}{onCancel && <Button variant="ghost" size="sm" onClick={onCancel} aria-label={`Remove ${name}`}><Icon name="close" size={17} /></Button>}
