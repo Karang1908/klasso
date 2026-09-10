@@ -1,5 +1,6 @@
 "use client";
 import { useEffect, useRef } from "react";
+import { haptic } from "@/lib/haptics";
 import { animate } from "animejs/animation";
 import { motion, useReducedMotion } from "motion/react";
 import { cx } from "./ui";
@@ -18,7 +19,7 @@ export function TaskCheck({ task, onToggle }: { task: Task; onToggle: () => void
     const animation = animate(path.current, { strokeDashoffset: [24, 0], duration: 220, ease: "outExpo" });
     return () => { animation.revert(); };
   }, [task.done, reduced]);
-  return <button className="task-check" aria-label={`Mark ${task.title} ${task.done ? "not done" : "done"}`} aria-pressed={task.done} onClick={onToggle}>
+  return <button className="task-check" aria-label={`Mark ${task.title} ${task.done ? "not done" : "done"}`} aria-pressed={task.done} onClick={() => { haptic(task.done ? "select" : "commit"); onToggle(); }}>
     <span>{task.done && <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path ref={path} d="m5 12 4 4L19 6" strokeDasharray="24" strokeDashoffset="0" /></svg>}</span>
   </button>;
 }
