@@ -13,7 +13,7 @@
     "check:planning": "node scripts/verify-planning.mjs",
     "check:zoom": "node scripts/verify-zoom.mjs",
     "icons": "node scripts/build-icons.mjs",
-    "check": "npx tsc --noEmit && eslint src --max-warnings 0 && node scripts/check-logic.mjs && node scripts/check-notifications.mjs && ./scripts/check-schema.sh",
+    "check": "npx tsc --noEmit && eslint src --max-warnings 0 && node scripts/check-logic.mjs && node scripts/check-notifications.mjs && node scripts/check-scale.mjs && ./scripts/check-schema.sh",
     "check:schema": "./scripts/check-schema.sh"
   },
   "dependencies": {
