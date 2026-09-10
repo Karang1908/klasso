@@ -456,11 +456,16 @@ Two traps that account for most of these:
    app answers `401` or the hostname does not resolve. The real HTTP status is
    in `net._http_response`. Never conclude the job works from job_run_details
    alone.
-2. **`profiles.timezone` defaults to `Asia/Dubai`.** Every reminder fires on
-   that clock, so an unchanged profile shifts the 07:30 summary to 07:30 Dubai
-   time — 09:00 in India. Signups now send the browser's IANA zone
-   (`signup_timezone()` in schema.sql), but a profile created before that keeps
-   the old default and must be changed in Settings.
+2. **`profiles.timezone` decides when every push fires, and is invisible.**
+   `zonedNow()` is the only timezone-aware function in the codebase and it is
+   used in exactly one place — `notifications.ts`, server-side. Everything on
+   screen goes through `formatMinutes()`, pure integer→clock maths. So a wrong
+   zone shifts every reminder by its offset with no visible symptom whatsoever.
+   It is now pinned to the device: `store.tsx` syncs it on load via
+   `timezoneToSync()`, and signups send it too (`signup_timezone()`). Settings
+   shows it read-only — a dropdown there would be overwritten on next load.
+   Note Chrome reports `Asia/Calcutta`, not `Asia/Kolkata`; both are valid IANA
+   aliases and Postgres resolves them identically.
 
 ## 10. Landmines
 
