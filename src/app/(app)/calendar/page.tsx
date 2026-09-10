@@ -32,6 +32,10 @@ export default function CalendarPage() {
   const [cursor, setCursor] = useState(() => now.dateISO.slice(0, 7)); // "YYYY-MM"
   const [selected, setSelected] = useState<string | null>(null);
   const [editing, setEditing] = useState<CalendarEvent | "new" | null>(null);
+  // Which date a NEW entry should default to. Separate from `selected`,
+  // which means "the day sheet is open" — overloading one state for both
+  // made closing the editor pop open a day sheet the user never asked for.
+  const [draftDate, setDraftDate] = useState<string | null>(null);
   const [planDraft, setPlanDraft] = useState<PlanDraft | null>(null);
 
   const eventsByDate = useMemo(() => {
@@ -68,7 +72,7 @@ export default function CalendarPage() {
             {upcoming[0] && ` · ${describeGap(daysBetweenISO(now.dateISO, upcoming[0].on_date))}`}
           </p>
         </div>
-        <Button size="sm" variant="primary" onClick={() => { setSelected(now.dateISO); setEditing("new"); }}>
+        <Button size="sm" variant="primary" onClick={() => { setDraftDate(now.dateISO); setEditing("new"); }}>
           <Icon name="plus" size={17} />Add entry
         </Button>
       </header>
@@ -148,7 +152,7 @@ export default function CalendarPage() {
           <EmptyState
             title="Nothing coming up"
             body="Add your exams and deadlines here and you'll be reminded ahead of each one."
-            action={<Button variant="primary" onClick={() => { setSelected(now.dateISO); setEditing("new"); }}>Add an exam</Button>}
+            action={<Button variant="primary" onClick={() => { setDraftDate(now.dateISO); setEditing("new"); }}>Add an exam</Button>}
           />
         </Card>
       ) : (
@@ -192,17 +196,17 @@ export default function CalendarPage() {
         onClose={() => setSelected(null)}
         title={selected ? formatDateISO(selected, "long") : ""}
         footer={
-          <div className="flex gap-2"><Button className="flex-1" onClick={() => setEditing("new")}>Add event</Button><Button variant="primary" className="flex-1" onClick={() => setPlanDraft({ kind: "activity", on_date: selected ?? now.dateISO })}><Icon name="plus" size={17} />Add plan</Button></div>
+          <div className="flex gap-2"><Button className="flex-1" onClick={() => { setDraftDate(selected); setEditing("new"); }}>Add event</Button><Button variant="primary" className="flex-1" onClick={() => setPlanDraft({ kind: "activity", on_date: selected ?? now.dateISO })}><Icon name="plus" size={17} />Add plan</Button></div>
         }
       >
         {selected && <DayDetail dateISO={selected} onEdit={setEditing} />}
       </Sheet>
 
       <EventSheet
-        key={editing === null ? "closed" : editing === "new" ? `new:${selected}` : editing.id}
+        key={editing === null ? "closed" : editing === "new" ? `new:${draftDate ?? selected}` : editing.id}
         target={editing}
-        dateISO={selected ?? now.dateISO}
-        onClose={() => setEditing(null)}
+        dateISO={draftDate ?? selected ?? now.dateISO}
+        onClose={() => { setEditing(null); setDraftDate(null); }}
       />
       {planDraft && <PlanEditor key={planDraft.id ?? `new:${planDraft.on_date}`} initial={planDraft} onClose={() => setPlanDraft(null)} />}
     </div>
