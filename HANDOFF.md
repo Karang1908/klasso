@@ -467,6 +467,40 @@ Two traps that account for most of these:
    Note Chrome reports `Asia/Calcutta`, not `Asia/Kolkata`; both are valid IANA
    aliases and Postgres resolves them identically.
 
+## 9c. Scaling: what the dispatcher can carry
+
+Before this pass the ceiling was roughly **40-60 users**, and it failed silently.
+Four things caused it, all now fixed:
+
+1. **Sequential pushes.** `await sendPush()` one at a time, while every user's
+   summary fires in the same tick. Now batched 20-wide with `Promise.allSettled`:
+   50 pushes went 10.0s -> 0.6s, 200 went 40.0s -> 2.0s (measured).
+2. **Lost notifications on timeout.** The claim into `notification_log` was
+   committed *before* the push, and the unique index on `dedupe_key` then made a
+   retry impossible — a timeout mid-loop dropped those reminders permanently and
+   silently. `delivered_at` now separates intent from delivery; undelivered
+   claims older than 90s are released and retried inside the catch-up window.
+3. **URL length.** `.in("user_id", ids)` is a URL filter at ~39 bytes per uuid,
+   so one query crossed the 8KB gateway limit at ~205 users. Reads are chunked
+   100 users wide; the URL is now a flat 3,975 bytes at any user count.
+4. **O(all users) every minute**, including a 400-day events window. Windows are
+   now derived from the loaded prefs (`exam_lead_days`, `task_lead_minutes`),
+   which is typically 8 days instead of 400.
+
+Also: `maxDuration = 60` (the platform default cut runs off at 10s), the summary
+default is jittered across 07:15-07:44 so a cohort no longer lands on one tick,
+and `notification_log` — which grows ~1.7 MB per user per year and had no
+pruning — is trimmed nightly by the `klasso-prune` pg_cron job.
+
+`scripts/check-scale.mjs` guards 1 and 3; it runs inside `npm run check`.
+
+Expect **500-1,000 users** comfortably now. Past that, the every-minute full scan
+has to become a "next due" queue, which is a real rewrite rather than a tune-up.
+
+**Never let `supabase/cron.sql` keep a real secret.** It is a tracked template;
+substituting the values in place and committing puts `CRON_SECRET` in git
+history. Fill it in, run it, then restore the placeholders.
+
 ## 10. Landmines
 
 Things that cost real time here. Read before editing.
