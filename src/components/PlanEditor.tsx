@@ -1,7 +1,7 @@
 "use client";
 
 import { useId, useState } from "react";
-import { Banner, Button, Dropdown, Field, Input, Sheet, Textarea } from "./ui";
+import { Banner, Button, Confirm, Dropdown, Field, Input, Sheet, Textarea } from "./ui";
 import { Icon } from "./icons";
 import { useApp } from "@/lib/store";
 import { BLOCK_KINDS, blockKind, blocksForDay, findClashes, validatePlan } from "@/lib/planning";
@@ -45,7 +45,32 @@ export function PlanEditor({ initial, onClose }: { initial: PlanDraft; onClose: 
     } catch { setError("Couldn’t reach your workspace. Your details are still here. Try again when you’re connected."); }
     finally { setBusy(false); }
   };
-  return <Sheet open title={initial.id ? "Edit your plan" : "Make a little time"} onClose={dismiss} footer={
+  const confirm = <>
+    <Confirm
+      open={discarding}
+      title="Discard your changes?"
+      body="This plan has edits that have not been saved."
+      cancelLabel="Keep editing" confirmLabel="Discard changes"
+      onCancel={() => setDiscarding(false)} onConfirm={onClose}
+    />
+    <Confirm
+      open={deleting}
+      title={`Delete this ${blockKind(candidate)} plan?`}
+      body="This cannot be undone."
+      cancelLabel="Keep plan" confirmLabel="Delete plan" busy={busy}
+      onCancel={() => setDeleting(false)}
+      onConfirm={async () => {
+        setBusy(true);
+        try {
+          if (initial.id && await removeBlock(initial.id)) onClose();
+          else setError("Couldn’t delete this plan. Please try again.");
+        } catch { setError("Couldn’t delete this plan. Please try again."); }
+        finally { setBusy(false); }
+      }}
+    />
+  </>;
+
+  return <Sheet open confirm={confirm} title={initial.id ? "Edit your plan" : "Make a little time"} onClose={dismiss} footer={
     <div className="flex items-center gap-2">
       <Button variant={initial.id ? "danger" : "ghost"} disabled={busy} onClick={() => initial.id ? setDeleting(true) : dismiss()}>{initial.id ? "Delete" : "Cancel"}</Button>
       <Button type="submit" form={formId} variant="primary" className="flex-1" disabled={busy || Boolean(validation)}>{busy ? "Saving…" : initial.id ? "Save changes" : "Add to plan"}</Button>
@@ -77,8 +102,6 @@ export function PlanEditor({ initial, onClose }: { initial: PlanDraft; onClose: 
       </div>
       {form.kind === "meeting" && <Field label="Who’s joining?"><Input aria-label="Meeting participants" value={form.people} maxLength={500} placeholder="Project group, tutor, friends…" onChange={(event) => change({ people: event.target.value })} /></Field>}
       <details className="plan-details" open={form.notes ? true : undefined}><summary>Notes & details <span>Optional</span></summary><Textarea aria-label="Plan notes" value={form.notes} placeholder="Anything you’ll want to remember" onChange={(event) => change({ notes: event.target.value })} /></details>
-      {deleting && <Banner tone="danger"><p>Delete this {blockKind(candidate)} plan? This cannot be undone.</p><div className="mt-3 flex flex-wrap gap-2"><Button size="sm" disabled={busy} onClick={() => setDeleting(false)}>Keep plan</Button><Button size="sm" variant="danger" disabled={busy} onClick={async () => { setBusy(true); try { if (initial.id && await removeBlock(initial.id)) onClose(); else setError("Couldn’t delete this plan. Please try again."); } catch { setError("Couldn’t delete this plan. Please try again."); } finally { setBusy(false); } }}>Delete plan</Button></div></Banner>}
-      {discarding && <Banner tone="warn"><p>Keep editing or discard your unsaved changes?</p><div className="mt-3 flex flex-wrap gap-2"><Button size="sm" onClick={() => setDiscarding(false)}>Keep editing</Button><Button size="sm" variant="danger" onClick={onClose}>Discard changes</Button></div></Banner>}
     </form>
   </Sheet>;
 }
