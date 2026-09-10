@@ -26,7 +26,7 @@
   :root:not([data-theme="light"]) {
     color-scheme: dark;
     --bg: #0d100f; --surface: #171b19; --surface-2: #1f2422;
-    --border: #2a302d; --text: #f1f3f2; --text-dim: #9aa39f; --text-faint: #7b8480;
+    --border: #2a302d; --text: #f1f3f2; --text-dim: #9aa39f; --text-faint: #8b938f;
     --brand: #6fd6a4; --brand-soft: #17332a;
     --danger: #ff9e8f; --danger-soft: #3a221e; --success: #6fd6a4; --success-soft: #15302a;
     --warn: #e8c37b; --warn-soft: #33291a;
@@ -48,7 +48,7 @@
 :root[data-theme="dark"] {
   color-scheme: dark;
   --bg: #0d100f; --surface: #171b19; --surface-2: #1f2422;
-  --border: #2a302d; --text: #f1f3f2; --text-dim: #9aa39f; --text-faint: #7b8480;
+  --border: #2a302d; --text: #f1f3f2; --text-dim: #9aa39f; --text-faint: #8b938f;
   --brand: #6fd6a4; --brand-soft: #17332a;
   --danger: #ff9e8f; --danger-soft: #3a221e; --success: #6fd6a4; --success-soft: #15302a;
   --warn: #e8c37b; --warn-soft: #33291a;
@@ -112,7 +112,7 @@ h1 { line-height: 1.22; }
 .segment { position: relative; flex: 1 1 5rem; min-width: 0; min-height: 2.75rem; padding: 7px 12px; font-size: .8125rem; font-weight: 650; border-radius: 10px; isolation: isolate; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .segment-marker { position: absolute; inset: 0; z-index: -1; border-radius: inherit; background: var(--glass-nav); box-shadow: var(--shadow); }
 .section-heading { font-size: 1.0625rem; font-weight: 700; letter-spacing: -.02em; }
-.section-link { display: inline-flex; align-items: center; gap: 6px; min-height: 44px; color: var(--text-dim); font-size: .8125rem; font-weight: 600; }
+.section-link { display: inline-flex; align-items: center; justify-content: center; gap: 6px; min-height: 44px; min-width: 44px; color: var(--text-dim); font-size: .8125rem; font-weight: 600; }
 .section-link:hover { color: var(--brand); }
 .page-heading { font-size: 1.875rem; font-weight: 750; letter-spacing: -.035em; }
 .page-subtitle { color: var(--text-dim); font-size: .875rem; line-height: 1.6; margin-top: 6px; }
@@ -382,10 +382,6 @@ h1 { line-height: 1.22; }
   .page-heading { font-size: 2rem; }
   .settings-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); align-items: start; }
 }
-/* Planning's agenda rows are tappable in full — 30px was well under the
-   44pt touch target. */
-.agenda-title { min-height: 44px; display: flex; align-items: center; }
-
 /* Rows are tappable in full; give them the guideline height rather than
    relying on their text to fill it. */
 .task-row > button:not(.task-check), .task-row > a { min-height: 44px; }
@@ -528,7 +524,7 @@ h1 { line-height: 1.22; }
 .agenda-symbol.meeting { background: var(--success-soft); color: var(--success); }
 .agenda-copy { flex: 1; min-width: 0; }
 .agenda-title { display: block; text-align: left; font-size: .9375rem; font-weight: 650; line-height: 1.45; overflow-wrap: anywhere; }
-button.agenda-title { min-height: 30px; margin-top: -5px; }
+button.agenda-title { display: flex; align-items: center; min-height: 44px; margin-top: -5px; }
 .agenda-title.is-done { text-decoration: line-through; color: var(--text-faint); }
 .agenda-meta { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 8px; margin-top: 5px; font-size: .75rem; line-height: 1.5; color: var(--text-dim); overflow-wrap: anywhere; }
 .agenda-meta span + span::before { content: "·"; margin-right: 8px; }
@@ -572,7 +568,7 @@ button.agenda-title { min-height: 30px; margin-top: -5px; }
 .duration-options button { min-height: 36px; padding: 7px 11px; border: 1px solid var(--border); border-radius: 20px; }
 .duration-options button[aria-pressed="true"] { background: var(--brand-soft); border-color: var(--brand); color: var(--brand); }
 .duration-options button:disabled { opacity: .4; }
-.plan-details summary { padding-block: 8px; font-size: .875rem; font-weight: 600; cursor: pointer; }
+.plan-details summary { display: flex; align-items: center; min-height: 44px; padding-block: 8px; font-size: .875rem; font-weight: 600; cursor: pointer; }
 .plan-details summary span { margin-left: 8px; color: var(--text-faint); font-size: .75rem; font-weight: 400; }
 .plan-details textarea { margin-top: 8px; }
 .syllabus-grid { display: grid; gap: 24px; }
