@@ -69,7 +69,12 @@ try {
   check("dismissing a picker unchanged does not dirty the form", !(await page.$("dialog[open]")));
   await textClick("An activity"); await type('[aria-label="Plan title"]', "UI gym session");
   await click('.sheet-close');
-  check("unsaved plan asks before discard", await page.$eval('.sheet-body', (el) => el.textContent.includes("discard your unsaved changes")));
+  check("unsaved plan asks before discard", Boolean(await page.$(".sheet-confirm")) && await page.$eval(".sheet-confirm", (el) => el.textContent.includes("Discard your changes?")));
+  check("…as an overlay, not buried at the end of the scrolling body", await page.evaluate(() => {
+    const el = document.querySelector(".sheet-confirm");
+    const card = el?.querySelector(".sheet-confirm-card")?.getBoundingClientRect();
+    return Boolean(el) && !document.querySelector(".sheet-body").contains(el) && card.top >= 0 && card.bottom <= innerHeight;
+  }));
   await textClick("Keep editing"); await textClick("Add to plan", ".sheet-footer button");
   check("activity saves without requiring a subject or time", Boolean(await page.$('[aria-label="Edit plan UI gym session"]')));
   await click('[aria-label="Mark UI gym session done"]');
@@ -79,8 +84,8 @@ try {
   await click('[aria-label="Edit plan UI project meeting"]');
   check("calendar opens the same plan editor", Boolean(await page.$('[aria-label="Meeting participants"]')));
   await textClick("Delete", ".sheet-footer button");
-  check("plan deletion asks for confirmation", await page.$eval('.sheet-body', (el) => el.textContent.includes("cannot be undone")));
-  await textClick("Delete plan", ".sheet-body button");
+  check("plan deletion asks for confirmation", Boolean(await page.$(".sheet-confirm")) && await page.$eval(".sheet-confirm", (el) => el.textContent.includes("cannot be undone")));
+  await textClick("Delete plan", ".sheet-confirm button");
   await go("planning");
   check("deleted meeting is removed everywhere", !(await page.$('[aria-label="Edit plan UI project meeting"]')));
   await go("timetable"); await textClick("Meeting");
