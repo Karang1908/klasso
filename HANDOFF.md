@@ -391,6 +391,41 @@ errors and no horizontal overflow.
 
 `README.md` has this as a fuller step-by-step.
 
+**TODO — Google sign-in: DEFERRED until the custom domain is bought.**
+
+Owner's decision (2026-09-10): the code is shipped and inert; the dashboard
+setup below waits for the domain. Doing it against a `*.vercel.app` URL would
+mean redoing the Google console redirect URI and the Supabase Site URL a second
+time once the domain lands. Nothing in the app breaks meanwhile — the button
+simply errors if pressed, and email + password is unaffected.
+
+The login page already calls `signInWithOAuth({ provider: "google" })`. It stays
+inert until both consoles are set up. No callback route is needed — the browser
+client runs with `detectSessionInUrl`, so it reads the session out of the return
+URL itself.
+
+7. **Verify the existing account's email first.** Confirm email is off, so the
+   password account is unverified, and Supabase only auto-links an OAuth identity
+   to an existing user when the emails match **and are verified**. Skip this and
+   Google creates a *second, empty* user. In the SQL editor:
+   `update auth.users set email_confirmed_at = now() where email_confirmed_at is null;`
+8. **Google Cloud Console** → new project → APIs & Services → OAuth consent
+   screen (External, add yourself as a test user) → Credentials → Create OAuth
+   client ID → Web application. Authorised redirect URI is Supabase's callback,
+   **not** the app's: `https://<project-ref>.supabase.co/auth/v1/callback`.
+9. **Supabase** → Authentication → Sign In / Providers → Google → paste the
+   client ID and secret, enable.
+10. **Supabase** → Authentication → URL Configuration → Site URL is the production
+    domain; add `https://<project>-*.vercel.app/**` to Redirect URLs or every
+    preview deployment bounces on return.
+
+**Known risk, unverified:** in an installed iOS home-screen PWA the hop to
+`accounts.google.com` may be handed to Safari, and Safari's localStorage is a
+separate store from the standalone web view — so the return lands signed in *in
+Safari* while the PWA still shows the login screen. Believed improved on iOS
+17.4+, not tested on a device. Email + password has no cross-origin hop and is
+unaffected. Test on the phone before relying on Google there.
+
 **Not built (surfaced to the owner, deliberately not added):**
 
 - **No error boundary.** Any page-level throw white-screens the PWA. Next
@@ -404,6 +439,28 @@ errors and no horizontal overflow.
 - No bulk timetable entry (e.g. "copy Monday to Wednesday").
 
 ---
+
+## 9b. When a scheduled notification does not arrive
+
+Run `supabase/diagnose.sql` in the Supabase SQL editor. It is read-only and
+ordered so that the checks which cannot error come first.
+
+The single most useful fact: **a working "Send a test notification" rules out
+the VAPID keys, the phone subscription and the service worker.** Those are the
+whole delivery half of the chain, so anything still broken is in the scheduler.
+
+Two traps that account for most of these:
+
+1. **`cron.job_run_details` lies.** `net.http_post` is asynchronous, so pg_cron
+   records "succeeded" the instant the request is queued — including when the
+   app answers `401` or the hostname does not resolve. The real HTTP status is
+   in `net._http_response`. Never conclude the job works from job_run_details
+   alone.
+2. **`profiles.timezone` defaults to `Asia/Dubai`.** Every reminder fires on
+   that clock, so an unchanged profile shifts the 07:30 summary to 07:30 Dubai
+   time — 09:00 in India. Signups now send the browser's IANA zone
+   (`signup_timezone()` in schema.sql), but a profile created before that keeps
+   the old default and must be changed in Settings.
 
 ## 10. Landmines
 
