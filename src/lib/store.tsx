@@ -14,6 +14,7 @@ import {
 
 import { isSupabaseConfigured, supabase } from "./supabase/client";
 import { inTaskScope } from "./tasks";
+import { deviceTimezone } from "./time";
 import type {
   Attendance,
   AttendanceStatus,
@@ -444,6 +445,25 @@ export function AppProvider({ children }: { children: ReactNode }) {
     // `data` drives every closure above, so it must stay in the dep list.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [session, userId, ready, loading, stale, error, data, refresh, fail]);
+
+  // Keep profiles.timezone pinned to the device.
+  //
+  // The push dispatcher is the only thing that reads this column, and nothing
+  // in the UI renders through it — a class typed as 09:00 shows as 09:00
+  // whatever the zone says. So a stale value silently shifts every reminder by
+  // the offset and gives no visible symptom at all. Syncing on load is the only
+  // way it cannot drift.
+  const syncedZone = useRef<string | null>(null);
+  useEffect(() => {
+    if (!userId || !value.data.profile || loading || stale || error || pendingMutations > 0) return;
+    const device = deviceTimezone();
+    if (!device || device === value.data.profile.timezone) return;
+    // One attempt per zone per session: the write updates `data`, which
+    // re-runs this effect, and a failed write must not become a retry loop.
+    if (syncedZone.current === device) return;
+    syncedZone.current = device;
+    void value.updateProfile({ timezone: device });
+  }, [userId, value, loading, stale, error, pendingMutations]);
 
   return <AppContext.Provider value={value}>{children}</AppContext.Provider>;
 }
