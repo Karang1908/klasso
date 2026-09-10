@@ -7,13 +7,13 @@ import { setHapticsEnabled, useHapticsEnabled, useHapticsSupported } from "@/lib
 import { PreviewContext, useAppHref } from "@/components/AppShell";
 import { Icon } from "@/components/icons";
 
-import { Banner, Button, Card, Field, Input, Dropdown, Spinner, Slider, Toggle, cx } from "@/components/ui";
+import { Banner, Button, Card, Field, Input, Spinner, Slider, Toggle, cx } from "@/components/ui";
 import {
   currentSubscription, detectEnvironment, disablePush, enablePush, sendTestPush,
   type PushState,
 } from "@/lib/push-client";
 import { useApp } from "@/lib/store";
-import { formatMinutes, isValidTimezone, parseTime } from "@/lib/time";
+import { formatMinutes, parseTime } from "@/lib/time";
 
 const CLASS_LEADS = [0, 5, 10, 15, 20, 30, 45, 60];
 const TASK_LEADS = [0, 10, 15, 30, 60, 120, 180];
