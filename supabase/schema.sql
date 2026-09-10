@@ -281,11 +281,37 @@ end $$;
 -- =====================================================================
 -- New user bootstrap: give every signup a profile + default notif prefs
 -- =====================================================================
+-- The name we show in the app. Password signups put it in `display_name`;
+-- Google OAuth sends `full_name` / `name` instead, so check all three before
+-- falling back to the email local-part. nullif() stops a blank string from
+-- winning the coalesce and leaving the profile with an empty name.
+create or replace function public.signup_display_name(meta jsonb, email text)
+returns text language sql immutable as $$
+  select coalesce(
+    nullif(trim(meta->>'display_name'), ''),
+    nullif(trim(meta->>'full_name'), ''),
+    nullif(trim(meta->>'name'), ''),
+    split_part(email, '@', 1)
+  );
+$$;
+
+-- Reminders fire on the profile's timezone. The column default is only a
+-- guess, so the signup form sends the browser's real IANA zone and we take it
+-- when it looks sane. Getting this wrong silently shifts every reminder.
+create or replace function public.signup_timezone(meta jsonb)
+returns text language sql immutable as $$
+  select coalesce(
+    nullif(trim(meta->>'timezone'), ''),
+    'Asia/Dubai'
+  );
+$$;
+
 create or replace function public.handle_new_user()
 returns trigger language plpgsql security definer set search_path = public as $$
 begin
-  insert into public.profiles (id, display_name)
-  values (new.id, coalesce(new.raw_user_meta_data->>'display_name', split_part(new.email, '@', 1)))
+  insert into public.profiles (id, display_name, timezone)
+  values (new.id, public.signup_display_name(new.raw_user_meta_data, new.email),
+          public.signup_timezone(new.raw_user_meta_data))
   on conflict (id) do nothing;
 
   insert into public.notification_prefs (user_id) values (new.id)
@@ -304,7 +330,7 @@ create trigger on_auth_user_created
 -- have no profile and no notification preferences, and Settings would sit on
 -- "Loading your preferences…" forever.
 insert into public.profiles (id, display_name)
-select u.id, coalesce(u.raw_user_meta_data->>'display_name', split_part(u.email, '@', 1))
+select u.id, public.signup_display_name(u.raw_user_meta_data, u.email)
 from auth.users u
 on conflict (id) do nothing;
 
