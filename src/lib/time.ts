@@ -141,3 +141,20 @@ export function deviceTimezone(): string | null {
     return null;
   }
 }
+
+/**
+ * Which zone, if any, the profile should be rewritten to. Pure so the loop
+ * guard is testable: the write updates the profile, which re-runs the effect,
+ * so refusing a zone already attempted this session is what stops a failed
+ * write turning into an endless retry.
+ */
+export function timezoneToSync(
+  stored: string | null | undefined,
+  device: string | null,
+  attempted: string | null,
+): string | null {
+  if (!device) return null;
+  if (device === stored) return null;
+  if (device === attempted) return null;
+  return device;
+}
