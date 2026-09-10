@@ -66,6 +66,7 @@ try {
   check("date picker is app-rendered", Boolean(await page.$('.temporal-popup:popover-open .picker-calendar')));
   await textClick("Done", ".temporal-popup button");
   await click('.sheet-close');
+  check("dismissing a picker unchanged does not dirty the form", !(await page.$("dialog[open]")));
   await textClick("An activity"); await type('[aria-label="Plan title"]', "UI gym session");
   await click('.sheet-close');
   check("unsaved plan asks before discard", await page.$eval('.sheet-body', (el) => el.textContent.includes("discard your unsaved changes")));
