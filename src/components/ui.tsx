@@ -145,22 +145,28 @@ export function Toggle({
 
 /** Bottom sheet — the natural modal shape on a phone. */
 export function Sheet({
-  open, onClose, title, children, footer,
+  open, onClose, title, children, footer, confirm,
 }: {
   open: boolean;
   onClose: () => void;
   title: string;
   children: ReactNode;
   footer?: ReactNode;
+  /**
+   * A confirmation layered over the whole sheet. It is a sibling of the body
+   * rather than a child: the body scrolls, and an absolutely positioned
+   * descendant of a scroll container gets clipped by it.
+   */
+  confirm?: ReactNode;
 }) {
   if (typeof document === "undefined") return null;
-  return createPortal(<AnimatePresence>{open && <SheetContent key="sheet" onClose={onClose} title={title} footer={footer}>{children}</SheetContent>}</AnimatePresence>, document.body);
+  return createPortal(<AnimatePresence>{open && <SheetContent key="sheet" onClose={onClose} title={title} footer={footer} confirm={confirm}>{children}</SheetContent>}</AnimatePresence>, document.body);
 }
 
 let sheetLocks = 0;
 let previousOverflow = "";
 
-function SheetContent({ onClose, title, children, footer }: { onClose: () => void; title: string; children: ReactNode; footer?: ReactNode }) {
+function SheetContent({ onClose, title, children, footer, confirm }: { onClose: () => void; title: string; children: ReactNode; footer?: ReactNode; confirm?: ReactNode }) {
   const dialog = useRef<HTMLDialogElement>(null);
   const heading = useRef<HTMLHeadingElement>(null);
   const titleId = useId();
@@ -214,12 +220,47 @@ function SheetContent({ onClose, title, children, footer }: { onClose: () => voi
           </button>
         </div>
         <div className="sheet-body">{children}</div>
+        {confirm}
         {footer && (
           <div className="sheet-footer">{footer}</div>
         )}
       </motion.div>
     </motion.div>
   </dialog>;
+}
+
+/**
+ * A decision that must be answered before anything else in the sheet. Rendered
+ * over the panel so it cannot be scrolled past — an inline banner at the foot
+ * of a long form is invisible until you reach the bottom of it.
+ */
+export function Confirm({
+  open, title, body, confirmLabel, cancelLabel = "Keep editing", tone = "danger", busy, onConfirm, onCancel,
+}: {
+  open: boolean;
+  title: string;
+  body?: string;
+  confirmLabel: string;
+  cancelLabel?: string;
+  tone?: "danger" | "primary";
+  busy?: boolean;
+  onConfirm: () => void;
+  onCancel: () => void;
+}) {
+  if (!open) return null;
+  return (
+    <div className="sheet-confirm" role="alertdialog" aria-modal="true" aria-label={title}
+         onPointerDown={(event) => { if (event.target === event.currentTarget) onCancel(); }}>
+      <div className="sheet-confirm-card">
+        <h3>{title}</h3>
+        {body && <p>{body}</p>}
+        <div className="sheet-confirm-actions">
+          <Button className="flex-1" onClick={onCancel} disabled={busy}>{cancelLabel}</Button>
+          <Button className="flex-1" variant={tone} onClick={onConfirm} disabled={busy}>{busy && <Spinner />}{confirmLabel}</Button>
+        </div>
+      </div>
+    </div>
+  );
 }
 
 export function EmptyState({
