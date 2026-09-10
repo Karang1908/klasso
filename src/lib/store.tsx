@@ -14,7 +14,7 @@ import {
 
 import { isSupabaseConfigured, supabase } from "./supabase/client";
 import { inTaskScope } from "./tasks";
-import { deviceTimezone } from "./time";
+import { deviceTimezone, timezoneToSync } from "./time";
 import type {
   Attendance,
   AttendanceStatus,
@@ -456,13 +456,10 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const syncedZone = useRef<string | null>(null);
   useEffect(() => {
     if (!userId || !value.data.profile || loading || stale || error || pendingMutations > 0) return;
-    const device = deviceTimezone();
-    if (!device || device === value.data.profile.timezone) return;
-    // One attempt per zone per session: the write updates `data`, which
-    // re-runs this effect, and a failed write must not become a retry loop.
-    if (syncedZone.current === device) return;
-    syncedZone.current = device;
-    void value.updateProfile({ timezone: device });
+    const next = timezoneToSync(value.data.profile.timezone, deviceTimezone(), syncedZone.current);
+    if (!next) return;
+    syncedZone.current = next;
+    void value.updateProfile({ timezone: next });
   }, [userId, value, loading, stale, error, pendingMutations]);
 
   return <AppContext.Provider value={value}>{children}</AppContext.Provider>;
