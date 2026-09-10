@@ -195,6 +195,30 @@ create table if not exists notification_log (
 );
 create index if not exists notif_log_user_idx on notification_log(user_id, sent_at desc);
 
+-- A claim is only proof of intent; delivered_at is proof of delivery. The
+-- dispatcher inserts the row before pushing (the unique index on dedupe_key is
+-- what stops two overlapping ticks double-sending), so a run that dies between
+-- the claim and the push used to leave a row that could never be re-claimed —
+-- the reminder was lost silently and forever. Undelivered claims are now
+-- released on the next tick instead.
+alter table notification_log add column if not exists delivered_at timestamptz;
+-- Backfill before the column goes live. Every pre-existing row would otherwise
+-- read as an abandoned claim on the first tick after deploying, and the release
+-- sweep would delete the entire history.
+update notification_log set delivered_at = sent_at where delivered_at is null;
+create index if not exists notif_log_undelivered_idx
+  on notification_log(sent_at) where delivered_at is null;
+-- Pruning (supabase/cron.sql) reads this; without it the table grows without
+-- bound at roughly 1.7 MB per user per year.
+create index if not exists notif_log_sent_idx on notification_log(sent_at);
+
+-- Spread the morning summary. Every row defaulting to 07:30 meant every user
+-- in a timezone fired in the same one-minute tick, which is the load spike the
+-- dispatcher has to absorb. Existing rows keep whatever they already have.
+alter table notification_prefs
+  alter column day_summary_time
+  set default ('07:15'::time + (floor(random() * 30)::int || ' minutes')::interval);
+
 -- ------------------------------------------------------------- heartbeat
 -- The per-minute dispatcher touches this, which also keeps a Supabase free
 -- project from being paused for inactivity after 7 idle days.
