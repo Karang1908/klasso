@@ -24,15 +24,29 @@ select cron.schedule(
   '* * * * *',
   $$
   select net.http_post(
-    url     := 'https://getklasso.vercel.app/api/cron/dispatch',
+    url     := 'YOUR_APP_URL/api/cron/dispatch',
     headers := jsonb_build_object(
                  'Content-Type',  'application/json',
-                 'x-cron-secret', 'd92bc0a7f9ab59075902f4a52950776eb0d8d645aed04fba8b7f631c1e728277'
+                 'x-cron-secret', 'YOUR_CRON_SECRET'
                ),
     body        := '{}'::jsonb,
     timeout_milliseconds := 20000
   );
   $$
+);
+
+-- ── Nightly prune ──────────────────────────────────────────────────────
+-- notification_log is append-only and grows at roughly 1.7 MB per user per
+-- year; left alone it is what fills a 500 MB free tier first. Nothing reads a
+-- delivered row after its dedupe window has passed.
+select cron.unschedule('klasso-prune')
+where exists (select 1 from cron.job where jobname = 'klasso-prune');
+
+select cron.schedule(
+  'klasso-prune',
+  '17 3 * * *',
+  $$ delete from public.notification_log
+     where sent_at < now() - interval '30 days' $$
 );
 
 -- ── Guard: fail loudly if the placeholders were not replaced ────────────
@@ -85,4 +99,6 @@ select net.http_post(
 -- Other useful queries:
 -- Verify:            select * from cron.job;
 -- Recent run status: select * from cron.job_run_details order by start_time desc limit 20;
--- Stop the job:      select cron.unschedule('klasso-dispatch');
+-- Stop the jobs:     select cron.unschedule('klasso-dispatch');
+--                    select cron.unschedule('klasso-prune');
+-- Log size:          select pg_size_pretty(pg_total_relation_size('notification_log'));
