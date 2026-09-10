@@ -77,7 +77,7 @@ export default function SettingsPage() {
   return (
     <div className="page-stack">
       <header className="flex items-center gap-3">
-        <Link href={href("/today")} aria-label="Back" className="rounded-lg p-1.5 text-dim hover:bg-surface-2">
+        <Link href={href("/today")} aria-label="Back" className="inline-flex size-11 items-center justify-center rounded-lg text-dim hover:bg-surface-2">
           <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round"><path d="m15 6-6 6 6 6" /></svg>
         </Link>
         <div><h1 className="page-heading">Make yourself at home.</h1><p className="page-subtitle">Your appearance, reminders and account.</p></div>
@@ -404,7 +404,7 @@ function ChipRow({
             onClick={() => onToggle(v)}
             aria-pressed={on}
             className={cx(
-              "rounded-lg px-3 py-1.5 text-sm font-bold transition active:scale-95",
+              "inline-flex min-h-11 items-center rounded-lg px-3 py-1.5 text-sm font-bold transition active:scale-95",
               on ? "bg-brand text-bg" : "bg-surface-2 text-dim",
             )}
           >
