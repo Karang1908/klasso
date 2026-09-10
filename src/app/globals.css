@@ -216,6 +216,11 @@ h1 { line-height: 1.22; }
 .sheet-close { display: grid; place-items: center; flex: none; width: 44px; height: 44px; border-radius: 50%; color: var(--text-dim); background: var(--surface-2); }
 .sheet-close:hover { color: var(--text); background: var(--border); }
 .sheet-body { flex: 1 1 auto; min-height: 0; overflow-y: auto; overscroll-behavior: contain; padding: 24px; scrollbar-gutter: stable; scroll-padding-block: 20px; }
+.sheet-confirm { position: absolute; inset: 0; z-index: 20; display: grid; place-items: center; padding: 20px; border-radius: inherit; background: rgb(9 29 20 / .55); }
+.sheet-confirm-card { width: min(100%, 22rem); padding: 20px; border: 1px solid var(--border); border-radius: 20px; background: var(--surface); box-shadow: var(--shadow-float); }
+.sheet-confirm-card h3 { font-size: 1.05rem; font-weight: 700; letter-spacing: -.02em; }
+.sheet-confirm-card p { margin-top: 8px; font-size: .875rem; line-height: 1.5; color: var(--text-dim); }
+.sheet-confirm-actions { display: flex; gap: 8px; margin-top: 18px; }
 .sheet-footer { flex: none; padding: 18px 24px max(22px, env(safe-area-inset-bottom, 0px)); border-top: 1px solid var(--border); background: var(--glass-nav); }
 .sheet-footer > div { flex-wrap: wrap; }
 .sheet-footer .btn { min-height: 46px; }
