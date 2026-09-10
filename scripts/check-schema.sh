@@ -141,5 +141,36 @@ ck "…and their notification preferences" \
 ck "backfill does not duplicate existing profiles" \
   "$(Q -c "select count(*) from profiles;")" "$(Q -c "select count(*) from auth.users;")"
 
+# Google OAuth writes the name to full_name/name, never display_name. If the
+# trigger only read display_name, every Google user would be named after their
+# email prefix instead.
+G1=77777777-7777-7777-7777-777777777777
+G2=88888888-8888-8888-8888-888888888888
+G3=99999999-9999-9999-9999-999999999999
+Q -c "insert into auth.users (id,email,raw_user_meta_data) values
+        ('$G1','kg@example.com','{\"full_name\":\"Karan Garg\"}'),
+        ('$G2','nm@example.com','{\"name\":\"Only Name\"}'),
+        ('$G3','bl@example.com','{\"display_name\":\"   \",\"full_name\":\"Real Name\"}');" >/dev/null 2>&1
+ck "a Google signup is named from full_name" \
+  "$(Q -c "select display_name from profiles where id='$G1';")" "Karan Garg"
+ck "…or from name when full_name is absent" \
+  "$(Q -c "select display_name from profiles where id='$G2';")" "Only Name"
+ck "a blank display_name does not win the coalesce" \
+  "$(Q -c "select display_name from profiles where id='$G3';")" "Real Name"
+ck "a signup with no name still falls back to the email" \
+  "$(Q -c "select display_name from profiles where id='$EARLY';")" "early"
+
+# Reminders fire on profiles.timezone. A signup that reports its browser zone
+# must keep it; one that does not falls back to the column default.
+TZ1=aaaaaaaa-0000-0000-0000-000000000001
+TZ2=aaaaaaaa-0000-0000-0000-000000000002
+Q -c "insert into auth.users (id,email,raw_user_meta_data) values
+        ('$TZ1','tz1@example.com','{\"timezone\":\"Asia/Kolkata\"}'),
+        ('$TZ2','tz2@example.com','{}');" >/dev/null 2>&1
+ck "a signup keeps its own timezone" \
+  "$(Q -c "select timezone from profiles where id='$TZ1';")" "Asia/Kolkata"
+ck "…and falls back when the browser sent none" \
+  "$(Q -c "select timezone from profiles where id='$TZ2';")" "Asia/Dubai"
+
 if [ "$fails" -eq 0 ]; then echo; echo "All schema checks passed."; else echo; echo "$fails schema check(s) FAILED."; fi
 exit $([ "$fails" -eq 0 ] && echo 0 || echo 1)
