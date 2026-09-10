@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useContext, useEffect, useState } from "react";
 import { useAppearance } from "@/components/Appearance";
+import { setHapticsEnabled, useHapticsEnabled, useHapticsSupported } from "@/lib/haptics";
 import { PreviewContext, useAppHref } from "@/components/AppShell";
 import { Icon } from "@/components/icons";
 
@@ -20,6 +21,8 @@ const EXAM_DAYS = [1, 2, 3, 5, 7, 14, 30];
 
 export default function SettingsPage() {
   const { data, userId, updatePrefs, updateProfile, signOut } = useApp();
+  const haptics = useHapticsEnabled();
+  const canBuzz = useHapticsSupported();
   const prefs = data.prefs;
   const preview = useContext(PreviewContext);
   const href = useAppHref();
@@ -82,6 +85,8 @@ export default function SettingsPage() {
 
       <div className="settings-grid">
       <section className="flex flex-col gap-3"><h2 className="section-heading">Appearance</h2><Card className="p-5"><p className="mb-4 text-sm text-dim">A lighter start. A quieter evening. Choose what feels right.</p><div className="grid grid-cols-3 gap-2" role="group" aria-label="Appearance">{([{ value: "light", label: "Light", icon: "sun" }, { value: "dark", label: "Dark", icon: "moon" }, { value: "system", label: "System", icon: "monitor" }] as const).map((option) => <button key={option.value} aria-pressed={theme === option.value} onClick={() => setTheme(option.value)} className={`flex min-h-20 flex-col items-center justify-center gap-2 rounded-xl border text-xs font-semibold ${theme === option.value ? "border-brand bg-brand-soft text-brand" : "border-line text-dim"}`}><Icon name={option.icon} />{option.label}</button>)}</div></Card></section>
+
+      {canBuzz && <section className="flex flex-col gap-3"><h2 className="section-heading">Feedback</h2><Card className="px-4 py-1"><Toggle label="Haptics" description="A short buzz when you check something off or flip a switch." checked={haptics} onChange={setHapticsEnabled} /></Card></section>}
 
       <section className="flex flex-col gap-3"><h2 className="section-heading">Your data, in your hands</h2><Card className="flex flex-col gap-4 p-5"><p className="text-sm leading-relaxed text-dim">Download your subjects, schedule, events, both task lists and attendance as a JSON backup.</p><Button onClick={() => {
         const blob = new Blob([JSON.stringify({ app: "Klasso", version: 2, exported_at: new Date().toISOString(), data }, null, 2)], { type: "application/json" });
@@ -362,14 +367,11 @@ export default function SettingsPage() {
           <Field label="Display name"><Input key={data.profile?.display_name} defaultValue={data.profile?.display_name ?? ""} placeholder="Your name" maxLength={60} onBlur={(event) => { const name = event.target.value.trim(); if (name && name !== data.profile?.display_name) void updateProfile({ display_name: name }); }} /></Field>
           <Field
             label="Time zone"
-            hint="Choose where you attend college. Reminders follow this timezone."
+            hint="Picked up from your phone. Reminders follow it automatically."
           >
-            <Dropdown
-              aria-label="Time zone"
-              value={data.profile?.timezone ?? "UTC"}
-              onChange={(v) => void updateProfile({ timezone: v })}
-              options={timezoneOptions(data.profile?.timezone).map((tz) => ({ value: tz, label: tz }))}
-            />
+            <p className="control w-full rounded-xl border border-line px-3 py-2.5 text-ink" aria-label="Time zone">
+              {data.profile?.timezone ?? "Detecting…"}
+            </p>
           </Field>
           <p className="text-sm text-dim">
             Signed in as <span className="font-semibold text-ink">{data.profile?.display_name ?? "you"}</span>
@@ -414,16 +416,4 @@ function ChipRow({
   );
 }
 
-/** The browser's own zone first, then a short list of common ones. */
-function timezoneOptions(current: string | undefined): string[] {
-  const guessed = Intl.DateTimeFormat().resolvedOptions().timeZone;
-  const common = [
-    "Asia/Dubai", "Asia/Kolkata", "Asia/Karachi", "Asia/Singapore", "Asia/Tokyo",
-    "Europe/London", "Europe/Berlin", "America/New_York", "America/Los_Angeles",
-    "Australia/Sydney", "UTC",
-  ];
-  const all = [guessed, current, ...common].filter(
-    (tz): tz is string => Boolean(tz) && isValidTimezone(tz as string),
-  );
-  return [...new Set(all)];
-}
+
