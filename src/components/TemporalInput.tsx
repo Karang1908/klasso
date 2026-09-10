@@ -28,14 +28,17 @@ export function TemporalInput({ type, value, onChange, className = "", ...props 
     setMonth((raw && dateMode ? raw : localDateISO()).slice(0, 7)); setDraft(raw);
     setHost(root.current?.closest("dialog") ?? document.body); setOpen(true);
   };
-  const commit = (next: string) => {
-    if (input.current) {
-      const element = input.current;
-      element.value = next;
-      onChange?.({ target: element, currentTarget: element } as ChangeEvent<HTMLInputElement>);
-    }
-    close(true);
+  // Write the value through without closing. The time sliders apply live: they
+  // used to stage into `draft`, so dismissing the popup with the X or a tap
+  // outside silently threw the chosen time away — and because the field never
+  // changed, the surrounding form never became dirty either.
+  const emit = (next: string) => {
+    if (!input.current) return;
+    const element = input.current;
+    element.value = next;
+    onChange?.({ target: element, currentTarget: element } as ChangeEvent<HTMLInputElement>);
   };
+  const commit = (next: string) => { emit(next); close(true); };
   useEffect(() => {
     if (!open || !popup.current) return;
     const menu = popup.current;
@@ -68,7 +71,11 @@ export function TemporalInput({ type, value, onChange, className = "", ...props 
   // parks at 09:00 so the thumbs have somewhere sensible to start; nothing is
   // written to the field until a slider actually moves.
   const timeMins = /^(?:[01]\d|2[0-3]):[0-5]\d$/.test(draft) ? parseTime(draft) : 9 * 60;
-  const setTimeMins = (mins: number) => setDraft(toTimeString(Math.min(23 * 60 + 59, Math.max(0, mins))));
+  const setTimeMins = (mins: number) => {
+    const next = toTimeString(Math.min(23 * 60 + 59, Math.max(0, mins)));
+    setDraft(next);
+    emit(next);
+  };
 
   const shift = (delta: number) => { const d = new Date(`${month}-15T12:00:00Z`); d.setUTCMonth(d.getUTCMonth() + delta); setMonth(d.toISOString().slice(0, 7)); };
   const first = `${month}-01`;
