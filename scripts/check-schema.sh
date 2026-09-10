@@ -172,5 +172,51 @@ ck "a signup keeps its own timezone" \
 ck "…and falls back when the browser sent none" \
   "$(Q -c "select timezone from profiles where id='$TZ2';")" "Asia/Dubai"
 
+# ── scale: the claim/deliver protocol ────────────────────────────────────
+# A claim proves intent, delivered_at proves delivery. A run that dies between
+# the two must leave a row that the next tick can release and retry.
+ck "notification_log has delivered_at" \
+  "$(Q -c "select count(*) from information_schema.columns where table_name='notification_log' and column_name='delivered_at';")" "1"
+ck "undelivered claims are indexed for the release sweep" \
+  "$(Q -c "select count(*) from pg_indexes where indexname='notif_log_undelivered_idx';")" "1"
+ck "sent_at is indexed for the nightly prune" \
+  "$(Q -c "select count(*) from pg_indexes where indexname='notif_log_sent_idx';")" "1"
+
+Q -c "insert into notification_log (user_id,dedupe_key,title,body,sent_at,delivered_at) values
+        ('$U','k:delivered','t','b', now() - interval '5 minutes', now()),
+        ('$U','k:abandoned','t','b', now() - interval '5 minutes', null),
+        ('$U','k:inflight', 't','b', now(),                        null);" >/dev/null 2>&1
+ck "the release sweep reclaims only abandoned claims" \
+  "$(Q -c "select count(*) from notification_log where delivered_at is null and sent_at < now() - interval '90 seconds';")" "1"
+ck "…leaving an in-flight claim alone" \
+  "$(Q -c "select count(*) from notification_log where dedupe_key='k:inflight';")" "1"
+# Rows written before delivered_at existed must not read as abandoned when the
+# column is added, or the first tick after deploying wipes the whole log.
+Q -c "insert into notification_log (user_id,dedupe_key,title,body,sent_at,delivered_at)
+      values ('$U','k:legacy','t','b', now() - interval '9 days', null);" >/dev/null 2>&1
+Q -c "update notification_log set delivered_at = sent_at where dedupe_key='k:legacy';" >/dev/null 2>&1
+Q -f "$ROOT/supabase/schema.sql" >/dev/null 2>&1
+ck "a pre-existing log row survives the delivered_at migration" \
+  "$(Q -c "select count(*) from notification_log where dedupe_key='k:legacy' and delivered_at is not null;")" "1"
+
+ck "a claim cannot be taken twice" \
+  "$(Q -c "insert into notification_log (user_id,dedupe_key,title,body) values ('$U','k:delivered','t','b');" >/dev/null 2>&1; echo $?)" "1"
+
+# ── scale: the nightly prune actually removes old rows ───────────────────
+Q -c "insert into notification_log (user_id,dedupe_key,title,body,sent_at,delivered_at)
+      values ('$U','k:ancient','t','b', now() - interval '40 days', now());" >/dev/null 2>&1
+Q -c "delete from notification_log where sent_at < now() - interval '30 days';" >/dev/null 2>&1
+ck "prune removes rows older than 30 days" \
+  "$(Q -c "select count(*) from notification_log where dedupe_key='k:ancient';")" "0"
+ck "…and keeps recent ones" \
+  "$(Q -c "select count(*) from notification_log where dedupe_key='k:delivered';")" "1"
+
+# ── scale: the morning summary is spread, not all on one minute ──────────
+Q -c "insert into auth.users (email) select 'spread'||g||'@example.com' from generate_series(1,40) g;" >/dev/null 2>&1
+ck "the summary default is jittered across users" \
+  "$(Q -c "select (count(distinct day_summary_time) > 3) from notification_prefs;")" "t"
+ck "…and stays inside the 07:15-07:44 window" \
+  "$(Q -c "select (min(day_summary_time) >= '07:15' and max(day_summary_time) <= '07:44') from notification_prefs;")" "t"
+
 if [ "$fails" -eq 0 ]; then echo; echo "All schema checks passed."; else echo; echo "$fails schema check(s) FAILED."; fi
 exit $([ "$fails" -eq 0 ] && echo 0 || echo 1)
