@@ -15,7 +15,7 @@ writeFileSync(join(out, "package.json"), JSON.stringify({ type: "commonjs" }));
 
 const require = createRequire(import.meta.url);
 const { attendanceBySubject, findGaps, resolveDay, dayStatus, packLanes } = require(join(out, "schedule.js"));
-const { parseTime, weekdayOfISO, zonedNow, daysBetweenISO, toTimeString } = require(join(out, "time.js"));
+const { parseTime, weekdayOfISO, zonedNow, daysBetweenISO, toTimeString, timezoneToSync } = require(join(out, "time.js"));
 const { inTaskScope, tasksForDay, sortTasks } = require(join(out, "tasks.js"));
 const { syllabusTopics, blocksForDay, blockForTopic, examPlans, plannedMinutes, findClashes, blockKind, validatePlan, weekStart } = require(join(out, "planning.js"));
 
@@ -304,6 +304,25 @@ eq("a separate cluster is not narrowed by an earlier overlap",
 eq("touching intervals do not count as overlapping",
   lanes([iv("a", 540, 600), iv("b", 600, 660)]), [["a", 0, 1], ["b", 0, 1]]);
 eq("no items yields nothing", packLanes([]), []);
+
+// ---------------------------------------------------- timezone auto-sync
+// profiles.timezone is invisible in the UI but decides when every push fires,
+// so it follows the device. The loop guard matters: writing it updates the
+// profile, which re-runs the effect that wrote it.
+eq("a device zone different from the profile is synced",
+  timezoneToSync("Asia/Dubai", "Asia/Kolkata", null), "Asia/Kolkata");
+eq("a profile already on the device zone is left alone",
+  timezoneToSync("Asia/Kolkata", "Asia/Kolkata", null), null);
+eq("an unreadable device zone changes nothing",
+  timezoneToSync("Asia/Dubai", null, null), null);
+eq("the same zone is not attempted twice in a session",
+  timezoneToSync("Asia/Dubai", "Asia/Kolkata", "Asia/Kolkata"), null);
+eq("but a newly changed device zone still syncs",
+  timezoneToSync("Asia/Dubai", "Europe/London", "Asia/Kolkata"), "Europe/London");
+eq("a profile with no zone yet is synced",
+  timezoneToSync(null, "Europe/London", null), "Europe/London");
+eq("Chrome's Calcutta alias is treated as its own zone",
+  timezoneToSync("Asia/Kolkata", "Asia/Calcutta", null), "Asia/Calcutta");
 
 console.log(failed === 0 ? "\nAll checks passed." : `\n${failed} check(s) FAILED.`);
 process.exit(failed === 0 ? 0 : 1);
