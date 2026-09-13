@@ -143,7 +143,7 @@ const value = {
       ...att("c", "s1", "slot1", "absent", 4, 8),
       ...att("d", "s2", "slot2", "present", 7, 1),
     ],
-    profile: { id: "u", display_name: "Karan", timezone: "Asia/Dubai", created_at: "" },
+    profile: { id: "u", display_name: "Alex", timezone: "Asia/Dubai", created_at: "" },
     prefs: {
       user_id: "u", class_enabled: true, class_lead_minutes: [10],
       day_summary_enabled: true, day_summary_time: "07:30:00",
