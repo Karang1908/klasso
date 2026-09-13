@@ -2,7 +2,7 @@
 @import "tailwindcss";
 
 :root {
-  color-scheme: light;
+  color-scheme: dark;
   --bg: #f4f5f5; --surface: #ffffff; --surface-2: #eef0ef;
   --border: #e3e6e5; --text: #161a18; --text-dim: #565e5b; --text-faint: #666d69;
   --brand: #286450; --brand-soft: #dceee3;
@@ -21,6 +21,10 @@
   --sidebar-mark: #ffffff; --sidebar-shadow: 0 18px 40px -28px rgb(12 40 28 / .55);
   --sidebar-avatar-bg: #ffffff; --sidebar-avatar-ink: #1a4c3a;
   --sidebar-sheen: rgb(255 255 255 / .22);
+  --dial-track: #e4ebe6; --dial-tick: #b7c6bd;
+  --dial-class: #2E6C55; --dial-lab: #4E9376; --dial-exam: #B5772A;
+  --dial-free: #cfded5; --dial-plan: #6FA98C;
+  --dial-now: #EFC873; --dial-now-ring: #1B4E3B;
 }
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) {
@@ -41,6 +45,10 @@
   --sidebar-mark: #ffffff; --sidebar-shadow: 0 18px 40px -28px rgb(0 0 0 / .75);
   --sidebar-avatar-bg: #ffffff; --sidebar-avatar-ink: #163a2d;
   --sidebar-sheen: rgb(255 255 255 / .5);
+  --dial-track: #1e2623; --dial-tick: #3b4a43;
+  --dial-class: #5FBF92; --dial-lab: #8FD9B4; --dial-exam: #E0A24D;
+  --dial-free: #2a352f; --dial-plan: #49A07A;
+  --dial-now: #F2D081; --dial-now-ring: #0d100f;
     --hero: #2b6149; --hero-light: #689473; --hero-dark: #194732;
     --shadow: 0 8px 28px -16px rgb(0 12 5 / .4); --shadow-float: 0 12px 36px -15px rgb(0 12 5 / .55);
   }
@@ -63,6 +71,10 @@
   --sidebar-mark: #ffffff; --sidebar-shadow: 0 18px 40px -28px rgb(0 0 0 / .75);
   --sidebar-avatar-bg: #ffffff; --sidebar-avatar-ink: #163a2d;
   --sidebar-sheen: rgb(255 255 255 / .5);
+  --dial-track: #1e2623; --dial-tick: #3b4a43;
+  --dial-class: #5FBF92; --dial-lab: #8FD9B4; --dial-exam: #E0A24D;
+  --dial-free: #2a352f; --dial-plan: #49A07A;
+  --dial-now: #F2D081; --dial-now-ring: #0d100f;
   --hero: #2b6149; --hero-light: #689473; --hero-dark: #194732;
   --shadow: 0 8px 28px -16px rgb(0 12 5 / .4); --shadow-float: 0 12px 36px -15px rgb(0 12 5 / .55);
 }
@@ -707,3 +719,236 @@ button.agenda-title { display: flex; align-items: center; min-height: 44px; marg
 .oauth-btn:hover:not(:disabled) { background: var(--surface-2); }
 .or-rule { display: flex; align-items: center; gap: .75rem; margin-block: 1.15rem; font-size: .75rem; color: var(--text-dim); }
 .or-rule::before, .or-rule::after { content: ""; flex: 1; height: 1px; background: var(--border); }
+
+
+/* ── Liquid glass ──────────────────────────────────────────────────────
+   A web APPROXIMATION of Apple's Liquid Glass. Apple ships the real thing
+   as a platform material; there is no official CSS for it. This is
+   backdrop-filter plus a layered fill and a specular edge.
+
+   The edge is drawn with inset shadows rather than a masked pseudo-element:
+   a ::before at z-index -1 inside an isolated stacking context paints behind
+   its own parent's background and disappears. */
+:root {
+  --glass-tint: 214 244 228;
+  --glass-a: .11;
+  --glass-b: 26px;
+  --glass-edge-a: .30;
+  --glass-hair-a: .13;
+}
+:root[data-theme="light"] { --glass-tint: 255 255 255; --glass-a: .58; --glass-edge-a: .9; --glass-hair-a: .55; }
+
+.glass, .glass-raised, .glass-nav {
+  position: relative;
+  border: 1px solid rgb(var(--glass-tint) / var(--glass-hair-a));
+  background:
+    linear-gradient(140deg, rgb(var(--glass-tint) / calc(var(--glass-a) * 1.7)), rgb(var(--glass-tint) / calc(var(--glass-a) * .35))),
+    rgb(var(--glass-tint) / calc(var(--glass-a) * .5));
+  backdrop-filter: blur(var(--glass-b)) saturate(1.6);
+  box-shadow:
+    inset 0 1px 0 rgb(var(--glass-tint) / var(--glass-edge-a)),
+    inset 0 -1px 0 rgb(var(--glass-tint) / calc(var(--glass-hair-a) * .6)),
+    0 14px 44px -26px rgb(4 12 9 / .7);
+}
+.glass-raised {
+  --glass-a: .17; --glass-b: 34px;
+  box-shadow:
+    inset 0 1px 0 rgb(var(--glass-tint) / var(--glass-edge-a)),
+    inset 0 -1px 0 rgb(var(--glass-tint) / calc(var(--glass-hair-a) * .6)),
+    0 30px 80px -34px rgb(4 12 9 / .85);
+}
+.glass-nav { --glass-a: .14; --glass-b: 30px; }
+
+/* Blur is decoration. Legibility is not. */
+@media (prefers-reduced-transparency: reduce) {
+  .glass, .glass-raised, .glass-nav { background: var(--surface); backdrop-filter: none; }
+}
+@supports not (backdrop-filter: blur(1px)) {
+  .glass, .glass-raised, .glass-nav { background: var(--surface); }
+}
+
+/* ── Landing ───────────────────────────────────────────────────────────
+   Dark mineral-green world, glass as the material, one authored entrance
+   per section. Nothing loops. Everything collapses under reduced motion.
+
+   Every full-height scene caps its tallest child against vh as well as vw,
+   so browser zoom (which shrinks the CSS viewport in both axes) reflows
+   instead of overflowing the pin. */
+.lp { --g: clamp(20px, 5vw, 72px); overflow-x: clip; position: relative; }
+.lp::before {
+  content: ""; position: fixed; inset: -20vmax; z-index: -1; pointer-events: none;
+  background:
+    radial-gradient(38vmax 32vmax at 18% 8%,  rgb(78 147 118 / .42), transparent 62%),
+    radial-gradient(34vmax 30vmax at 86% 26%, rgb(52 139 108 / .40), transparent 64%),
+    radial-gradient(40vmax 34vmax at 60% 88%, rgb(31 84 66 / .28), transparent 66%);
+  filter: blur(12px);
+}
+:root[data-theme="light"] .lp::before {
+  background:
+    radial-gradient(38vmax 32vmax at 18% 8%,  rgb(120 190 158 / .40), transparent 62%),
+    radial-gradient(34vmax 30vmax at 86% 26%, rgb(150 205 178 / .34), transparent 64%),
+    radial-gradient(40vmax 34vmax at 60% 88%, rgb(176 214 194 / .40), transparent 66%);
+}
+.lp h1, .lp h2, .lp h3 { text-wrap: balance; letter-spacing: -.035em; }
+
+/* brand bar — the name is on screen before anything moves */
+.lp-topbar {
+  position: absolute; inset: 0 0 auto; z-index: 5;
+  display: flex; align-items: center; justify-content: space-between; gap: 16px;
+  max-width: 82rem; margin-inline: auto;
+  padding: calc(18px + env(safe-area-inset-top, 0px)) var(--g) 0;
+}
+.lp-brand { display: inline-flex; align-items: center; gap: 10px; font-size: 1.1875rem; font-weight: 800; letter-spacing: -.035em; color: var(--text); }
+.lp-brand svg { flex: none; }
+.lp-signin {
+  display: inline-flex; align-items: center; min-height: 40px; padding-inline: 20px;
+  border-radius: 999px; border: 1px solid rgb(255 255 255 / .16);
+  font-size: .875rem; font-weight: 650; color: var(--text);
+  transition: background-color 200ms;
+}
+.lp-signin:hover { background: rgb(255 255 255 / .07); }
+:root[data-theme="light"] .lp-signin { border-color: var(--border); }
+:root[data-theme="light"] .lp-signin:hover { background: var(--surface-2); }
+
+/* hero */
+.lp-hero {
+  display: grid; gap: clamp(32px, 5vw, 64px); align-items: center;
+  min-height: 100dvh; padding: calc(112px + env(safe-area-inset-top, 0px)) var(--g) 72px;
+  max-width: 82rem; margin-inline: auto; perspective: 1200px;
+}
+.lp-hero h1 { font-size: clamp(2.05rem, 5.2vw, 4rem); font-weight: 800; line-height: 1.03; max-width: 22ch; }
+.lp-hero h1 > span { display: block; white-space: nowrap; }
+.word { display: inline-block; overflow: hidden; vertical-align: bottom; }
+.word-in { display: inline-block; will-change: transform; }
+.hero-sub { margin-top: 22px; max-width: 42ch; font-size: clamp(1rem, 2vw, 1.1875rem); line-height: 1.6; color: var(--text-dim); }
+.lp-actions { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 32px; }
+.lp-cta, .lp-cta-ghost {
+  display: inline-flex; align-items: center; justify-content: center; gap: 8px; white-space: nowrap;
+  min-height: 54px; padding-inline: 28px; border-radius: 999px;
+  font-size: .9375rem; font-weight: 700; transition: filter 200ms, background-color 200ms, transform 200ms;
+}
+.lp-cta { background: var(--brand); color: #06120d; box-shadow: 0 14px 40px -18px var(--brand); }
+.lp-cta:hover { filter: brightness(1.1); }
+.lp-cta:active, .lp-cta-ghost:active { transform: scale(.985); }
+.lp-cta-ghost { border: 1px solid rgb(255 255 255 / .16); color: var(--text); }
+.lp-cta-ghost:hover { background: rgb(255 255 255 / .06); }
+:root[data-theme="light"] .lp-cta-ghost { border-color: var(--border); }
+:root[data-theme="light"] .lp-cta-ghost:hover { background: var(--surface-2); }
+
+/* the ring stands on the page, not on a card */
+.hero-stage { display: grid; justify-items: center; transform-style: preserve-3d; }
+.day-dial { width: min(100%, 340px, 44vh); height: auto; overflow: visible; }
+.dial-arc { transition: stroke-width 320ms ease, opacity 320ms ease; }
+.dial-time { font-size: 38px; font-weight: 800; letter-spacing: -.04em; fill: var(--text); font-variant-numeric: tabular-nums; }
+.dial-caption { font-size: 13px; font-weight: 600; fill: var(--text-dim); }
+.lp-dial-caption { display: flex; align-items: center; gap: 8px; margin-top: 20px; font-size: .875rem; font-weight: 600; color: var(--text); }
+.lp-dot { width: 9px; height: 9px; border-radius: 50%; background: var(--dial-class); }
+.lp-dot[data-kind="lab"] { background: var(--dial-lab); }
+.lp-dot[data-kind="exam"] { background: var(--dial-exam); }
+.lp-dot[data-kind="plan"] { background: var(--dial-plan); }
+.lp-dot[data-kind="free"] { background: var(--dial-free); }
+.lp-synthetic { margin-top: 10px; font-size: .6875rem; letter-spacing: .1em; text-transform: uppercase; color: var(--text-faint); }
+
+/* one push notification, drawn the way the phone draws it */
+.notif-card { display: flex; align-items: flex-start; gap: 12px; padding: 13px 15px; border-radius: 18px; }
+.notif-icon { flex: none; display: grid; place-items: center; width: 32px; height: 32px; border-radius: 10px; background: rgb(var(--glass-tint) / .14); color: var(--dial-class); }
+.notif-card[data-kind="summary"] .notif-icon { color: var(--dial-now); }
+.notif-card[data-kind="task"] .notif-icon { color: var(--dial-plan); }
+.notif-card[data-kind="exam"] .notif-icon { color: var(--dial-exam); }
+.notif-card[data-kind="plan"] .notif-icon { color: var(--dial-lab); }
+.notif-copy { flex: 1; min-width: 0; }
+.notif-copy strong { display: block; font-size: .875rem; font-weight: 700; line-height: 1.35; }
+.notif-copy p { margin-top: 3px; font-size: .8125rem; line-height: 1.45; color: var(--text-dim); }
+.notif-when { flex: none; font-size: .6875rem; color: var(--text-faint); padding-top: 2px; }
+
+/* horizontal pan */
+.lp-pan { position: relative; overflow: hidden; }
+.lp-pan-track { display: flex; align-items: center; gap: clamp(18px, 3vw, 34px); height: 100dvh; padding-inline: var(--g); }
+.lp-pan-intro { flex: none; width: min(74vw, 26rem); }
+.lp-pan-intro h2 { font-size: clamp(2rem, 5vw, 3.2rem); font-weight: 780; line-height: 1.04; }
+.lp-pan-intro p { margin-top: 14px; font-size: 1rem; line-height: 1.6; color: var(--text-dim); }
+.lp-pan-card {
+  flex: none; width: min(78vw, 22rem); min-height: clamp(180px, 31vh, 272px);
+  display: flex; flex-direction: column; padding: clamp(22px, 3.4vh, 32px);
+  border-radius: 26px; will-change: transform;
+}
+.lp-pan-card:nth-child(even) { margin-top: clamp(36px, 8vh, 84px); }
+.lp-pan-time { font-size: .75rem; font-weight: 700; letter-spacing: .12em; color: var(--dial-class); font-variant-numeric: tabular-nums; }
+.lp-pan-card[data-tone="lab"] .lp-pan-time { color: var(--dial-lab); }
+.lp-pan-card[data-tone="exam"] .lp-pan-time { color: var(--dial-exam); }
+.lp-pan-card[data-tone="free"] .lp-pan-time { color: var(--text-dim); }
+.lp-pan-card h3 { margin-top: auto; padding-top: 14px; font-size: clamp(1.15rem, 2.4vh, 1.4rem); font-weight: 720; }
+.lp-pan-card p { margin-top: 10px; font-size: .9375rem; line-height: 1.6; color: var(--text-dim); }
+.lp-pan.is-static .lp-pan-track { height: auto; flex-wrap: wrap; padding-block: 72px; }
+.lp-pan.is-static .lp-pan-card { margin-top: 0; }
+
+/* sticky stack — one pinned viewport, three screens moving through it */
+.lp-stack { position: relative; }
+.stack-vp { position: relative; height: 100dvh; overflow: hidden; perspective: 1400px; }
+.stack-card { position: absolute; inset: 0; display: grid; place-items: center; padding: clamp(32px, 7vh, 80px) var(--g); transform-style: preserve-3d; will-change: transform; }
+.stack-inner {
+  display: grid; gap: clamp(22px, 4vw, 52px); align-items: center;
+  max-width: 56rem; width: 100%; transform-style: preserve-3d; will-change: transform;
+}
+.stack-copy { max-width: 30rem; }
+.stack-copy h2 { font-size: clamp(1.9rem, 5vw, 3.1rem); font-weight: 780; line-height: 1.03; }
+.stack-copy p { margin-top: 16px; max-width: 38ch; font-size: clamp(.9375rem, 1.8vw, 1.0625rem); line-height: 1.65; color: var(--text-dim); }
+.stack-device { justify-self: center; will-change: transform; width: min(68vw, 290px, 32vh); padding: 10px; border-radius: 38px; }
+.stack-device img { display: block; width: 100%; height: auto; border-radius: 28px; }
+.lp-stack.is-static .stack-vp { height: auto; overflow: visible; }
+.lp-stack.is-static .stack-card { position: static; padding-block: 48px; }
+/* Must match FLAT in PhoneStack.tsx: the pin is dropped at the same breakpoint
+   the layout stops fitting, or the cards get clipped by a pin that is still on. */
+@media (max-height: 700px) and (max-width: 899px) {
+  .stack-vp { height: auto; overflow: visible; }
+  .stack-card { position: static; padding-block: 40px; }
+}
+
+/* svg path */
+.lp-path { padding: clamp(72px, 12vw, 140px) var(--g); max-width: 64rem; margin-inline: auto; }
+.lp-path h2 { font-size: clamp(1.9rem, 4.6vw, 3rem); font-weight: 780; max-width: 16ch; }
+.lp-path-body { display: grid; gap: 28px; margin-top: clamp(36px, 6vw, 64px); align-items: start; }
+.rp-svg { width: 120px; justify-self: center; height: auto; }
+.rp-track { stroke: rgb(255 255 255 / .08); stroke-width: 2; }
+:root[data-theme="light"] .rp-track { stroke: rgb(0 0 0 / .1); }
+.rp-line { stroke: var(--brand); stroke-width: 2.5; stroke-linecap: round; }
+.rp-node { fill: var(--dial-now); }
+.lp-path-stops { display: grid; gap: clamp(34px, 6vw, 68px); list-style: none; }
+.rp-stop h3 { font-size: 1.15rem; font-weight: 700; }
+.rp-stop > p { margin-top: 6px; font-size: .9375rem; line-height: 1.6; color: var(--text-dim); }
+.rp-stop .notif-card { margin-top: 16px; max-width: 26rem; }
+
+/* close */
+.lp-close { padding: clamp(64px, 10vw, 132px) var(--g) clamp(80px, 12vw, 150px); max-width: 54rem; margin-inline: auto; }
+.lp-close-inner { text-align: center; }
+.lp-close h2 { font-size: clamp(2rem, 5.4vw, 3.4rem); font-weight: 800; }
+.lp-close p { margin-top: 16px; margin-inline: auto; max-width: 44ch; font-size: 1.0625rem; line-height: 1.62; color: var(--text-dim); }
+.lp-close .lp-actions { justify-content: center; }
+
+@media (min-width: 900px) {
+  .lp-hero { grid-template-columns: 1.06fr .94fr; }
+  /* auto/auto + centred, not 1fr/auto: a 1fr copy column stretches to the
+     container and pushes the device to the far edge. */
+  .stack-inner { grid-template-columns: auto auto; justify-content: center; }
+  .lp-path-body { grid-template-columns: 120px 1fr; gap: 56px; }
+  .rp-svg { justify-self: start; position: sticky; top: 22vh; }
+  .day-dial { width: min(100%, 380px, 48vh); }
+}
+@media (max-width: 899px) {
+  .lp-hero { grid-template-columns: 1fr; }
+  .hero-stage { order: -1; }
+  .lp-path-body { grid-template-columns: 1fr; }
+  .rp-svg { display: none; }
+  .lp-path-stops { gap: 32px; }
+  .rp-stop { padding-left: 18px; border-left: 2px solid var(--brand); }
+  .stack-device { width: min(56vw, 220px, 30vh); }
+}
+/* Zoomed far in the headline no longer fits on one line; let it wrap rather
+   than push the page sideways. */
+@media (max-width: 620px) {
+  .lp-hero h1 > span { white-space: normal; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .word-in { transform: none !important; }
+  .dial-arc { transition: none; }
+}
