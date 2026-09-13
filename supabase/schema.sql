@@ -12,6 +12,15 @@ create table if not exists profiles (
   created_at  timestamptz not null default now()
 );
 
+-- Clock preference. It lives on the profile rather than in browser storage
+-- because the push dispatcher formats reminder text server-side too, and a
+-- 14:00 reminder for someone who reads 2:00 pm is a small papercut every day.
+alter table profiles add column if not exists time_format text not null default '12';
+do $$ begin
+  alter table profiles add constraint profiles_time_format_valid
+    check (time_format in ('12','24'));
+exception when duplicate_object then null; end $$;
+
 -- ---------------------------------------------------------------- subjects
 create table if not exists subjects (
   id          uuid primary key default gen_random_uuid(),
