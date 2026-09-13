@@ -458,7 +458,9 @@ h1 { line-height: 1.22; }
 .no-bar { scrollbar-width: none; }
 .no-bar::-webkit-scrollbar { display: none; }
 .safe-b { padding-bottom: max(1rem, env(safe-area-inset-bottom, 0px)); }
-.safe-t { padding-top: env(safe-area-inset-top, 0px); }
+/* Clears the notch. max() so it can only ever increase the padding the
+   element already has — set --safe-t-base to match that padding. */
+.safe-t { padding-top: max(var(--safe-t-base, 2.5rem), env(safe-area-inset-top, 0px)); }
 .skip-link { position: fixed; left: 16px; top: -100px; z-index: 100; background: var(--surface); padding: 12px; border-radius: 12px; }
 .skip-link:focus { top: 12px; }
 @media (min-width: 680px) {
