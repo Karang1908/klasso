@@ -228,6 +228,31 @@ h1 { line-height: 1.22; }
 .auth-switch:hover { background: var(--brand-soft); border-color: var(--brand); }
 .auth-switch:active { transform: scale(.985); }
 
+/* Collapsible settings groups. Closed by default: Settings is a page you open
+   to change one thing, not to read. */
+.settings-group { border: 1px solid var(--border); border-radius: 18px; background: var(--surface); overflow: hidden; }
+.settings-group + .settings-group { margin-top: 10px; }
+.settings-group > summary {
+  display: flex; align-items: center; justify-content: space-between; gap: 12px;
+  min-height: 56px; padding: 12px 16px; cursor: pointer; list-style: none;
+  font-weight: 650; color: var(--text); transition: background-color 160ms;
+}
+.settings-group > summary::-webkit-details-marker { display: none; }
+.settings-group > summary:hover { background: var(--surface-2); }
+.settings-group > summary:focus-visible { outline: 2px solid var(--brand); outline-offset: -2px; }
+.settings-group > summary svg { flex: none; color: var(--text-dim); transform: rotate(90deg); transition: transform 200ms ease; }
+.settings-group[open] > summary svg { transform: rotate(-90deg); }
+.settings-group[open] > summary { border-bottom: 1px solid var(--border); }
+.settings-group-head { display: flex; flex-direction: column; min-width: 0; }
+.settings-group-title { font-size: .9375rem; letter-spacing: -.01em; }
+.settings-group-hint { margin-top: 2px; font-size: .75rem; font-weight: 500; color: var(--text-dim); }
+.settings-group-body { padding: 4px 16px 16px; }
+.settings-group-body > .card { border: 0; background: transparent; box-shadow: none; padding-inline: 0; }
+/* The clock sits above the groups, always visible — it is the one setting
+   people come here to flip. */
+.settings-clock { border: 1px solid var(--brand-soft); border-radius: 18px; background: var(--surface); padding: 16px; }
+@media (prefers-reduced-motion: reduce) { .settings-group > summary svg { transition: none; } }
+
 /* Sits above the docked nav on a phone, bottom-right on a desktop. Not a
    modal: installing is an offer, and the app stays usable behind it. */
 .install-card {
