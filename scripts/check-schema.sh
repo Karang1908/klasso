@@ -172,6 +172,17 @@ ck "a signup keeps its own timezone" \
 ck "…and falls back when the browser sent none" \
   "$(Q -c "select timezone from profiles where id='$TZ2';")" "Asia/Dubai"
 
+# Clock preference. The dispatcher formats reminder text server-side, so this
+# has to live on the profile rather than in browser storage.
+ck "a new profile defaults to the 12-hour clock" \
+  "$(Q -c "select time_format from profiles where id='$TZ1';")" "12"
+ck "24 is accepted" \
+  "$(Q -c "update profiles set time_format='24' where id='$TZ1';" >/dev/null 2>&1; echo $?)" "0"
+ck "anything else is rejected" \
+  "$(Q -c "update profiles set time_format='36' where id='$TZ1';" >/dev/null 2>&1; echo $?)" "1"
+ck "re-running the schema keeps the chosen clock" \
+  "$(Q -f "$ROOT/supabase/schema.sql" >/dev/null 2>&1; Q -c "select time_format from profiles where id='$TZ1';")" "24"
+
 # ── scale: the claim/deliver protocol ────────────────────────────────────
 # A claim proves intent, delivered_at proves delivery. A run that dies between
 # the two must leave a row that the next tick can release and retry.
