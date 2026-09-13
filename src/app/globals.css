@@ -247,6 +247,10 @@ h1 { line-height: 1.22; }
 .settings-group-title { font-size: .9375rem; letter-spacing: -.01em; }
 .settings-group-hint { margin-top: 2px; font-size: .75rem; font-weight: 500; color: var(--text-dim); }
 .settings-group-body { padding: 4px 16px 16px; }
+/* A block inside a group. Plain headings rather than nested disclosures —
+   an accordion inside an accordion is a maze, not organisation. */
+.settings-sub + .settings-sub { margin-top: 18px; padding-top: 18px; border-top: 1px solid var(--border); }
+.settings-sub > h3 { font-size: .8125rem; font-weight: 700; letter-spacing: .02em; text-transform: uppercase; color: var(--text-dim); margin-bottom: 8px; }
 .settings-group-body > .card { border: 0; background: transparent; box-shadow: none; padding-inline: 0; }
 /* The clock sits above the groups, always visible — it is the one setting
    people come here to flip. */
