@@ -85,7 +85,7 @@ export default function LoginPage() {
             {mode === "up" ? "Already have an account?" : "New to Klasso?"}
           </p>
           <button
-            className="mt-1 text-sm font-semibold text-brand underline underline-offset-4"
+            className="auth-switch mt-2"
             onClick={() => { setMode(mode === "up" ? "in" : "up"); setError(null); setNotice(null); }}
           >
             {mode === "up" ? "Sign in instead" : "Create an account"}
