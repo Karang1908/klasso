@@ -41,7 +41,7 @@ export function PlanEditor({ initial, onClose }: { initial: PlanDraft; onClose: 
       location: form.location.trim() || null, people: form.kind === "meeting" ? form.people.trim() || null : null, notes: form.notes.trim() || null };
     try {
       const saved = initial.id ? await updateBlock(initial.id, payload) : await addBlock(payload);
-      if (saved) onClose(); else setError("Your plan wasn’t saved. Your details are still here — check your connection and try again.");
+      if (saved) onClose(); else setError("Your plan wasn’t saved. Your details are still here, so check your connection and try again.");
     } catch { setError("Couldn’t reach your workspace. Your details are still here. Try again when you’re connected."); }
     finally { setBusy(false); }
   };
