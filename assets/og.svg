@@ -1,0 +1,43 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630" role="img" aria-label="Klasso">
+  <!-- Link-preview card. 1200x630 is the size every scraper crops to, and the
+       background is fully opaque: a transparent OG image is composited on
+       white by most clients, which is what put white corners on the mark. -->
+  <defs>
+    <linearGradient id="og-bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#1E5A44"/>
+      <stop offset="55%" stop-color="#143F31"/>
+      <stop offset="100%" stop-color="#0D2B21"/>
+    </linearGradient>
+    <linearGradient id="og-tile" x1="0.15" y1="0" x2="0.85" y2="1">
+      <stop offset="0%" stop-color="#4E9376"/>
+      <stop offset="52%" stop-color="#2E6C55"/>
+      <stop offset="100%" stop-color="#1B4E3B"/>
+    </linearGradient>
+  </defs>
+
+  <rect width="1200" height="630" fill="url(#og-bg)"/>
+  <circle cx="1010" cy="120" r="300" fill="#4E9376" opacity=".10"/>
+  <circle cx="150" cy="560" r="220" fill="#4E9376" opacity=".08"/>
+
+  <!-- the mark, on its own rounded tile -->
+  <g transform="translate(96 195) scale(3.75)">
+    <rect width="64" height="64" rx="14.25" fill="url(#og-tile)"/>
+    <g transform="rotate(-90 32 32)" fill="none" stroke="#FFFFFF" stroke-width="3.75">
+      <circle cx="32" cy="32" r="19" stroke-opacity=".16"/>
+      <circle cx="32" cy="32" r="19" stroke-linecap="round" stroke-dasharray="83.57 119.38"/>
+    </g>
+    <g fill="none" stroke="#FFFFFF" stroke-width="3.75" stroke-linecap="round">
+      <path d="M22.5 25H37.25" stroke-opacity=".55"/>
+      <path d="M22.5 32H41.5"/>
+      <path d="M22.5 39H33.25" stroke-opacity=".55"/>
+    </g>
+    <circle cx="14" cy="38" r="3.1" fill="#1B4E3B"/>
+    <circle cx="14" cy="38" r="2.1" fill="#EFC873"/>
+  </g>
+
+  <g font-family="Manrope, -apple-system, Segoe UI, Roboto, sans-serif" fill="#FFFFFF">
+    <text x="430" y="292" font-size="104" font-weight="800" letter-spacing="-3">Klasso</text>
+    <text x="434" y="352" font-size="35" font-weight="600" fill="#BCD8C8">Plan well. Be present.</text>
+    <text x="434" y="424" font-size="27" font-weight="500" fill="#8FB6A1">Timetable · Attendance · Exams · Reminders</text>
+  </g>
+</svg>
