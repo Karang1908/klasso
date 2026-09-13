@@ -10,6 +10,7 @@ import {
 } from "react";
 import { createPortal } from "react-dom";
 import { AnimatePresence, LayoutGroup, motion, useReducedMotion } from "motion/react";
+import { Icon } from "./icons";
 import { TemporalInput } from "./TemporalInput";
 import { haptic } from "@/lib/haptics";
 
@@ -263,6 +264,31 @@ export function Confirm({
         </div>
       </div>
     </div>
+  );
+}
+
+/**
+ * A collapsible settings group.
+ *
+ * Native <details> rather than a hand-rolled accordion: it is keyboard and
+ * screen-reader correct for free, survives the page being printed or searched
+ * with ⌘F, and needs no state. Settings is a long page you visit to change one
+ * thing, so everything starts closed.
+ */
+export function SettingsGroup({
+  title, hint, open = false, children,
+}: { title: ReactNode; hint?: string; open?: boolean; children: ReactNode }) {
+  return (
+    <details className="settings-group" open={open || undefined}>
+      <summary>
+        <span className="settings-group-head">
+          <span className="settings-group-title">{title}</span>
+          {hint && <span className="settings-group-hint">{hint}</span>}
+        </span>
+        <Icon name="chevron" size={17} />
+      </summary>
+      <div className="settings-group-body">{children}</div>
+    </details>
   );
 }
 
