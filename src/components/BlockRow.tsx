@@ -1,10 +1,11 @@
 "use client";
+import { useClock } from "@/lib/clock";
 import Link from "next/link";
 import { cx } from "./ui";
 import { Icon } from "./icons";
 import { useAppHref } from "./AppShell";
 import { useApp } from "@/lib/store";
-import { formatMinutes, parseTime } from "@/lib/time";
+import { parseTime } from "@/lib/time";
 import type { StudyBlock } from "@/lib/types";
 import { BLOCK_KINDS, blockKind } from "@/lib/planning";
 
@@ -14,6 +15,7 @@ import { BLOCK_KINDS, blockKind } from "@/lib/planning";
  * owner thinks of them as part of the day's to-dos, so they render alongside.
  */
 export function BlockRow({ block }: { block: StudyBlock }) {
+  const clock = useClock();
   const { data, subjectsById, toggleBlock } = useApp();
   const href = useAppHref();
   const subject = block.subject_id ? subjectsById.get(block.subject_id) : null;
@@ -34,8 +36,8 @@ export function BlockRow({ block }: { block: StudyBlock }) {
         <span className="mt-1 flex min-w-0 flex-wrap items-center gap-x-2 gap-y-1 text-xs text-dim">
           {block.start_time ? (
             <span className="font-semibold text-ink">
-              {formatMinutes(parseTime(block.start_time))}
-              {block.end_time ? `–${formatMinutes(parseTime(block.end_time))}` : ""}
+              {clock(parseTime(block.start_time))}
+              {block.end_time ? `–${clock(parseTime(block.end_time))}` : ""}
             </span>
           ) : (
             <span>Planned</span>
