@@ -251,7 +251,13 @@ h1 { line-height: 1.22; }
    an accordion inside an accordion is a maze, not organisation. */
 .settings-sub + .settings-sub { margin-top: 18px; padding-top: 18px; border-top: 1px solid var(--border); }
 .settings-sub > h3 { font-size: .8125rem; font-weight: 700; letter-spacing: .02em; text-transform: uppercase; color: var(--text-dim); margin-bottom: 8px; }
-.settings-group-body > .card { border: 0; background: transparent; box-shadow: none; padding-inline: 0; }
+.settings-group-body > .panel,
+.settings-sub > .panel {
+  border: 0; background: transparent; box-shadow: none; border-radius: 0; padding: 0;
+}
+/* Blocks need room from each other; without this they sat flush at 0px. */
+.settings-group-body > * + * { margin-top: 16px; }
+.settings-sub > * + * { margin-top: 12px; }
 /* The clock sits above the groups, always visible — it is the one setting
    people come here to flip. */
 .settings-clock { border: 1px solid var(--brand-soft); border-radius: 18px; background: var(--surface); padding: 16px; }
