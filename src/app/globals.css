@@ -296,6 +296,34 @@ h1 { line-height: 1.22; }
 .temporal-popup footer button { min-height: 40px; padding: 8px 12px; font-size: .8125rem; color: var(--text-dim); border-radius: 10px; }
 .picker-time-options { display: grid; grid-template-columns: repeat(4,minmax(0,1fr)); gap: 6px; margin-top: 14px; }
 .picker-time-options button { min-height: 40px; border: 1px solid var(--border); border-radius: 10px; font-size: .8125rem; }
+/* Alarm-clock wheels. Native scrolling with snap points, so momentum,
+   rubber-banding and trackpads all work without a drag handler. */
+.wheel-set { position: relative; display: flex; justify-content: center; gap: 6px; margin-top: 12px; --wheel-item: 40px; }
+.wheel { display: flex; flex-direction: column; align-items: center; min-width: 0; }
+.wheel-label { font-size: .6875rem; font-weight: 600; letter-spacing: .04em; text-transform: uppercase; color: var(--text-dim); margin-bottom: 6px; }
+.wheel-track {
+  height: calc(var(--wheel-item) * 5); overflow-y: auto; scroll-snap-type: y mandatory;
+  scrollbar-width: none; -ms-overflow-style: none; outline: none; border-radius: 14px;
+  /* The band is drawn behind; fade the ends so rows appear to roll away. */
+  mask-image: linear-gradient(180deg, transparent 0, #000 22%, #000 78%, transparent 100%);
+}
+.wheel-track::-webkit-scrollbar { display: none; }
+.wheel-track:focus-visible { box-shadow: 0 0 0 2px var(--brand); }
+.wheel-item {
+  height: var(--wheel-item); display: grid; place-items: center; scroll-snap-align: center;
+  min-width: 3.4rem; padding-inline: 10px; font-size: 1.125rem; font-weight: 600;
+  font-variant-numeric: tabular-nums; color: var(--text-dim); cursor: pointer;
+  transition: color 140ms, opacity 140ms;
+}
+.wheel-item[aria-selected="true"] { color: var(--text); font-weight: 720; }
+/* The selection band sits behind every column, level with the centre row. */
+.wheel-band {
+  position: absolute; left: 0; right: 0; top: calc(22px + var(--wheel-item) * 2);
+  height: var(--wheel-item); border-radius: 12px; background: var(--surface-2);
+  pointer-events: none;
+}
+@media (prefers-reduced-motion: reduce) { .wheel-track { scroll-behavior: auto; } }
+
 .picker-readout { margin-top: 10px; font-size: 1.75rem; font-weight: 680; letter-spacing: -.02em; font-variant-numeric: tabular-nums; color: var(--text); }
 .picker-sliders { display: grid; gap: 14px; margin-top: 12px; }
 .picker-sliders .slider-head { font-size: .75rem; }
