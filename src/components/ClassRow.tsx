@@ -13,7 +13,7 @@ export function ClassRow({ occurrence: c, state, attendance, onAttendance, onCan
   const clock = useClock();
   const name = c.subject?.name ?? "Unassigned class";
   return <li className="schedule-row">
-    <div className="class-time"><strong>{clock(c.startMin).replace(/ [ap]m/, "")}</strong><span>&ndash;&nbsp;{clock(c.endMin)}</span>{state === "now" && <span className="mt-1 text-[10px] font-bold text-brand">Now</span>}</div>
+    <div className="class-time"><strong>{clock(c.startMin).replace(/ [ap]m/, "")}</strong><span>-&nbsp;{clock(c.endMin)}</span>{state === "now" && <span className="mt-1 text-[10px] font-bold text-brand">Now</span>}</div>
     <div className="class-content">
       <h3 className={cx("class-title", state === "past" && "text-dim")}>{name}</h3>
       <p className="mt-1 flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-dim"><span className="inline-flex items-center gap-1.5"><span className="h-1.5 w-1.5 rounded-full" style={{ background: c.subject?.color ?? "var(--brand)" }} />{c.subject?.short_name || c.kind}</span>{(c.room || c.subject?.room) && <span>{c.room || c.subject?.room}</span>}{c.isExtra && <span className="text-warn">Extra</span>}</p>
