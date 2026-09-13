@@ -150,7 +150,7 @@ export default function SettingsPage() {
               setBusy(true);
               const res = await sendTestPush();
               setMessage(res.ok
-                ? { tone: "success", text: "Sent — it should arrive in a moment." }
+                ? { tone: "success", text: "Sent. It should arrive in a moment." }
                 : { tone: "danger", text: res.error });
               setBusy(false);
             }}
@@ -187,7 +187,7 @@ export default function SettingsPage() {
                 />
                 {prefs.class_lead_minutes.length === 0 && (
                   <p className="mt-2 text-xs font-semibold text-warn">
-                    Nothing selected — no class reminders will be sent.
+                    Nothing selected, so no class reminders will be sent.
                   </p>
                 )}
                 {prefs.class_lead_minutes.length > 1 && (
