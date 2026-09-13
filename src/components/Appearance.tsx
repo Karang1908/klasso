@@ -4,19 +4,19 @@ import { createContext, useContext, useEffect, useState, type ReactNode } from "
 import { MotionConfig } from "motion/react";
 
 type Theme = "system" | "light" | "dark";
-const AppearanceContext = createContext<{ theme: Theme; setTheme: (value: Theme) => void }>({ theme: "system", setTheme: () => {} });
+const AppearanceContext = createContext<{ theme: Theme; setTheme: (value: Theme) => void }>({ theme: "dark", setTheme: () => {} });
 
 export function AppearanceProvider({ children }: { children: ReactNode }) {
-  const [theme, setValue] = useState<Theme>("system");
+  const [theme, setValue] = useState<Theme>("dark");
   useEffect(() => {
     const update = () => {
       const value = document.documentElement.dataset.theme;
-      setValue(value === "light" || value === "dark" ? value : "system");
+      setValue(value === "light" || value === "system" ? value : "dark");
     };
     update();
     const onStorage = (event: StorageEvent) => {
       if (event.key !== "klasso-theme") return;
-      document.documentElement.dataset.theme = event.newValue ?? "system";
+      document.documentElement.dataset.theme = event.newValue ?? "dark";
       update();
     };
     window.addEventListener("storage", onStorage);
