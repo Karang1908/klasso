@@ -64,7 +64,7 @@ export async function POST(request: Request) {
       {
         error:
           dead.length > 0
-            ? "Your subscription had expired — it has been cleared. Turn notifications off and on again."
+            ? "Your subscription had expired and has been cleared. Turn notifications off and on again."
             : failures[0] ?? "Push failed.",
       },
       { status: 502 },
