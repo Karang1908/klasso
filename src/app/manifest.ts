@@ -2,7 +2,7 @@ import type { MetadataRoute } from "next";
 
 export default function manifest(): MetadataRoute.Manifest {
   return {
-    name: "Klasso — timetable, calendar & tasks",
+    name: "Klasso: timetable, calendar and tasks",
     short_name: "Klasso",
     description:
       "Your timetable, exam calendar, attendance and to-do list, with reminders before every class.",
