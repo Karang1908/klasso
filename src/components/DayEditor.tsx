@@ -1,11 +1,13 @@
 "use client";
+import { useClock } from "@/lib/clock";
 import { useState } from "react";
 import { Banner, Button, Field, Input, Dropdown, Sheet } from "./ui";
 import { dayCancelledNote, resolveDay } from "@/lib/schedule";
 import { useApp } from "@/lib/store";
-import { formatDateISO, formatMinutes } from "@/lib/time";
+import { formatDateISO } from "@/lib/time";
 
 export function DayEditor({ open, onClose, dateISO }: { open: boolean; onClose: () => void; dateISO: string }) {
+  const clock = useClock();
   const { data, subjectsById, addOverride, removeOverride } = useApp();
   const classes = resolveDay(dateISO, data.slots, data.overrides, subjectsById);
   const holiday = dayCancelledNote(dateISO, data.overrides);
@@ -18,7 +20,7 @@ export function DayEditor({ open, onClose, dateISO }: { open: boolean; onClose: 
         if (holiday) { const override = data.overrides.find((o) => o.on_date === dateISO && o.kind === "cancel_day"); if (override) void removeOverride(override.id); }
         else void addOverride({ on_date: dateISO, kind: "cancel_day", note: "No classes" });
       }}>{holiday ? "Restore normal classes" : "Mark the whole day off"}</Button>
-      {classes.length > 0 && <section><h3 className="mb-2 font-semibold">Cancel a class</h3><ul className="divide-y divide-line">{classes.map((c) => <li key={c.key} className="flex items-center gap-3 py-2"><span className="min-w-0 flex-1 text-sm">{c.subject?.name || "Class"}<span className="block text-xs text-dim">{formatMinutes(c.startMin)}</span></span><Button size="sm" variant="danger" onClick={() => { if (c.isExtra && c.overrideId) void removeOverride(c.overrideId); else void addOverride({ on_date: dateISO, kind: "cancel_slot", slot_id: c.slotId }); }}>Cancel</Button></li>)}</ul></section>}
+      {classes.length > 0 && <section><h3 className="mb-2 font-semibold">Cancel a class</h3><ul className="divide-y divide-line">{classes.map((c) => <li key={c.key} className="flex items-center gap-3 py-2"><span className="min-w-0 flex-1 text-sm">{c.subject?.name || "Class"}<span className="block text-xs text-dim">{clock(c.startMin)}</span></span><Button size="sm" variant="danger" onClick={() => { if (c.isExtra && c.overrideId) void removeOverride(c.overrideId); else void addOverride({ on_date: dateISO, kind: "cancel_slot", slot_id: c.slotId }); }}>Cancel</Button></li>)}</ul></section>}
       {cancelled.length > 0 && <section><h3 className="mb-2 font-semibold">Cancelled classes</h3>{cancelled.map((o) => { const slot = data.slots.find((s) => s.id === o.slot_id); return <div key={o.id} className="flex items-center gap-3 py-1"><span className="flex-1 text-sm text-dim">{slot?.subject_id ? subjectsById.get(slot.subject_id)?.name : "Class"}</span><Button size="sm" onClick={() => void removeOverride(o.id)}>Restore</Button></div>; })}</section>}
       <section className="space-y-3"><h3 className="font-semibold">Add a one-off class</h3>
         {data.subjects.length === 0 ? <p className="text-sm text-dim">Add a subject in Timetable first.</p> : <>
