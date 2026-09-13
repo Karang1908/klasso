@@ -30,6 +30,14 @@ const clickText = async (text, selector = "button") => {
 const fill = async (selector, value) => {
   await page.$eval(selector, (element, value) => { Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, "value").set.call(element, value); element.dispatchEvent(new Event("input", { bubbles: true })); element.dispatchEvent(new Event("change", { bubbles: true })); }, value); await pause(50);
 };
+const openGroup = async (title) => {
+  await page.evaluate((title) => {
+    const g = [...document.querySelectorAll("details.settings-group")]
+      .find((d) => d.querySelector(".settings-group-title")?.textContent.trim() === title);
+    if (g && !g.open) g.querySelector("summary").click();
+  }, title);
+  await pause(320);
+};
 const hasTask = (title) => page.$(`button[aria-label="Edit ${title}"]`).then(Boolean);
 const addTask = async (title) => { await fill('input[aria-label="New task"]', title); await page.locator('button[type="submit"]').click(); await page.waitForSelector(`button[aria-label="Edit ${title}"]`); await pause(350); };
 const chooseList = async (list) => { await page.evaluate((list) => { [...document.querySelectorAll('[aria-label="Task lists"] button')].find((b) => b.querySelector("strong")?.textContent === list).click(); }, list); await pause(); };
@@ -127,15 +135,16 @@ try {
   check("calendar rejects an end before start", await page.$$eval("dialog button", (buttons) => buttons.find((button) => button.textContent.trim() === "Add").disabled));
   await page.keyboard.press("Escape"); await pause();
 
-  await go("settings"); await clickText("Dark");
+  await go("settings"); await openGroup("Appearance"); await clickText("Dark");
   check("dark appearance applies immediately", await page.evaluate(() => document.documentElement.dataset.theme === "dark"));
   await page.reload({ waitUntil: "networkidle0" }); await pause();
   check("appearance survives reload", await page.evaluate(() => document.documentElement.dataset.theme === "dark"));
-  await clickText("Light");
+  await openGroup("Appearance"); await clickText("Light");
+  await openGroup("Before each class");
   const before = await page.$eval('[aria-label="Class reminders"]', (el) => el.getAttribute("aria-checked"));
   await click('[aria-label="Class reminders"]');
   check("reminder preference is editable", await page.$eval('[aria-label="Class reminders"]', (el, before) => el.getAttribute("aria-checked") !== before, before));
-  await clickText("Download backup"); await pause(500);
+  await openGroup("Your data, in your hands"); await clickText("Download backup"); await pause(500);
   const backup = readdirSync(OUT).find((name) => name.endsWith(".json"));
   const exported = backup ? JSON.parse(readFileSync(resolve(OUT, backup), "utf8")) : null;
   check("backup includes both task lists and no session", exported?.version === 2 && exported.data.tasks.some((task) => task.list_kind === "daily") && exported.data.tasks.some((task) => (task.list_kind ?? "master") === "master") && !exported.session && !JSON.stringify(exported).includes("access_token"));
