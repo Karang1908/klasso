@@ -392,6 +392,12 @@ export default function SettingsPage() {
       }}><Icon name="download" size={17} />Download backup</Button><p className="text-xs text-dim">Includes your personal planner data. Passwords and login tokens are excluded.</p></Card>
         </div>
       </SettingsGroup>
+
+      <nav className="settings-legal" aria-label="Legal">
+        <Link href="/privacy">Privacy</Link>
+        <span aria-hidden="true">·</span>
+        <Link href="/terms">Terms of Service</Link>
+      </nav>
       </div>
 
       <p className="pb-2 text-center text-xs text-faint">Klasso</p>

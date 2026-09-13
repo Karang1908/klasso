@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="120" height="120" viewBox="10.20 10.46 43.07 43.07" role="img" aria-label="Klasso">
+  <!-- Transparent brand mark for third-party consent screens and profiles.
+       Fixed colours on purpose: assets/favicon.svg re-colours itself with
+       prefers-color-scheme, which cannot survive a static PNG export. Google's
+       consent screen is light, so the mark is brand green. -->
+  <g transform="rotate(-90 32 32)" fill="none" stroke="#2E6C55" stroke-width="3.75">
+    <circle cx="32" cy="32" r="19" stroke-opacity=".22"/>
+    <circle cx="32" cy="32" r="19" stroke-linecap="round" stroke-dasharray="83.57 119.38"/>
+  </g>
+  <g fill="none" stroke="#2E6C55" stroke-width="3.75" stroke-linecap="round">
+    <path d="M22.5 25H37.25" stroke-opacity=".55"/>
+    <path d="M22.5 32H41.5"/>
+    <path d="M22.5 39H33.25" stroke-opacity=".55"/>
+  </g>
+  <circle cx="14" cy="38" r="3.4" fill="#FFFFFF"/>
+  <circle cx="14" cy="38" r="2.4" fill="#D9A43C"/>
+</svg>

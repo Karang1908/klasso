@@ -8,6 +8,7 @@ const maskable = readFileSync("assets/logo-maskable.svg");
 const badge = readFileSync("assets/badge.svg");
 const square = readFileSync("assets/logo-square.svg");
 const og = readFileSync("assets/og.svg");
+const brandmark = readFileSync("assets/logo-brandmark.svg");
 
 mkdirSync("public/icons", { recursive: true });
 
@@ -33,6 +34,13 @@ for (const [svg, out, size, opaque] of jobs) {
   await pipe.png({ compressionLevel: 9 }).toFile(out);
   console.log(`${out}  ${size}x${size}${opaque ? "  opaque" : "  alpha"}`);
 }
+
+// 120x120 transparent mark for third-party branding (Google's consent screen
+// asks for exactly this size). Alpha is kept: it sits on someone else's page.
+await sharp(brandmark, { density: 512 }).resize(120, 120)
+  .png({ compressionLevel: 9 })
+  .toFile("public/icons/brandmark-120.png");
+console.log("public/icons/brandmark-120.png  120x120  alpha");
 
 // Link preview. Next picks src/app/opengraph-image.png up by file convention.
 await sharp(og, { density: 192 }).resize(1200, 630)

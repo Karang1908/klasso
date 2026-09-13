@@ -228,6 +228,20 @@ h1 { line-height: 1.22; }
 .auth-switch:hover { background: var(--brand-soft); border-color: var(--brand); }
 .auth-switch:active { transform: scale(.985); }
 
+.settings-legal { display: flex; justify-content: center; gap: 10px; margin-top: 26px; font-size: .8125rem; color: var(--text-dim); }
+.settings-legal a { min-height: 44px; display: inline-flex; align-items: center; color: var(--text-dim); }
+.settings-legal a:hover { color: var(--brand); text-decoration: underline; text-underline-offset: 3px; }
+
+/* Legal pages: long-form reading, so a proper measure and generous leading. */
+.legal-body { margin-top: 28px; max-width: 68ch; }
+.legal-body h2 { margin-top: 32px; font-size: 1.0625rem; font-weight: 700; letter-spacing: -.01em; color: var(--text); }
+.legal-body p { margin-top: 10px; line-height: 1.7; color: var(--text-dim); }
+.legal-body ul { margin-top: 10px; display: grid; gap: 8px; }
+.legal-body li { position: relative; padding-left: 18px; line-height: 1.65; color: var(--text-dim); }
+.legal-body li::before { content: ""; position: absolute; left: 2px; top: .65em; width: 5px; height: 5px; border-radius: 50%; background: var(--brand); }
+.legal-body strong { color: var(--text); font-weight: 650; }
+.legal-body a, .legal-body li a { color: var(--brand); text-decoration: underline; text-underline-offset: 3px; }
+
 /* Collapsible settings groups. Closed by default: Settings is a page you open
    to change one thing, not to read. */
 .settings-group { border: 1px solid var(--border); border-radius: 18px; background: var(--surface); overflow: hidden; }
