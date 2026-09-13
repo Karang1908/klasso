@@ -110,7 +110,7 @@ export function planNotifications(input: PlanInput): PlannedNotification[] {
 
           const name = subjectLabel(c.subject);
           const where = c.room ?? c.subject?.room ?? null;
-          const when = `${formatMinutes(c.startMin, hour12)} – ${formatMinutes(c.endMin, hour12)}`;
+          const when = `${formatMinutes(c.startMin, hour12)} - ${formatMinutes(c.endMin, hour12)}`;
           push({
             dedupeKey: `class:${c.slotId ?? c.overrideId}:${dateISO}:${lead}`,
             title: lead === 0 ? `${name} starting now` : `${name} in ${lead} min`,
