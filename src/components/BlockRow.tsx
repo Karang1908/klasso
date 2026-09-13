@@ -37,7 +37,7 @@ export function BlockRow({ block }: { block: StudyBlock }) {
           {block.start_time ? (
             <span className="font-semibold text-ink">
               {clock(parseTime(block.start_time))}
-              {block.end_time ? `–${clock(parseTime(block.end_time))}` : ""}
+              {block.end_time ? `-${clock(parseTime(block.end_time))}` : ""}
             </span>
           ) : (
             <span>Planned</span>
