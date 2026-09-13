@@ -62,7 +62,7 @@ const keys = (r) => r.map((n) => n.dedupeKey).sort();
 // ------------------------------------------------------------- class leads
 eq("10 min before the 09:00 class fires once",
   plan({ now: atDubai("2026-09-09", 8, 50) }).map((n) => [n.dedupeKey, n.title, n.body]),
-  [["class:slotA:2026-09-09:10", "Physics in 10 min", "9:00 am – 10:00 am · B12"]]);
+  [["class:slotA:2026-09-09:10", "Physics in 10 min", "9:00 am - 10:00 am · B12"]]);
 eq("a minute early fires nothing", keys(plan({ now: atDubai("2026-09-09", 8, 49) })), []);
 eq("a minute late still fires (catch-up window)",
   keys(plan({ now: atDubai("2026-09-09", 8, 52) })), ["class:slotA:2026-09-09:10"]);
