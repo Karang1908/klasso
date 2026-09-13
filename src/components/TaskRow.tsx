@@ -1,11 +1,12 @@
 "use client";
+import { useClock } from "@/lib/clock";
 import { useEffect, useRef } from "react";
 import { haptic } from "@/lib/haptics";
 import { animate } from "animejs/animation";
 import { motion, useReducedMotion } from "motion/react";
 import { cx } from "./ui";
 import { useApp } from "@/lib/store";
-import { formatDateISO, formatMinutes, parseTime } from "@/lib/time";
+import { formatDateISO, parseTime } from "@/lib/time";
 import type { Task } from "@/lib/types";
 
 export function TaskCheck({ task, onToggle }: { task: Task; onToggle: () => void }) {
@@ -25,6 +26,7 @@ export function TaskCheck({ task, onToggle }: { task: Task; onToggle: () => void
 }
 
 export function TaskRow({ task, dateISO, onEdit }: { task: Task; dateISO: string; onEdit: () => void }) {
+  const clock = useClock();
   const { subjectsById, toggleTask } = useApp();
   const subject = task.subject_id ? subjectsById.get(task.subject_id) : null;
   const overdue = !task.done && task.due_date && task.due_date < dateISO;
@@ -34,7 +36,7 @@ export function TaskRow({ task, dateISO, onEdit }: { task: Task; dateISO: string
       <span className={cx("task-title", task.done && "is-done")}>{task.title}</span>
       {(subject || task.notes || task.due_date) && <span className="mt-1 flex min-w-0 flex-wrap gap-x-2 gap-y-1 text-xs text-dim">
         {subject && <span className="inline-flex items-center gap-1.5"><span className="h-1.5 w-1.5 rounded-full" style={{ background: subject.color }} />{subject.short_name || subject.name}</span>}
-        {task.due_date && <span className={overdue ? "text-danger" : undefined}>{overdue ? "Overdue · " : ""}{task.due_date === dateISO ? "Due today" : formatDateISO(task.due_date)}{task.due_time && ` · ${formatMinutes(parseTime(task.due_time))}`}</span>}
+        {task.due_date && <span className={overdue ? "text-danger" : undefined}>{overdue ? "Overdue · " : ""}{task.due_date === dateISO ? "Due today" : formatDateISO(task.due_date)}{task.due_time && ` · ${clock(parseTime(task.due_time))}`}</span>}
         {task.notes && <span className="basis-full truncate">{task.notes}</span>}
       </span>}
     </button>
