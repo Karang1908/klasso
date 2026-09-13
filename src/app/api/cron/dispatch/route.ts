@@ -168,6 +168,7 @@ async function dispatch() {
     const planned = planNotifications({
       now,
       timezone: profileById.get(userId)?.timezone || "UTC",
+      hour12: (profileById.get(userId)?.time_format ?? "12") !== "24",
       prefs: userPrefs,
       subjects: subjectsByUser.get(userId) ?? [],
       slots: slotsByUser.get(userId) ?? [],
