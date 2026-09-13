@@ -148,6 +148,7 @@ export type Profile = {
   id: string;
   display_name: string | null;
   timezone: string;
+  time_format?: '12' | '24';
   created_at: string;
 };
 
