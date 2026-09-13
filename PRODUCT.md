@@ -22,7 +22,14 @@ Cloud authentication and phone push delivery require the owner's configured Supa
 
 ## Brand Commitments
 
-The user requests impeccable, high-quality art direction, glassmorphism, polished animation and a cohesive color/theme overhaul. Avoid the generic black-and-purple aesthetic. Klasso and its existing schedule-ring logo are provisional project identity, retained for continuity.
+The user requests impeccable, high-quality art direction, glassmorphism, polished animation and a cohesive color/theme overhaul. Avoid the generic black-and-purple aesthetic. Klasso and its existing schedule-ring logo are the settled project identity.
+
+Standing decisions (2026-09-14), confirmed directly by the owner:
+
+- **Dark is the default.** Every visitor starts on the dark mineral-green world; light and system are opt-in from Settings. Do not reintroduce system-follows-OS as the default.
+- **Liquid glass is on, everywhere.** An earlier round removed glassmorphism after it was applied badly; the owner has since reversed that. The instruction is glass as a real material on both the marketing surface and the app, not a blur slapped on every card. What was wrong before was the execution, not the material.
+- **The ring is the brand device.** The schedule ring carries the identity across the icon, the loading screen and the marketing surface.
+- **No em-dashes in any user-facing copy.** Restructure the sentence instead.
 
 ## Evidence on Hand
 
