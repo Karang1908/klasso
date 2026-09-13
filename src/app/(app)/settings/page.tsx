@@ -1,4 +1,5 @@
 "use client";
+import { useClock } from "@/lib/clock";
 
 import Link from "next/link";
 import { useContext, useEffect, useState } from "react";
@@ -7,19 +8,20 @@ import { setHapticsEnabled, useHapticsEnabled, useHapticsSupported } from "@/lib
 import { PreviewContext, useAppHref } from "@/components/AppShell";
 import { Icon } from "@/components/icons";
 
-import { Banner, Button, Card, Field, Input, Spinner, Slider, Toggle, cx } from "@/components/ui";
+import { Banner, Button, Card, Field, Input, Segmented, Spinner, Slider, Toggle, cx } from "@/components/ui";
 import {
   currentSubscription, detectEnvironment, disablePush, enablePush, sendTestPush,
   type PushState,
 } from "@/lib/push-client";
 import { useApp } from "@/lib/store";
-import { formatMinutes, parseTime } from "@/lib/time";
+import { parseTime } from "@/lib/time";
 
 const CLASS_LEADS = [0, 5, 10, 15, 20, 30, 45, 60];
 const TASK_LEADS = [0, 10, 15, 30, 60, 120, 180];
 const EXAM_DAYS = [1, 2, 3, 5, 7, 14, 30];
 
 export default function SettingsPage() {
+  const clock = useClock();
   const { data, userId, updatePrefs, updateProfile, signOut } = useApp();
   const haptics = useHapticsEnabled();
   const canBuzz = useHapticsSupported();
@@ -248,7 +250,7 @@ export default function SettingsPage() {
                     format={(v) => `${v}d`}
                   />
                   <p className="mt-2 text-xs text-faint">
-                    Sent with your morning summary at {formatMinutes(parseTime(prefs.day_summary_time))}.
+                    Sent with your morning summary at {clock(parseTime(prefs.day_summary_time))}.
                   </p>
                 </div>
                 <div>
@@ -365,6 +367,20 @@ export default function SettingsPage() {
         <h2 className="section-heading">Account</h2>
         <Card className="flex flex-col gap-4 p-4">
           <Field label="Display name"><Input key={data.profile?.display_name} defaultValue={data.profile?.display_name ?? ""} placeholder="Your name" maxLength={60} onBlur={(event) => { const name = event.target.value.trim(); if (name && name !== data.profile?.display_name) void updateProfile({ display_name: name }); }} /></Field>
+          <Field
+            label="Clock"
+            hint="Used everywhere, including the text of your reminders."
+          >
+            <Segmented
+              label="Clock"
+              value={data.profile?.time_format ?? "12"}
+              onChange={(v) => void updateProfile({ time_format: v })}
+              options={[
+                { value: "12", label: `12-hour · ${clock(13 * 60 + 5)}` },
+                { value: "24", label: "24-hour · 13:05" },
+              ]}
+            />
+          </Field>
           <Field
             label="Time zone"
             hint="Picked up from your phone. Reminders follow it automatically."
