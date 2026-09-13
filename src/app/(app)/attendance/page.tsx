@@ -84,7 +84,7 @@ export default function AttendancePage() {
                       "shrink-0 text-lg font-bold tabular-nums",
                       s.percent === null ? "text-faint" : s.meetsMinimum ? "text-success" : "text-danger",
                     )}>
-                      {s.percent === null ? "—" : `${s.percent.toFixed(0)}%`}
+                      {s.percent === null ? "Not marked" : `${s.percent.toFixed(0)}%`}
                     </span>
                   </div>
 
@@ -103,7 +103,7 @@ export default function AttendancePage() {
                     ) : (
                       <>
                         {s.present} present · {s.absent} absent · needs {s.subject.min_attendance}%
-                        {" — "}
+                        {" · "}
                         {s.subject.min_attendance === 0 ? "No minimum requirement." : !s.meetsMinimum && s.subject.min_attendance === 100 ? <span className="text-danger">A recorded absence means 100% is no longer possible.</span> : s.meetsMinimum ? (
                           s.canSkip > 0 ? (
                             <span className="font-semibold text-success">
