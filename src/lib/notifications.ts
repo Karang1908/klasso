@@ -44,6 +44,9 @@ export type PlannedNotification = {
 export type PlanInput = {
   now: Date;
   timezone: string;
+  /** Clock the reminder text is written in. Server-side and explicit: the
+   *  dispatcher formats for many users in one pass. */
+  hour12?: boolean;
   prefs: NotificationPrefs;
   subjects: Subject[];
   slots: TimetableSlot[];
@@ -77,6 +80,7 @@ function subjectLabel(s: Subject | null | undefined, fallback = "Class"): string
  */
 export function planNotifications(input: PlanInput): PlannedNotification[] {
   const { now, timezone, prefs, subjects, slots, overrides, events, tasks } = input;
+  const hour12 = input.hour12 ?? true;
   const blocks = input.blocks ?? [];
   const catchUp = input.catchUpMinutes ?? 3;
 
@@ -106,7 +110,7 @@ export function planNotifications(input: PlanInput): PlannedNotification[] {
 
           const name = subjectLabel(c.subject);
           const where = c.room ?? c.subject?.room ?? null;
-          const when = `${formatMinutes(c.startMin)} – ${formatMinutes(c.endMin)}`;
+          const when = `${formatMinutes(c.startMin, hour12)} – ${formatMinutes(c.endMin, hour12)}`;
           push({
             dedupeKey: `class:${c.slotId ?? c.overrideId}:${dateISO}:${lead}`,
             title: lead === 0 ? `${name} starting now` : `${name} in ${lead} min`,
@@ -135,8 +139,8 @@ export function planNotifications(input: PlanInput): PlannedNotification[] {
       const endsAt = Math.max(...classes.map((c) => c.endMin));
       body =
         `${classes.length} ${classes.length === 1 ? "class" : "classes"} · ` +
-        `${subjectLabel(first.subject)} at ${formatMinutes(first.startMin)} · ` +
-        `ends ${formatMinutes(endsAt)}`;
+        `${subjectLabel(first.subject)} at ${formatMinutes(first.startMin, hour12)} · ` +
+        `ends ${formatMinutes(endsAt, hour12)}`;
     }
     if (examsToday.length) body += ` · ${examsToday.map((e) => e.title).join(", ")}`;
     if (dueToday) body += ` · ${dueToday} task${dueToday === 1 ? "" : "s"} due`;
@@ -165,7 +169,7 @@ export function planNotifications(input: PlanInput): PlannedNotification[] {
           push({
             dedupeKey: `task:${t.id}:${t.due_date}:m${lead}`,
             title: lead === 0 ? `Due now: ${t.title}` : `Due in ${lead} min: ${t.title}`,
-            body: `${formatMinutes(parseTime(t.due_time))}${suffix}`,
+            body: `${formatMinutes(parseTime(t.due_time), hour12)}${suffix}`,
             url: taskUrl,
             tag: `task-${t.id}`,
           });
@@ -203,7 +207,7 @@ export function planNotifications(input: PlanInput): PlannedNotification[] {
       dedupeKey: `block:${block.id}:${block.on_date}:m${rule.lead}`,
       title: rule.lead === 0 ? `${block.title} starting now` : `${block.title} in ${rule.lead} min`,
       body: [
-        formatMinutes(parseTime(block.start_time)),
+        formatMinutes(parseTime(block.start_time), hour12),
         block.location,
         block.people,
         subject?.name,
@@ -229,7 +233,7 @@ export function planNotifications(input: PlanInput): PlannedNotification[] {
           title: `${noun} in ${days} day${days === 1 ? "" : "s"}: ${e.title}`,
           body: [
             subject?.name,
-            e.start_time ? formatMinutes(parseTime(e.start_time)) : null,
+            e.start_time ? formatMinutes(parseTime(e.start_time), hour12) : null,
             e.location,
           ]
             .filter(Boolean)
@@ -247,7 +251,7 @@ export function planNotifications(input: PlanInput): PlannedNotification[] {
           dedupeKey: `event:${e.id}:m${lead}`,
           title: lead === 0 ? `${e.title} starting now` : `${e.title} in ${lead} min`,
           body: [
-            formatMinutes(parseTime(e.start_time)),
+            formatMinutes(parseTime(e.start_time), hour12),
             e.location,
             subject?.name,
           ]
