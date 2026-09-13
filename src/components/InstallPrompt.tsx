@@ -45,7 +45,7 @@ export function InstallPrompt() {
           <div className="install-copy">
             <strong>Keep Klasso one tap away</strong>
             {mode === "prompt" ? (
-              <p>Add it to your home screen and it opens like any other app — and reminders can reach you.</p>
+              <p>Add it to your home screen and it opens like any other app, and reminders can reach you.</p>
             ) : (
               <p>
                 Tap <ShareGlyph /> in the Safari toolbar, then <b>Add to Home Screen</b>.
