@@ -84,15 +84,18 @@ export function Textarea(
 }
 
 export function Segmented<T extends string>({
-  value, onChange, options,
+  value, onChange, options, label = "View options",
 }: {
   value: T;
   onChange: (v: T) => void;
   options: { value: T; label: string }[];
+  /** What this control selects. "View options" is only right for a view
+   *  switcher; every other use needs its own name for screen readers. */
+  label?: string;
 }) {
   const group = useId();
   return (
-    <LayoutGroup id={group}><div role="tablist" aria-label="View options" className="segmented">
+    <LayoutGroup id={group}><div role="tablist" aria-label={label} className="segmented">
       {options.map((o) => (
         <button
           key={o.value}
