@@ -1,4 +1,5 @@
 "use client";
+import { useClock } from "@/lib/clock";
 
 import { useMemo, useState } from "react";
 
@@ -8,7 +9,7 @@ import {
 import { resolveDay } from "@/lib/schedule";
 import { useApp } from "@/lib/store";
 import {
-  addDaysISO, daysBetweenISO, formatDateISO, formatMinutes, parseTime, weekdayOfISO,
+  addDaysISO, daysBetweenISO, formatDateISO, parseTime, weekdayOfISO,
   WEEKDAY_SHORT,
 } from "@/lib/time";
 import { useNow } from "@/lib/useNow";
@@ -26,6 +27,7 @@ const KINDS: { value: EventKind; label: string; tone: string }[] = [
 const toneFor = (k: EventKind) => KINDS.find((x) => x.value === k)?.tone ?? "";
 
 export default function CalendarPage() {
+  const clock = useClock();
   const { data, subjectsById } = useApp();
   const now = useNow(60_000);
   const [view, setView] = useState<"month" | "list">("month");
@@ -170,7 +172,7 @@ export default function CalendarPage() {
                       <span className="block truncate font-bold">{e.title}</span>
                       <span className="block truncate text-sm text-dim">
                         {formatDateISO(e.on_date)}
-                        {e.start_time ? ` · ${formatMinutes(parseTime(e.start_time))}` : ""}
+                        {e.start_time ? ` · ${clock(parseTime(e.start_time))}` : ""}
                         {e.location ? ` · ${e.location}` : ""}
                       </span>
                     </span>
@@ -188,7 +190,7 @@ export default function CalendarPage() {
         </ul>
       )}
 
-      {view === "month" && upcoming.length > 0 && <section><h2 className="section-heading mb-3">Coming up</h2><div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">{upcoming.slice(0, 3).map((event) => <button key={event.id} onClick={() => setEditing(event)} className="panel p-5 text-left"><span className={`tag ${toneFor(event.kind)}`}>{event.kind}</span><span className="mt-3 block font-semibold">{event.title}</span><span className="mt-2 block text-xs text-dim">{formatDateISO(event.on_date)}{event.start_time ? ` · ${formatMinutes(parseTime(event.start_time))}` : ""}</span></button>)}</div></section>}
+      {view === "month" && upcoming.length > 0 && <section><h2 className="section-heading mb-3">Coming up</h2><div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">{upcoming.slice(0, 3).map((event) => <button key={event.id} onClick={() => setEditing(event)} className="panel p-5 text-left"><span className={`tag ${toneFor(event.kind)}`}>{event.kind}</span><span className="mt-3 block font-semibold">{event.title}</span><span className="mt-2 block text-xs text-dim">{formatDateISO(event.on_date)}{event.start_time ? ` · ${clock(parseTime(event.start_time))}` : ""}</span></button>)}</div></section>}
 
       {/* ------------------------------------------------------ day detail */}
       <Sheet
@@ -236,7 +238,7 @@ export default function CalendarPage() {
                     </span>
                     <span className="min-w-0 flex-1 font-semibold">{e.title}</span>
                     {e.start_time && (
-                      <span className="shrink-0 text-xs text-dim">{formatMinutes(parseTime(e.start_time))}</span>
+                      <span className="shrink-0 text-xs text-dim">{clock(parseTime(e.start_time))}</span>
                     )}
                   </button>
                 </li>
@@ -255,13 +257,13 @@ export default function CalendarPage() {
                 <li key={c.key} className="calendar-detail-row">
                   <span className="h-3 w-3 shrink-0 rounded-full" style={{ background: c.subject?.color ?? "#94a3b8" }} />
                   <span className="min-w-0 flex-1 font-semibold">{c.subject?.name ?? "Class"}{c.room && <small className="mt-1 block font-normal text-dim">{c.room}</small>}</span>
-                  <span className="calendar-detail-time">{formatMinutes(c.startMin)}<small>{formatMinutes(c.endMin)}</small></span>
+                  <span className="calendar-detail-time">{clock(c.startMin)}<small>{clock(c.endMin)}</small></span>
                 </li>
               ))}
             </ul>
           )}
         </section>
-        {plans.length > 0 && <section><h3 className="mb-2 text-sm font-semibold text-dim">Your plans</h3><ul>{plans.map((plan) => <li key={plan.id}><button className="calendar-detail-row" onClick={() => setPlanDraft(plan)} aria-label={`Edit plan ${plan.title}`}><Icon name={blockKind(plan) === "meeting" ? "people" : blockKind(plan) === "activity" ? "activity" : "book"} size={18} /><span className="min-w-0 flex-1"><strong className={cx("task-title", plan.done && "is-done")}>{plan.title}</strong><small className="text-dim capitalize">{blockKind(plan)}{plan.location ? ` · ${plan.location}` : ""}</small></span><span className="calendar-detail-time">{plan.start_time ? formatMinutes(parseTime(plan.start_time)) : "Anytime"}<Icon name="chevron" size={14} /></span></button></li>)}</ul></section>}
+        {plans.length > 0 && <section><h3 className="mb-2 text-sm font-semibold text-dim">Your plans</h3><ul>{plans.map((plan) => <li key={plan.id}><button className="calendar-detail-row" onClick={() => setPlanDraft(plan)} aria-label={`Edit plan ${plan.title}`}><Icon name={blockKind(plan) === "meeting" ? "people" : blockKind(plan) === "activity" ? "activity" : "book"} size={18} /><span className="min-w-0 flex-1"><strong className={cx("task-title", plan.done && "is-done")}>{plan.title}</strong><small className="text-dim capitalize">{blockKind(plan)}{plan.location ? ` · ${plan.location}` : ""}</small></span><span className="calendar-detail-time">{plan.start_time ? clock(parseTime(plan.start_time)) : "Anytime"}<Icon name="chevron" size={14} /></span></button></li>)}</ul></section>}
       </div>
     );
   }
