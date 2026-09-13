@@ -1,4 +1,5 @@
 "use client";
+import { useClock } from "@/lib/clock";
 
 import Link from "next/link";
 import { Suspense, useState } from "react";
@@ -12,7 +13,7 @@ import { LaunchScreen } from "@/components/LaunchScreen";
 import { BLOCK_KINDS, blockForTopic, blockKind, blocksForDay, examPlans, findClashes, plannedMinutes, weekStart } from "@/lib/planning";
 import { resolveDay } from "@/lib/schedule";
 import { useApp } from "@/lib/store";
-import { addDaysISO, daysBetweenISO, formatDateISO, formatDuration, formatMinutes, parseTime, WEEKDAY_SHORT } from "@/lib/time";
+import { addDaysISO, daysBetweenISO, formatDateISO, formatDuration, parseTime, WEEKDAY_SHORT } from "@/lib/time";
 import { useNow } from "@/lib/useNow";
 import type { BlockKind } from "@/lib/types";
 
@@ -29,6 +30,7 @@ function PlanRoute() {
 }
 
 function PlanningWorkspace({ initialDate, initialDraft }: { initialDate: string; initialDraft: PlanDraft | null }) {
+  const clock = useClock();
   const { data, subjectsById, toggleBlock } = useApp();
   const href = useAppHref();
   const now = useNow(60_000);
@@ -71,7 +73,7 @@ function PlanningWorkspace({ initialDate, initialDraft }: { initialDate: string;
               const title = c?.subject?.name ?? c?.kind ?? block!.title;
               const subject = c?.subject ?? (block?.subject_id ? subjectsById.get(block.subject_id) : undefined);
               return <motion.li layout="position" key={item.key} initial={false} exit={{ opacity: 0 }} className="agenda-row" data-kind={kind}>
-                <div className="agenda-time">{item.start < 1441 ? <><strong>{formatMinutes(item.start)}</strong>{end !== null && <span>{formatMinutes(end)}</span>}</> : <span>Anytime</span>}</div>
+                <div className="agenda-time">{item.start < 1441 ? <><strong>{clock(item.start)}</strong>{end !== null && <span>{clock(end)}</span>}</> : <span>Anytime</span>}</div>
                 <div className="agenda-item">
                   <span className={`agenda-symbol ${kind}`}><Icon name={kind === "class" || kind === "study" ? "book" : kind === "meeting" ? "people" : "activity"} size={19} /></span>
                   <div className="agenda-copy">{block ? <button className={cx("agenda-title", block.done && "is-done")} aria-label={`Edit plan ${title}`} onClick={() => setDraft(block)}>{title}</button> : <h3 className="agenda-title">{title}</h3>}
@@ -93,7 +95,7 @@ function PlanningWorkspace({ initialDate, initialDraft }: { initialDate: string;
     </> : plans.length === 0 ? <Card><EmptyState icon={<Icon name="book" size={32} />} title="Turn your syllabus into a plan." body="Add an exam or assignment in Calendar, then list its topics. Schedule each topic here, one session at a time." action={<Link className="section-link" href={href("/calendar")}>Open calendar <Icon name="arrow" size={17} /></Link>} /></Card> :
       <div className="syllabus-grid">{plans.map((plan) => <Card key={plan.event.id} className="syllabus-plan"><header><div><h2 className="section-heading">{plan.event.title}</h2><p>{formatDateISO(plan.event.on_date)} · {plan.done} of {plan.topics.length} topics completed</p></div><span className="tag bg-brand-soft text-brand">{plan.scheduled}/{plan.topics.length} scheduled</span></header><div className="syllabus-progress"><span style={{ width: `${plan.coverage * 100}%` }} /></div><ul>{plan.topics.map((topic) => {
         const block = blockForTopic(data.blocks, plan.event.id, topic);
-        return <li key={topic}><span className={cx("syllabus-state", block?.done && "is-done")}><Icon name={block?.done ? "check" : block ? "clock" : "book"} size={16} /></span><span className="min-w-0 flex-1"><strong className={cx("task-title", block?.done && "is-done")}>{topic}</strong>{block && <small className="text-dim">{formatDateISO(block.on_date)}{block.start_time && ` · ${formatMinutes(parseTime(block.start_time))}`}</small>}</span><Button variant="ghost" size="sm" onClick={() => setDraft(block ?? { kind: "study", title: topic, on_date: date, event_id: plan.event.id, subject_id: plan.event.subject_id })}>{block ? "Edit" : "Schedule"}<Icon name="arrow" size={14} /></Button></li>;
+        return <li key={topic}><span className={cx("syllabus-state", block?.done && "is-done")}><Icon name={block?.done ? "check" : block ? "clock" : "book"} size={16} /></span><span className="min-w-0 flex-1"><strong className={cx("task-title", block?.done && "is-done")}>{topic}</strong>{block && <small className="text-dim">{formatDateISO(block.on_date)}{block.start_time && ` · ${clock(parseTime(block.start_time))}`}</small>}</span><Button variant="ghost" size="sm" onClick={() => setDraft(block ?? { kind: "study", title: topic, on_date: date, event_id: plan.event.id, subject_id: plan.event.subject_id })}>{block ? "Edit" : "Schedule"}<Icon name="arrow" size={14} /></Button></li>;
       })}</ul></Card>)}</div>}
     {draft && <PlanEditor key={draft.id ?? `${draft.kind}:${draft.title ?? "new"}:${draft.on_date}`} initial={draft} onClose={() => setDraft(null)} />}
   </div>;
