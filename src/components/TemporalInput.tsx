@@ -3,12 +3,15 @@
 import { useEffect, useId, useRef, useState, type InputHTMLAttributes, type ChangeEvent } from "react";
 import { createPortal } from "react-dom";
 import { Icon } from "./icons";
-import { addDaysISO, formatDateISO, formatMinutes, localDateISO, parseTime, toTimeString, WEEKDAY_SHORT } from "@/lib/time";
-import { Slider } from "./Slider";
+import { addDaysISO, formatDateISO, localDateISO, parseTime, toTimeString, WEEKDAY_SHORT } from "@/lib/time";
+import { TimeWheel } from "./WheelPicker";
+import { useClock, useHour12 } from "@/lib/clock";
 import { haptic } from "@/lib/haptics";
 
 /** In-app date and time pickers; no platform calendar, wheel or select menu. */
 export function TemporalInput({ type, value, onChange, className = "", ...props }: InputHTMLAttributes<HTMLInputElement>) {
+  const clock = useClock();
+  const hour12 = useHour12();
   const uid = useId();
   const input = useRef<HTMLInputElement>(null);
   const root = useRef<HTMLDivElement>(null);
@@ -94,11 +97,8 @@ export function TemporalInput({ type, value, onChange, className = "", ...props 
             onKeyDown={(event) => { const delta = { ArrowRight: 1, ArrowLeft: -1, ArrowDown: 7, ArrowUp: -7 }[event.key]; if (delta) { event.preventDefault(); const next = addDaysISO(day, delta); const target = popup.current?.querySelector(`[data-date="${next}"]`) as HTMLButtonElement | null; if (target) target.focus(); else { setMonth(next.slice(0, 7)); requestAnimationFrame(() => (popup.current?.querySelector(`[data-date="${next}"]`) as HTMLButtonElement | null)?.focus()); } } }}>{Number(day.slice(8))}</button>; })}
         </div>
       </> : <><header><strong>Choose a time</strong><button type="button" aria-label="Close time picker" data-picker-focus="true" onClick={() => close(true)}><Icon name="close" size={17} /></button></header>
-        <p className="picker-readout" aria-live="polite">{formatMinutes(timeMins)}</p>
-        <div className="picker-sliders">
-          <Slider label="Hour" min={0} max={23} step={1} value={Math.floor(timeMins / 60)} format={(h) => String(h).padStart(2, "0")} onChange={(h) => setTimeMins(h * 60 + (timeMins % 60))} />
-          <Slider label="Minute" min={0} max={55} step={5} value={timeMins % 60} format={(m) => String(m).padStart(2, "0")} onChange={(m) => setTimeMins(Math.floor(timeMins / 60) * 60 + m)} />
-        </div>
+        <p className="picker-readout" aria-live="polite">{clock(timeMins)}</p>
+        <TimeWheel minutes={timeMins} hour12={hour12} onChange={setTimeMins} />
         <div className="picker-time-options">{["08:00", "09:00", "10:00", "12:00", "14:00", "16:00", "18:00", "20:00"].map((time) => <button type="button" key={time} onClick={() => { haptic("select"); commit(time); }} disabled={!inRange(time)}>{time}</button>)}</div></>}
       <div className="picker-entry"><input type="text" aria-label={dateMode ? "Enter date YYYY-MM-DD" : "Enter time HH:MM"} placeholder={dateMode ? "YYYY-MM-DD" : "HH:MM"} value={draft} maxLength={dateMode ? 10 : 5} onChange={(event) => setDraft(event.target.value)} onKeyDown={(event) => { if (event.key === "Enter") { event.preventDefault(); if (valid && inRange(draft)) commit(draft); } }} /><button type="button" disabled={!valid || !inRange(draft)} onClick={() => commit(draft)}>Apply</button></div>
       <footer><button type="button" disabled={Boolean(props.required)} onClick={() => commit("")}>Clear</button>{dateMode && <button type="button" disabled={!inRange(localDateISO())} onClick={() => commit(localDateISO())}>Today</button>}<button type="button" onClick={() => { if (draft !== raw && valid && inRange(draft)) commit(draft); else close(true); }}>Done</button></footer>
