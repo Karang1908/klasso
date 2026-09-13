@@ -1,4 +1,5 @@
 "use client";
+import { useClock } from "@/lib/clock";
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -16,10 +17,11 @@ import { dayCancelledNote, dayStatus, findGaps, resolveDay } from "@/lib/schedul
 import { inTaskScope, sortTasks, tasksForDay } from "@/lib/tasks";
 import { blocksForDay } from "@/lib/planning";
 import { useApp } from "@/lib/store";
-import { addDaysISO, daysBetweenISO, formatDateISO, formatDuration, formatMinutes, WEEKDAY_SHORT, weekdayOfISO } from "@/lib/time";
+import { addDaysISO, daysBetweenISO, formatDateISO, formatDuration, WEEKDAY_SHORT, weekdayOfISO } from "@/lib/time";
 import { useNow } from "@/lib/useNow";
 
 export default function TodayPage() {
+  const clock = useClock();
   const { data, subjectsById, setAttendance, removeOverride } = useApp();
   const now = useNow();
   const href = useAppHref();
@@ -61,13 +63,13 @@ export default function TodayPage() {
         <div className="flex items-center justify-between gap-3"><h2 className="section-heading">Your schedule</h2><button className="section-link" onClick={() => setSheet(true)}>Edit day<Icon name="arrow" size={16} /></button></div>
         {classes.length === 0 ? <EmptyState icon={<Icon name="coffee" size={28} />} title={holiday ? "A day to yourself" : "Your day is open"} body="Add your weekly classes, or use Edit day for a one-off." action={<Link className="section-link" href={href("/timetable")}>Set up timetable<Icon name="arrow" size={16} /></Link>} /> : <ul>{classes.map((c) => {
           const gap = gaps.find((g) => g.endMin === c.startMin);
-          return <Fragment key={c.key}>{gap && <li className="flex items-center gap-2.5 rounded-xl bg-surface-2/60 px-3 py-3 text-xs text-dim"><Icon name="coffee" size={17} /><span><strong className="font-semibold text-ink">{formatDuration(gap.endMin - gap.startMin)} free</strong> · {formatMinutes(gap.startMin)}–{formatMinutes(gap.endMin)}</span></li>}
+          return <Fragment key={c.key}>{gap && <li className="flex items-center gap-2.5 rounded-xl bg-surface-2/60 px-3 py-3 text-xs text-dim"><Icon name="coffee" size={17} /><span><strong className="font-semibold text-ink">{formatDuration(gap.endMin - gap.startMin)} free</strong> · {clock(gap.startMin)}–{clock(gap.endMin)}</span></li>}
             <ClassRow occurrence={c} state={!isToday ? "upcoming" : now.minutes >= c.endMin ? "past" : now.minutes >= c.startMin ? "now" : "upcoming"}
               attendance={data.attendance.find((a) => a.on_date === dateISO && a.occurrence_key === c.occKey)?.status}
               onAttendance={(state) => { if (c.subjectId) void setAttendance({ subjectId: c.subjectId, slotId: c.slotId, occKey: c.occKey, date: dateISO, status: state }); }} />
           </Fragment>;
         })}</ul>}
-        {classes.length > 0 && <p className="mb-2 mt-1 border-t border-line py-3 text-xs text-dim">{classes.length} classes · College ends at <strong className="font-semibold text-ink">{formatMinutes(status.endsAtMin ?? 0)}</strong></p>}
+        {classes.length > 0 && <p className="mb-2 mt-1 border-t border-line py-3 text-xs text-dim">{classes.length} classes · College ends at <strong className="font-semibold text-ink">{clock(status.endsAtMin ?? 0)}</strong></p>}
       </Card>
 
       <div className="flex min-w-0 flex-col gap-5">
@@ -93,6 +95,7 @@ function countdownLabel(days: number): string {
 }
 
 function LiveClass({ status, nowMin, holiday, isToday }: { status: ReturnType<typeof dayStatus>; nowMin: number; holiday: string | null; isToday: boolean }) {
+  const clock = useClock();
   const root = useRef<HTMLDivElement>(null);
   const previous = useRef(0);
   const reduced = useReducedMotion();
@@ -114,13 +117,13 @@ function LiveClass({ status, nowMin, holiday, isToday }: { status: ReturnType<ty
     <div className="live-content"><div className="min-w-0 flex-1">
       <span className="live-badge"><span className="live-dot" />{current ? "IN CLASS NOW" : next ? isToday ? "UP NEXT" : "FIRST CLASS" : holiday ? "DAY OFF" : status.finished ? "DONE FOR THE DAY" : "NOTHING SCHEDULED"}</span>
       <h2>{chosen?.subject?.name ?? (holiday ? "A little breathing room." : status.finished ? "College is over." : "The day is yours.")}</h2>
-      <p className="mt-2 text-xs leading-relaxed sm:text-sm">{chosen ? [chosen.subject?.short_name, chosen.kind.charAt(0).toUpperCase() + chosen.kind.slice(1), chosen.room || chosen.subject?.room].filter(Boolean).join(" · ") : status.finished ? `Finished at ${formatMinutes(status.endsAtMin ?? 0)}. Time to make it your own.` : "Your schedule will appear here when you add a class."}</p>
-      {chosen && <p className="mt-1 text-xs">{formatMinutes(chosen.startMin)} – {formatMinutes(chosen.endMin)}</p>}
+      <p className="mt-2 text-xs leading-relaxed sm:text-sm">{chosen ? [chosen.subject?.short_name, chosen.kind.charAt(0).toUpperCase() + chosen.kind.slice(1), chosen.room || chosen.subject?.room].filter(Boolean).join(" · ") : status.finished ? `Finished at ${clock(status.endsAtMin ?? 0)}. Time to make it your own.` : "Your schedule will appear here when you add a class."}</p>
+      {chosen && <p className="mt-1 text-xs">{clock(chosen.startMin)} – {clock(chosen.endMin)}</p>}
     </div><div className="relative h-[105px] w-[105px] shrink-0 sm:h-32 sm:w-32" aria-hidden="true">
       <svg viewBox="0 0 100 100" fill="none"><circle cx="50" cy="50" r="44" stroke="currentColor" opacity=".18" /><circle cx="50" cy="50" r="34" stroke="currentColor" opacity=".3" /><circle cx="50" cy="50" r="23" stroke="currentColor" opacity=".15" /><path d="M50 2v8M50 90v8" stroke="currentColor" opacity=".5" /><g className="dial-marker" transform={`rotate(${progress * 360} 50 50)`}><circle cx="50" cy="6" r="5" fill="var(--gold)" /><circle cx="50" cy="6" r="2.5" fill="var(--hero-ink)" /></g></svg>
       <div className="absolute inset-0 flex flex-col items-center justify-center"><span className="text-lg font-bold sm:text-xl">{current ? formatDuration(status.currentRemaining) : next && isToday ? formatDuration(status.untilNext) : <Icon name={status.finished ? "check" : "sun"} size={27} />}</span>{(current || (next && isToday)) && <span className="mt-1 text-[10px] text-[var(--hero-dim)]">{current ? "left" : "to go"}</span>}</div>
     </div></div>
     <div className="live-progress" role="progressbar" aria-label="Current class progress" aria-valuemin={0} aria-valuemax={100} aria-valuenow={Math.round(progress * 100)}><div className="live-fill" style={{ transform: `scaleX(${progress})` }} /></div>
-    <div className="mt-3 flex flex-wrap justify-between gap-2 text-[11px] text-[var(--hero-dim)]"><span>{current ? "Class in progress" : next ? `Starts ${formatMinutes(next.startMin)}` : "A moment for yourself"}</span><span>{current ? `${nowMin - current.startMin} / ${current.endMin - current.startMin} min` : status.endsAtMin !== null ? `Day ends ${formatMinutes(status.endsAtMin)}` : "Plan at your own pace"}</span></div>
+    <div className="mt-3 flex flex-wrap justify-between gap-2 text-[11px] text-[var(--hero-dim)]"><span>{current ? "Class in progress" : next ? `Starts ${clock(next.startMin)}` : "A moment for yourself"}</span><span>{current ? `${nowMin - current.startMin} / ${current.endMin - current.startMin} min` : status.endsAtMin !== null ? `Day ends ${clock(status.endsAtMin)}` : "Plan at your own pace"}</span></div>
   </section>;
 }
