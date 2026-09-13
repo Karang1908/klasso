@@ -8,7 +8,7 @@ import { setHapticsEnabled, useHapticsEnabled, useHapticsSupported } from "@/lib
 import { PreviewContext, useAppHref } from "@/components/AppShell";
 import { Icon } from "@/components/icons";
 
-import { Banner, Button, Card, Field, Input, Segmented, Spinner, Slider, Toggle, cx } from "@/components/ui";
+import { Banner, Button, Card, Field, Input, Segmented, SettingsGroup, Spinner, Slider, Toggle, cx } from "@/components/ui";
 import {
   currentSubscription, detectEnvironment, disablePush, enablePush, sendTestPush,
   type PushState,
@@ -85,20 +85,36 @@ export default function SettingsPage() {
         <div><h1 className="page-heading">Make yourself at home.</h1><p className="page-subtitle">Your appearance, reminders and account.</p></div>
       </header>
 
+      <div className="settings-clock">
+        <Field
+          label="Clock"
+          hint="Used everywhere, including the text of your reminders."
+        >
+          <Segmented
+            label="Clock"
+            value={data.profile?.time_format ?? "12"}
+            onChange={(v) => void updateProfile({ time_format: v })}
+            options={[
+              { value: "12", label: `12-hour · ${clock(13 * 60 + 5)}` },
+              { value: "24", label: "24-hour · 13:05" },
+            ]}
+          />
+        </Field>
+      </div>
+
       <div className="settings-grid">
-      <section className="flex flex-col gap-3"><h2 className="section-heading">Appearance</h2><Card className="p-5"><p className="mb-4 text-sm text-dim">A lighter start. A quieter evening. Choose what feels right.</p><div className="grid grid-cols-3 gap-2" role="group" aria-label="Appearance">{([{ value: "light", label: "Light", icon: "sun" }, { value: "dark", label: "Dark", icon: "moon" }, { value: "system", label: "System", icon: "monitor" }] as const).map((option) => <button key={option.value} aria-pressed={theme === option.value} onClick={() => setTheme(option.value)} className={`flex min-h-20 flex-col items-center justify-center gap-2 rounded-xl border text-xs font-semibold ${theme === option.value ? "border-brand bg-brand-soft text-brand" : "border-line text-dim"}`}><Icon name={option.icon} />{option.label}</button>)}</div></Card></section>
+      <SettingsGroup title="Appearance"><Card className="p-5"><p className="mb-4 text-sm text-dim">A lighter start. A quieter evening. Choose what feels right.</p><div className="grid grid-cols-3 gap-2" role="group" aria-label="Appearance">{([{ value: "light", label: "Light", icon: "sun" }, { value: "dark", label: "Dark", icon: "moon" }, { value: "system", label: "System", icon: "monitor" }] as const).map((option) => <button key={option.value} aria-pressed={theme === option.value} onClick={() => setTheme(option.value)} className={`flex min-h-20 flex-col items-center justify-center gap-2 rounded-xl border text-xs font-semibold ${theme === option.value ? "border-brand bg-brand-soft text-brand" : "border-line text-dim"}`}><Icon name={option.icon} />{option.label}</button>)}</div></Card></SettingsGroup>
 
-      {canBuzz && <section className="flex flex-col gap-3"><h2 className="section-heading">Feedback</h2><Card className="px-4 py-1"><Toggle label="Haptics" description="A short buzz when you check something off or flip a switch." checked={haptics} onChange={setHapticsEnabled} /></Card></section>}
+      {canBuzz && <SettingsGroup title="Feedback"><Card className="px-4 py-1"><Toggle label="Haptics" description="A short buzz when you check something off or flip a switch." checked={haptics} onChange={setHapticsEnabled} /></Card></SettingsGroup>}
 
-      <section className="flex flex-col gap-3"><h2 className="section-heading">Your data, in your hands</h2><Card className="flex flex-col gap-4 p-5"><p className="text-sm leading-relaxed text-dim">Download your subjects, schedule, events, both task lists and attendance as a JSON backup.</p><Button onClick={() => {
+      <SettingsGroup title="Your data, in your hands"><Card className="flex flex-col gap-4 p-5"><p className="text-sm leading-relaxed text-dim">Download your subjects, schedule, events, both task lists and attendance as a JSON backup.</p><Button onClick={() => {
         const blob = new Blob([JSON.stringify({ app: "Klasso", version: 2, exported_at: new Date().toISOString(), data }, null, 2)], { type: "application/json" });
         const url = URL.createObjectURL(blob); const link = document.createElement("a"); link.href = url; link.download = `klasso-backup-${new Date().toISOString().slice(0, 10)}.json`; link.click(); setTimeout(() => URL.revokeObjectURL(url), 1000);
         setMessage({ tone: "success", text: preview ? "Sample backup downloaded." : "Backup downloaded. Keep a copy somewhere safe." });
-      }}><Icon name="download" size={17} />Download backup</Button><p className="text-xs text-dim">Includes your personal planner data. Passwords and login tokens are excluded.</p></Card></section>
+      }}><Icon name="download" size={17} />Download backup</Button><p className="text-xs text-dim">Includes your personal planner data. Passwords and login tokens are excluded.</p></Card></SettingsGroup>
 
       {/* ----------------------------------------------- notifications */}
-      <section className="flex flex-col gap-2">
-        <h2 className="section-heading">Notifications</h2>
+      <SettingsGroup title="Notifications">
 
         {push?.needsInstall && (
           <Banner tone="warn">
@@ -148,15 +164,14 @@ export default function SettingsPage() {
             {busy && <Spinner className="h-4 w-4" />} Send a test notification
           </Button>
         )}
-      </section>
+      </SettingsGroup>
 
       {!prefs ? (
         <Card className="p-4 text-sm text-dim">Loading your preferences…</Card>
       ) : (
         <>
           {/* ------------------------------------------- class reminders */}
-          <section className="flex flex-col gap-2">
-            <h2 className="section-heading">Before each class</h2>
+          <SettingsGroup title="Before each class">
             <Card className="px-4 py-1">
               <Toggle
                 checked={prefs.class_enabled}
@@ -188,11 +203,10 @@ export default function SettingsPage() {
                 )}
               </Card>
             )}
-          </section>
+          </SettingsGroup>
 
           {/* --------------------------------------------- task reminders */}
-          <section className="flex flex-col gap-2">
-            <h2 className="section-heading">Task reminders</h2>
+          <SettingsGroup title="Task reminders">
             <Card className="px-4 py-1">
               <Toggle
                 checked={prefs.task_enabled}
@@ -226,11 +240,10 @@ export default function SettingsPage() {
                 </Field>
               </Card>
             )}
-          </section>
+          </SettingsGroup>
 
           {/* ------------------------------------------------------ exams */}
-          <section className="flex flex-col gap-2">
-            <h2 className="section-heading">Exams & events</h2>
+          <SettingsGroup title="Exams & events">
             <Card className="px-4 py-1">
               <Toggle
                 checked={prefs.exam_enabled}
@@ -269,11 +282,10 @@ export default function SettingsPage() {
                 </div>
               </Card>
             )}
-          </section>
+          </SettingsGroup>
 
           {/* -------------------------------------------- morning summary */}
-          <section className="flex flex-col gap-2">
-            <h2 className="section-heading">Daily summary</h2>
+          <SettingsGroup title="Daily summary">
             <Card className="px-4 py-1">
               <Toggle
                 checked={prefs.day_summary_enabled}
@@ -293,7 +305,7 @@ export default function SettingsPage() {
                 </Field>
               </Card>
             )}
-          </section>
+          </SettingsGroup>
 
           {/* ------------------------------ study, activities and meetings */}
           {([
@@ -307,8 +319,7 @@ export default function SettingsPage() {
             const enabled = prefs[`${item.key}_enabled`] ?? true;
             const lead = prefs[`${item.key}_lead_minutes`] ?? item.fallback;
             return (
-              <section key={item.key} className="flex flex-col gap-2">
-                <h2 className="section-heading">{item.title}</h2>
+              <SettingsGroup key={item.key} title={item.title}>
                 <Card className="px-4 py-1">
                   <Toggle
                     checked={enabled}
@@ -331,13 +342,12 @@ export default function SettingsPage() {
                     />
                   </Card>
                 )}
-              </section>
+              </SettingsGroup>
             );
           })}
 
           {/* ------------------------------------------------ quiet hours */}
-          <section className="flex flex-col gap-2">
-            <h2 className="section-heading">Quiet hours</h2>
+          <SettingsGroup title="Quiet hours">
             <Card className="px-4 py-1">
               <Toggle
                 checked={prefs.quiet_enabled}
@@ -358,29 +368,14 @@ export default function SettingsPage() {
                 </Field>
               </Card>
             )}
-          </section>
+          </SettingsGroup>
         </>
       )}
 
       {/* -------------------------------------------------------- account */}
-      <section className="flex flex-col gap-2">
-        <h2 className="section-heading">Account</h2>
+      <SettingsGroup title="Account">
         <Card className="flex flex-col gap-4 p-4">
           <Field label="Display name"><Input key={data.profile?.display_name} defaultValue={data.profile?.display_name ?? ""} placeholder="Your name" maxLength={60} onBlur={(event) => { const name = event.target.value.trim(); if (name && name !== data.profile?.display_name) void updateProfile({ display_name: name }); }} /></Field>
-          <Field
-            label="Clock"
-            hint="Used everywhere, including the text of your reminders."
-          >
-            <Segmented
-              label="Clock"
-              value={data.profile?.time_format ?? "12"}
-              onChange={(v) => void updateProfile({ time_format: v })}
-              options={[
-                { value: "12", label: `12-hour · ${clock(13 * 60 + 5)}` },
-                { value: "24", label: "24-hour · 13:05" },
-              ]}
-            />
-          </Field>
           <Field
             label="Time zone"
             hint="Picked up from your phone. Reminders follow it automatically."
@@ -394,7 +389,7 @@ export default function SettingsPage() {
           </p>
           <Button variant="danger" onClick={() => void signOut()}>Sign out</Button>
         </Card>
-      </section>
+      </SettingsGroup>
       </div>
 
       <p className="pb-2 text-center text-xs text-faint">Klasso</p>
