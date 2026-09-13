@@ -216,6 +216,18 @@ h1 { line-height: 1.22; }
 .sheet-close { display: grid; place-items: center; flex: none; width: 44px; height: 44px; border-radius: 50%; color: var(--text-dim); background: var(--surface-2); }
 .sheet-close:hover { color: var(--text); background: var(--border); }
 .sheet-body { flex: 1 1 auto; min-height: 0; overflow-y: auto; overscroll-behavior: contain; padding: 24px; scrollbar-gutter: stable; scroll-padding-block: 20px; }
+/* The secondary way into the app. An outlined pill so it reads as a real
+   control next to the filled primary, without competing with it. */
+.auth-switch {
+  display: inline-flex; align-items: center; justify-content: center;
+  min-height: 44px; padding-inline: 22px; border-radius: 999px;
+  border: 1px solid var(--border); background: var(--surface);
+  color: var(--brand); font-size: .875rem; font-weight: 650; letter-spacing: -.01em;
+  transition: background-color 160ms, border-color 160ms, color 160ms;
+}
+.auth-switch:hover { background: var(--brand-soft); border-color: var(--brand); }
+.auth-switch:active { transform: scale(.985); }
+
 /* Sits above the docked nav on a phone, bottom-right on a desktop. Not a
    modal: installing is an offer, and the app stays usable behind it. */
 .install-card {
