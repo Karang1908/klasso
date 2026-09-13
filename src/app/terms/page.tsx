@@ -33,7 +33,7 @@ export default function Terms() {
       <p>
         Notifications depend on your device, your browser and third-party push services.
         They are usually reliable, but Klasso cannot guarantee any particular reminder
-        arrives or arrives on time. Do not rely on it alone for something that matters —
+        arrives or arrives on time. Do not rely on it alone for something that matters,
         an exam, for instance.
       </p>
 
