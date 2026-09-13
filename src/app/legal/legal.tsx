@@ -1,9 +1,9 @@
 import Link from "next/link";
 import type { ReactNode } from "react";
 
-/** One address, so it is changed in a single place if you ever move to a
- *  dedicated support inbox rather than a personal one. */
-export const CONTACT = "karan.garg1908@gmail.com";
+/** The project's own address, not a personal one — these pages are public and
+ *  get scraped. Change it here and both documents follow. */
+export const CONTACT = "getklasso@gmail.com";
 export const UPDATED = "14 September 2026";
 
 export function LegalPage({ title, intro, children }: { title: string; intro: string; children: ReactNode }) {
