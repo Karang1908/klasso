@@ -10,6 +10,22 @@ export const metadata: Metadata = {
     "Your timetable, exam calendar, attendance and to-do list — with a reminder before every class.",
   applicationName: "Klasso",
   manifest: "/manifest.webmanifest",
+  // Without metadataBase, Next emits relative OG URLs and most scrapers ignore
+  // them, which is why shared links fell back to the home-screen icon.
+  metadataBase: new URL("https://www.klasso.me"),
+  openGraph: {
+    type: "website",
+    siteName: "Klasso",
+    title: "Klasso",
+    description:
+      "Your timetable, exam calendar, attendance and to-do list — with a reminder before every class.",
+    url: "/",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Klasso",
+    description: "Your timetable, exams, attendance and to-dos — with a reminder before every class.",
+  },
   appleWebApp: {
     capable: true,
     title: "Klasso",
