@@ -107,7 +107,7 @@ export default function TimetablePage() {
               <div className="mb-2 flex flex-wrap items-baseline justify-between gap-x-3 gap-y-1">
                 <h2 className="font-bold">{WEEKDAY_NAMES[day]}</h2>
                 <span className="text-xs font-semibold text-faint">
-                  {clock(parseTime(list[0].start_time))} –{" "}
+                  {clock(parseTime(list[0].start_time))} -{" "}
                   {clock(Math.max(...list.map((s) => parseTime(s.end_time))))}
                 </span>
               </div>
@@ -129,7 +129,7 @@ export default function TimetablePage() {
                             {subject?.name ?? "Unassigned"}
                           </span>
                           <span className="block truncate text-sm text-dim">
-                            {clock(parseTime(slot.start_time))} –{" "}
+                            {clock(parseTime(slot.start_time))} -{" "}
                             {clock(parseTime(slot.end_time))}
                             {slot.room ? ` · ${slot.room}` : ""}
                             {slot.kind !== "lecture" ? ` · ${slot.kind}` : ""}
@@ -223,7 +223,7 @@ function WeekGrid({
                   <div className="week-now" style={{ top: y(now.minutes) }} aria-hidden />
                 )}
 
-                {dayClasses.length === 0 && <span className="week-empty">—</span>}
+                {dayClasses.length === 0 && <span className="week-empty" aria-label="No classes" />}
 
                 {packLanes(dayClasses).map(({ item, lane, lanes }) => {
                   const s = item.slot;
@@ -236,7 +236,7 @@ function WeekGrid({
                       key={s.id}
                       onClick={() => onPick(s)}
                       className="week-block"
-                      title={`${subject?.name ?? "Class"} · ${clock(item.startMin)}–${clock(item.endMin)}`}
+                      title={`${subject?.name ?? "Class"} · ${clock(item.startMin)}-${clock(item.endMin)}`}
                       style={{
                         top: top + 2, height,
                         left: `calc(${lane * width}% + 3px)`,
@@ -252,7 +252,7 @@ function WeekGrid({
                       </span>
                       {height > 34 && (
                         <span className="week-block-time">
-                          {clock(item.startMin)}–{clock(item.endMin)}
+                          {clock(item.startMin)}-{clock(item.endMin)}
                         </span>
                       )}
                       {height > 58 && (s.room || subject?.room) && (
