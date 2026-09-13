@@ -212,7 +212,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
       setStale(recovered);
       setError(
         recovered
-          ? "Offline — showing your last synced data."
+          ? "Offline. Showing your last synced data."
           : err instanceof Error ? err.message : "Could not load your data.",
       );
     } finally {
