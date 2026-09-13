@@ -103,18 +103,12 @@ export default function SettingsPage() {
       </div>
 
       <div className="settings-grid">
-      <SettingsGroup title="Appearance"><Card className="p-5"><p className="mb-4 text-sm text-dim">A lighter start. A quieter evening. Choose what feels right.</p><div className="grid grid-cols-3 gap-2" role="group" aria-label="Appearance">{([{ value: "light", label: "Light", icon: "sun" }, { value: "dark", label: "Dark", icon: "moon" }, { value: "system", label: "System", icon: "monitor" }] as const).map((option) => <button key={option.value} aria-pressed={theme === option.value} onClick={() => setTheme(option.value)} className={`flex min-h-20 flex-col items-center justify-center gap-2 rounded-xl border text-xs font-semibold ${theme === option.value ? "border-brand bg-brand-soft text-brand" : "border-line text-dim"}`}><Icon name={option.icon} />{option.label}</button>)}</div></Card></SettingsGroup>
+      <SettingsGroup title="Appearance" hint="Theme and feedback"><Card className="p-5"><p className="mb-4 text-sm text-dim">A lighter start. A quieter evening. Choose what feels right.</p><div className="grid grid-cols-3 gap-2" role="group" aria-label="Appearance">{([{ value: "light", label: "Light", icon: "sun" }, { value: "dark", label: "Dark", icon: "moon" }, { value: "system", label: "System", icon: "monitor" }] as const).map((option) => <button key={option.value} aria-pressed={theme === option.value} onClick={() => setTheme(option.value)} className={`flex min-h-20 flex-col items-center justify-center gap-2 rounded-xl border text-xs font-semibold ${theme === option.value ? "border-brand bg-brand-soft text-brand" : "border-line text-dim"}`}><Icon name={option.icon} />{option.label}</button>)}</div></Card>{canBuzz && <><Card className="px-4 py-1"><Toggle label="Haptics" description="A short buzz when you check something off or flip a switch." checked={haptics} onChange={setHapticsEnabled} /></Card></>}</SettingsGroup>
 
-      {canBuzz && <SettingsGroup title="Feedback"><Card className="px-4 py-1"><Toggle label="Haptics" description="A short buzz when you check something off or flip a switch." checked={haptics} onChange={setHapticsEnabled} /></Card></SettingsGroup>}
 
-      <SettingsGroup title="Your data, in your hands"><Card className="flex flex-col gap-4 p-5"><p className="text-sm leading-relaxed text-dim">Download your subjects, schedule, events, both task lists and attendance as a JSON backup.</p><Button onClick={() => {
-        const blob = new Blob([JSON.stringify({ app: "Klasso", version: 2, exported_at: new Date().toISOString(), data }, null, 2)], { type: "application/json" });
-        const url = URL.createObjectURL(blob); const link = document.createElement("a"); link.href = url; link.download = `klasso-backup-${new Date().toISOString().slice(0, 10)}.json`; link.click(); setTimeout(() => URL.revokeObjectURL(url), 1000);
-        setMessage({ tone: "success", text: preview ? "Sample backup downloaded." : "Backup downloaded. Keep a copy somewhere safe." });
-      }}><Icon name="download" size={17} />Download backup</Button><p className="text-xs text-dim">Includes your personal planner data. Passwords and login tokens are excluded.</p></Card></SettingsGroup>
 
       {/* ----------------------------------------------- notifications */}
-      <SettingsGroup title="Notifications">
+      <SettingsGroup title="Notifications" hint="Reminders, timing and quiet hours">
 
         {push?.needsInstall && (
           <Banner tone="warn">
@@ -164,14 +158,14 @@ export default function SettingsPage() {
             {busy && <Spinner className="h-4 w-4" />} Send a test notification
           </Button>
         )}
-      </SettingsGroup>
+      
 
       {!prefs ? (
         <Card className="p-4 text-sm text-dim">Loading your preferences…</Card>
       ) : (
         <>
           {/* ------------------------------------------- class reminders */}
-          <SettingsGroup title="Before each class">
+          <div className="settings-sub"><h3>Before each class</h3>
             <Card className="px-4 py-1">
               <Toggle
                 checked={prefs.class_enabled}
@@ -203,10 +197,10 @@ export default function SettingsPage() {
                 )}
               </Card>
             )}
-          </SettingsGroup>
+          </div>
 
           {/* --------------------------------------------- task reminders */}
-          <SettingsGroup title="Task reminders">
+          <div className="settings-sub"><h3>Task reminders</h3>
             <Card className="px-4 py-1">
               <Toggle
                 checked={prefs.task_enabled}
@@ -240,10 +234,10 @@ export default function SettingsPage() {
                 </Field>
               </Card>
             )}
-          </SettingsGroup>
+          </div>
 
           {/* ------------------------------------------------------ exams */}
-          <SettingsGroup title="Exams & events">
+          <div className="settings-sub"><h3>Exams & events</h3>
             <Card className="px-4 py-1">
               <Toggle
                 checked={prefs.exam_enabled}
@@ -282,10 +276,10 @@ export default function SettingsPage() {
                 </div>
               </Card>
             )}
-          </SettingsGroup>
+          </div>
 
           {/* -------------------------------------------- morning summary */}
-          <SettingsGroup title="Daily summary">
+          <div className="settings-sub"><h3>Daily summary</h3>
             <Card className="px-4 py-1">
               <Toggle
                 checked={prefs.day_summary_enabled}
@@ -305,7 +299,7 @@ export default function SettingsPage() {
                 </Field>
               </Card>
             )}
-          </SettingsGroup>
+          </div>
 
           {/* ------------------------------ study, activities and meetings */}
           {([
@@ -319,7 +313,7 @@ export default function SettingsPage() {
             const enabled = prefs[`${item.key}_enabled`] ?? true;
             const lead = prefs[`${item.key}_lead_minutes`] ?? item.fallback;
             return (
-              <SettingsGroup key={item.key} title={item.title}>
+              <div key={item.key} className="settings-sub"><h3>{item.title}</h3>
                 <Card className="px-4 py-1">
                   <Toggle
                     checked={enabled}
@@ -342,12 +336,12 @@ export default function SettingsPage() {
                     />
                   </Card>
                 )}
-              </SettingsGroup>
+              </div>
             );
           })}
 
           {/* ------------------------------------------------ quiet hours */}
-          <SettingsGroup title="Quiet hours">
+          <div className="settings-sub"><h3>Quiet hours</h3>
             <Card className="px-4 py-1">
               <Toggle
                 checked={prefs.quiet_enabled}
@@ -368,12 +362,13 @@ export default function SettingsPage() {
                 </Field>
               </Card>
             )}
-          </SettingsGroup>
+          </div>
         </>
       )}
+      </SettingsGroup>
 
       {/* -------------------------------------------------------- account */}
-      <SettingsGroup title="Account">
+      <SettingsGroup title="Account & data" hint="Your details, and a copy of everything">
         <Card className="flex flex-col gap-4 p-4">
           <Field label="Display name"><Input key={data.profile?.display_name} defaultValue={data.profile?.display_name ?? ""} placeholder="Your name" maxLength={60} onBlur={(event) => { const name = event.target.value.trim(); if (name && name !== data.profile?.display_name) void updateProfile({ display_name: name }); }} /></Field>
           <Field
@@ -389,6 +384,13 @@ export default function SettingsPage() {
           </p>
           <Button variant="danger" onClick={() => void signOut()}>Sign out</Button>
         </Card>
+        <div className="settings-sub"><h3>A copy of everything</h3>
+<Card className="flex flex-col gap-4 p-5"><p className="text-sm leading-relaxed text-dim">Download your subjects, schedule, events, both task lists and attendance as a JSON backup.</p><Button onClick={() => {
+        const blob = new Blob([JSON.stringify({ app: "Klasso", version: 2, exported_at: new Date().toISOString(), data }, null, 2)], { type: "application/json" });
+        const url = URL.createObjectURL(blob); const link = document.createElement("a"); link.href = url; link.download = `klasso-backup-${new Date().toISOString().slice(0, 10)}.json`; link.click(); setTimeout(() => URL.revokeObjectURL(url), 1000);
+        setMessage({ tone: "success", text: preview ? "Sample backup downloaded." : "Backup downloaded. Keep a copy somewhere safe." });
+      }}><Icon name="download" size={17} />Download backup</Button><p className="text-xs text-dim">Includes your personal planner data. Passwords and login tokens are excluded.</p></Card>
+        </div>
       </SettingsGroup>
       </div>
 
