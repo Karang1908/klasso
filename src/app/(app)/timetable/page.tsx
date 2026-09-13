@@ -1,4 +1,5 @@
 "use client";
+import { useClock } from "@/lib/clock";
 
 import { useMemo, useState } from "react";
 import Link from "next/link";
@@ -13,7 +14,7 @@ import { packLanes } from "@/lib/schedule";
 import { useApp } from "@/lib/store";
 import { useNow } from "@/lib/useNow";
 import {
-  formatMinutes, parseTime, toTimeString, WEEK_ORDER, WEEKDAY_NAMES, WEEKDAY_SHORT,
+  parseTime, toTimeString, WEEK_ORDER, WEEKDAY_NAMES, WEEKDAY_SHORT,
 } from "@/lib/time";
 import type { SlotKind, Subject, TimetableSlot } from "@/lib/types";
 import { Icon } from "@/components/icons";
@@ -31,6 +32,7 @@ const KINDS: { value: SlotKind; label: string }[] = [
 ];
 
 export default function TimetablePage() {
+  const clock = useClock();
   const { data, subjectsById } = useApp();
   const href = useAppHref();
   const [planDraft, setPlanDraft] = useState<PlanDraft | null>(null);
@@ -105,8 +107,8 @@ export default function TimetablePage() {
               <div className="mb-2 flex flex-wrap items-baseline justify-between gap-x-3 gap-y-1">
                 <h2 className="font-bold">{WEEKDAY_NAMES[day]}</h2>
                 <span className="text-xs font-semibold text-faint">
-                  {formatMinutes(parseTime(list[0].start_time))} –{" "}
-                  {formatMinutes(Math.max(...list.map((s) => parseTime(s.end_time))))}
+                  {clock(parseTime(list[0].start_time))} –{" "}
+                  {clock(Math.max(...list.map((s) => parseTime(s.end_time))))}
                 </span>
               </div>
               <ul className="flex flex-col gap-1.5">
@@ -127,8 +129,8 @@ export default function TimetablePage() {
                             {subject?.name ?? "Unassigned"}
                           </span>
                           <span className="block truncate text-sm text-dim">
-                            {formatMinutes(parseTime(slot.start_time))} –{" "}
-                            {formatMinutes(parseTime(slot.end_time))}
+                            {clock(parseTime(slot.start_time))} –{" "}
+                            {clock(parseTime(slot.end_time))}
                             {slot.room ? ` · ${slot.room}` : ""}
                             {slot.kind !== "lecture" ? ` · ${slot.kind}` : ""}
                           </span>
@@ -165,6 +167,7 @@ export default function TimetablePage() {
 function WeekGrid({
   slots, subjects, onPick,
 }: { slots: TimetableSlot[]; subjects: Subject[]; onPick: (s: TimetableSlot) => void }) {
+  const clock = useClock();
   const byId = new Map(subjects.map((s) => [s.id, s]));
   const now = useNow(60_000);
 
@@ -196,7 +199,7 @@ function WeekGrid({
           <div className="week-axis" style={{ height: hours * ROW }}>
             {Array.from({ length: hours + 1 }, (_, i) => (
               <span key={i} className="week-hour" style={{ top: i * ROW }}>
-                {formatMinutes(from + i * 60)}
+                {clock(from + i * 60)}
               </span>
             ))}
           </div>
@@ -233,7 +236,7 @@ function WeekGrid({
                       key={s.id}
                       onClick={() => onPick(s)}
                       className="week-block"
-                      title={`${subject?.name ?? "Class"} · ${formatMinutes(item.startMin)}–${formatMinutes(item.endMin)}`}
+                      title={`${subject?.name ?? "Class"} · ${clock(item.startMin)}–${clock(item.endMin)}`}
                       style={{
                         top: top + 2, height,
                         left: `calc(${lane * width}% + 3px)`,
@@ -249,7 +252,7 @@ function WeekGrid({
                       </span>
                       {height > 34 && (
                         <span className="week-block-time">
-                          {formatMinutes(item.startMin)}–{formatMinutes(item.endMin)}
+                          {clock(item.startMin)}–{clock(item.endMin)}
                         </span>
                       )}
                       {height > 58 && (s.room || subject?.room) && (
