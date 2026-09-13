@@ -140,11 +140,11 @@ try {
   await page.reload({ waitUntil: "networkidle0" }); await pause();
   check("appearance survives reload", await page.evaluate(() => document.documentElement.dataset.theme === "dark"));
   await openGroup("Appearance"); await clickText("Light");
-  await openGroup("Before each class");
+  await openGroup("Notifications");
   const before = await page.$eval('[aria-label="Class reminders"]', (el) => el.getAttribute("aria-checked"));
   await click('[aria-label="Class reminders"]');
   check("reminder preference is editable", await page.$eval('[aria-label="Class reminders"]', (el, before) => el.getAttribute("aria-checked") !== before, before));
-  await openGroup("Your data, in your hands"); await clickText("Download backup"); await pause(500);
+  await openGroup("Account & data"); await clickText("Download backup"); await pause(500);
   const backup = readdirSync(OUT).find((name) => name.endsWith(".json"));
   const exported = backup ? JSON.parse(readFileSync(resolve(OUT, backup), "utf8")) : null;
   check("backup includes both task lists and no session", exported?.version === 2 && exported.data.tasks.some((task) => task.list_kind === "daily") && exported.data.tasks.some((task) => (task.list_kind ?? "master") === "master") && !exported.session && !JSON.stringify(exported).includes("access_token"));
