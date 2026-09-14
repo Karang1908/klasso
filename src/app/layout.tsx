@@ -66,6 +66,9 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
           dangerouslySetInnerHTML={{ __html: JSON.stringify({
             "@context": "https://schema.org",
             "@type": "WebApplication",
+            // A stable @id so the Organization below can point at this node
+            // instead of repeating it.
+            "@id": "https://www.klasso.me/#app",
             name: "Klasso",
             url: "https://www.klasso.me",
             applicationCategory: "EducationalApplication",
