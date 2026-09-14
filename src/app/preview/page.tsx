@@ -1,11 +1,14 @@
 "use client";
-/* Visual harness — renders every screen against mock data so layout and dark
-   mode can be checked without a Supabase project. Used by scripts/shoot.mjs and
-   scripts/verify-ui.mjs. Returns 404 in production; it exists for development. */
+/* Visual harness and public demo — renders every screen against mock data.
+   Used by scripts/shoot.mjs and scripts/verify-ui.mjs, and by the landing
+   page's "Try the live demo", which is why it must NOT 404 in production.
+   Safe to expose: it never touches Supabase, every row is a fixture, and the
+   shell labels it "Sample data". */
 
-import { notFound, useRouter, useSearchParams } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { Suspense, useEffect, useState } from "react";
 import { AppShell, PreviewContext } from "@/components/AppShell";
+import { Walkthrough } from "@/components/Walkthrough";
 import { inTaskScope } from "@/lib/tasks";
 
 import AttendancePage from "../(app)/attendance/page";
@@ -16,7 +19,6 @@ import PlanningPage from "../(app)/planning/page";
 import { LaunchScreen } from "@/components/LaunchScreen";
 import TimetablePage from "../(app)/timetable/page";
 import TodayPage from "../(app)/today/page";
-import WelcomePage from "../welcome/page";
 import { AppContext, type AppContextValue } from "@/lib/store";
 import { localDateISO, toTimeString, addDaysISO } from "@/lib/time";
 import type { Subject, TimetableSlot } from "@/lib/types";
@@ -144,7 +146,10 @@ const value = {
       ...att("c", "s1", "slot1", "absent", 4, 8),
       ...att("d", "s2", "slot2", "present", 7, 1),
     ],
-    profile: { id: "u", display_name: "Alex", timezone: "Asia/Dubai", created_at: "" },
+    // Already onboarded by default: the walkthrough's scrim swallows every
+    // click, which silently breaks the scripts that drive this harness.
+    // `?tour=1` clears it when the tour itself is what needs reviewing.
+    profile: { id: "u", display_name: "Alex", timezone: "Asia/Dubai", created_at: "", onboarded_at: "2026-01-01T00:00:00.000Z" },
     prefs: {
       user_id: "u", class_enabled: true, class_lead_minutes: [10],
       day_summary_enabled: true, day_summary_time: "07:30:00",
@@ -171,11 +176,12 @@ const SCREENS: Record<string, () => React.ReactElement> = {
   today: TodayPage, timetable: TimetablePage, calendar: CalendarPage,
   tasks: TasksPage, attendance: AttendancePage, settings: SettingsPage,
   planning: PlanningPage,
-  welcome: WelcomePage,
   loading: () => <LaunchScreen inline />,
 };
 
 const PREVIEW_KEY = "klasso-preview-v3";
+/** ?tour=1 arms the walkthrough for this tab, ?tour=0 disarms it. */
+const TOUR_KEY = "klasso-preview-tour";
 
 function Inner() {
   const params = useSearchParams();
@@ -184,6 +190,9 @@ function Inner() {
   const Screen = SCREENS[screen] ?? TodayPage;
   const [data, setData] = useState(value.data);
   const [loaded, setLoaded] = useState(false);
+  // The tour navigates between screens and rebuilds the query string as it
+  // goes, so ?tour=1 cannot survive as a URL flag. Hold it for the tab.
+  const [tour, setTour] = useState(false);
   useEffect(() => {
     Promise.resolve().then(() => {
       try {
@@ -192,6 +201,12 @@ function Inner() {
         // an older build has no key for a field added since, and a missing array
         // would blow up the first consumer that filters it.
         if (saved) { const parsed = JSON.parse(saved); if (parsed.date === today) setData({ ...value.data, ...parsed.data }); }
+      } catch {}
+      try {
+        const flag = new URLSearchParams(window.location.search).get("tour");
+        if (flag === "1") sessionStorage.setItem(TOUR_KEY, "1");
+        if (flag === "0") sessionStorage.removeItem(TOUR_KEY);
+        setTour(sessionStorage.getItem(TOUR_KEY) === "1");
       } catch {}
       setLoaded(true);
     });
@@ -208,8 +223,11 @@ function Inner() {
   const insert = (key: ListKey, row: object) => setData((d) => ({ ...d, [key]: [...d[key], { id: crypto.randomUUID(), user_id: "u", created_at: new Date().toISOString(), ...row }] }));
   const update = (key: ListKey, id: string, changes: object) => setData((d) => ({ ...d, [key]: d[key].map((row) => row.id === id ? { ...row, ...changes } : row) }));
   const remove = (key: ListKey, id: string) => setData((d) => ({ ...d, [key]: d[key].filter((row) => row.id !== id) }));
+  const shown = tour && data.profile
+    ? { ...data, profile: { ...data.profile, onboarded_at: null } }
+    : data;
   const interactive: AppContextValue = {
-    ...value, data, subjectsById: new Map(data.subjects.map((s) => [s.id, s])),
+    ...value, data: shown, subjectsById: new Map(data.subjects.map((s) => [s.id, s])),
     addTask: async (changes) => { insert("tasks", { notes: null, subject_id: null, due_date: null, due_time: null, list_kind: "master", planned_date: null, priority: 1, done: false, done_at: null, position: -Date.now(), ...changes }); return true; },
     updateTask: async (id, changes) => update("tasks", id, changes),
     toggleTask: async (id) => { const task = data.tasks.find((t) => t.id === id); if (task) update("tasks", id, { done: !task.done, done_at: task.done ? null : new Date().toISOString() }); },
@@ -233,16 +251,13 @@ function Inner() {
   };
   return (
     <PreviewContext.Provider value={true}><AppContext.Provider value={interactive}>
-      {/* The intro owns the whole viewport and has its own chrome, so it is the
-          one screen that must not be dressed in the app shell. */}
-      {screen === "welcome"
-        ? <Screen />
-        : <AppShell screen={screen}><Screen /></AppShell>}
+      {/* The tour lives in the app layout, which the harness does not use;
+          mounting it here is what makes it reviewable at all. */}
+      <AppShell screen={screen}><Screen /><Walkthrough /></AppShell>
     </AppContext.Provider></PreviewContext.Provider>
   );
 }
 
 export default function Preview() {
-  if (process.env.NODE_ENV === "production") notFound();
   return <Suspense><Inner /></Suspense>;
 }
