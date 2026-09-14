@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { useReducedMotion } from "motion/react";
-import { DayDial, type DialItem } from "./DayDial";
+import { DayDial, type DialItem } from "../DayDial";
 import { useGsapScope, gsap } from "./useGsap";
 import { Icon } from "../icons";
 
@@ -72,7 +72,7 @@ export function Hero() {
       <div className="lp-hero-copy">
         <h1><Words text="Your whole college" /><Words text="day, in one place." /></h1>
         <p className="hero-sub">
-          Timetable, exams, attendance and tasks on one ring, with a reminder before every class.
+          Timetable, exams, attendance and tasks on one clock face, with a reminder before every class.
         </p>
         <div className="hero-act lp-actions">
           <Link href="/login" className="lp-cta">Create your account<Icon name="arrow" size={18} /></Link>
