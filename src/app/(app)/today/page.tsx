@@ -7,6 +7,7 @@ import { Fragment, useEffect, useRef, useState } from "react";
 import { gsap } from "gsap";
 import { AnimatePresence, useReducedMotion } from "motion/react";
 import { ClassRow } from "@/components/ClassRow";
+import { DayDial, type DialItem } from "@/components/DayDial";
 import { DayEditor } from "@/components/DayEditor";
 import { useAppHref } from "@/components/AppShell";
 import { Icon } from "@/components/icons";
@@ -17,7 +18,7 @@ import { dayCancelledNote, dayStatus, findGaps, resolveDay } from "@/lib/schedul
 import { inTaskScope, sortTasks, tasksForDay } from "@/lib/tasks";
 import { blocksForDay } from "@/lib/planning";
 import { useApp } from "@/lib/store";
-import { addDaysISO, daysBetweenISO, formatDateISO, formatDuration, WEEKDAY_SHORT, weekdayOfISO } from "@/lib/time";
+import { addDaysISO, daysBetweenISO, formatDateISO, formatDuration, parseTime, WEEKDAY_SHORT, weekdayOfISO } from "@/lib/time";
 import { useNow } from "@/lib/useNow";
 
 export default function TodayPage() {
@@ -39,6 +40,28 @@ export default function TodayPage() {
   const due = tasksForDay(data.tasks, dateISO).filter((t) => t.list_kind !== "daily");
   // Planned study blocks share the day's list — that is where the owner looks.
   const planBlocks = blocksForDay(data.blocks, dateISO);
+  // The ring the landing page promises, drawn from the real day: classes as
+  // arcs, planned blocks lighter, exams as marks. Untimed blocks and all-day
+  // events have no place on a clock, so they are left off rather than guessed.
+  const dialItems: DialItem[] = [
+    ...classes.map((c) => ({
+      id: c.key,
+      label: c.subject?.name ?? "Class",
+      from: c.startMin, to: c.endMin,
+      kind: (c.kind === "lab" ? "lab" : "class") as DialItem["kind"],
+    })),
+    ...planBlocks.filter((b) => b.start_time && b.end_time).map((b) => ({
+      id: b.id, label: b.title,
+      from: parseTime(b.start_time), to: parseTime(b.end_time),
+      kind: "plan" as const,
+    })),
+    ...data.events.filter((e) => e.on_date === dateISO && e.kind === "exam" && e.start_time).map((e) => ({
+      id: e.id, label: e.title,
+      from: parseTime(e.start_time),
+      to: e.end_time ? parseTime(e.end_time) : parseTime(e.start_time) + 60,
+      kind: "exam" as const,
+    })),
+  ].sort((a, b) => a.from - b.from);
   const upcoming = [...data.events].filter((e) => e.on_date >= dateISO).sort((a, b) => a.on_date.localeCompare(b.on_date)).slice(0, 3);
   const name = data.profile?.display_name?.split(" ")[0];
   const greeting = now.at.getHours() < 12 ? "Good morning" : now.at.getHours() < 17 ? "Good afternoon" : "Good evening";
@@ -49,7 +72,7 @@ export default function TodayPage() {
       <time dateTime={dateISO} className="pb-1 text-xs font-semibold text-dim">{formatDateISO(dateISO)}</time>
     </header>
 
-    <LiveClass status={status} nowMin={isToday ? now.minutes : -1} holiday={holiday} isToday={isToday} />
+    <LiveClass status={status} nowMin={isToday ? now.minutes : -1} holiday={holiday} isToday={isToday} dial={dialItems} />
 
     <section aria-label="Choose a day">
       <div className="mb-2 flex items-center justify-between"><span className="text-xs font-semibold text-dim">{new Date(`${dateISO}T12:00:00`).toLocaleDateString("en-GB", { month: "long", year: "numeric" })}</span><div className="flex items-center gap-1"><Button size="sm" variant="ghost" aria-label="Previous week" onClick={() => setOffset(offset - 7)}><Icon name="back" size={15} /></Button>{!isToday && <Button size="sm" variant="ghost" onClick={() => setOffset(0)}>Today</Button>}<Button size="sm" variant="ghost" aria-label="Next week" onClick={() => setOffset(offset + 7)}><Icon name="chevron" size={15} /></Button></div></div>
@@ -87,6 +110,9 @@ export default function TodayPage() {
   </div>;
 }
 
+/** How long a tapped block stays named on the dial before the countdown returns. */
+const PEEK_HOLD_MS = 3000;
+
 /** "today" / "tomorrow" / "in 4 days" — never "in 1 days". */
 function countdownLabel(days: number): string {
   if (days <= 0) return "today";
@@ -94,11 +120,27 @@ function countdownLabel(days: number): string {
   return `in ${days} days`;
 }
 
-function LiveClass({ status, nowMin, holiday, isToday }: { status: ReturnType<typeof dayStatus>; nowMin: number; holiday: string | null; isToday: boolean }) {
+function LiveClass({ status, nowMin, holiday, isToday, dial }: { status: ReturnType<typeof dayStatus>; nowMin: number; holiday: string | null; isToday: boolean; dial: DialItem[] }) {
   const clock = useClock();
   const root = useRef<HTMLDivElement>(null);
   const previous = useRef(0);
   const reduced = useReducedMotion();
+  // What the pointer is resting on, if anything. The ring answers questions
+  // about the rest of the day; the countdown only answers one about now.
+  const [peek, setPeek] = useState<DialItem | null>(null);
+  const peekTimer = useRef(0);
+
+  // A tap has no matching "leave", so it gets a stopwatch: long enough to read
+  // a block's name and time, short enough that the countdown is never lost.
+  // A hover is left alone — it ends when the pointer does.
+  const showPeek = (item: DialItem | null, sticky?: boolean) => {
+    window.clearTimeout(peekTimer.current);
+    setPeek(item);
+    if (item && sticky) {
+      peekTimer.current = window.setTimeout(() => setPeek(null), PEEK_HOLD_MS);
+    }
+  };
+  useEffect(() => () => window.clearTimeout(peekTimer.current), []);
   const current = status.current;
   const next = status.next;
   const chosen = current ?? next;
@@ -109,7 +151,6 @@ function LiveClass({ status, nowMin, holiday, isToday }: { status: ReturnType<ty
     const ctx = gsap.context(() => {
       const duration = reduced ? 0 : .65;
       gsap.fromTo(".live-fill", { scaleX: from }, { scaleX: progress, duration, ease: "power3.out" });
-      gsap.fromTo(".dial-marker", { attr: { transform: `rotate(${from * 360} 50 50)` } }, { attr: { transform: `rotate(${progress * 360} 50 50)` }, duration, ease: "power3.out" });
     }, root);
     return () => ctx.revert();
   }, [progress, reduced]);
@@ -119,9 +160,17 @@ function LiveClass({ status, nowMin, holiday, isToday }: { status: ReturnType<ty
       <h2>{chosen?.subject?.name ?? (holiday ? "A little breathing room." : status.finished ? "College is over." : "The day is yours.")}</h2>
       <p className="mt-2 text-xs leading-relaxed sm:text-sm">{chosen ? [chosen.subject?.short_name, chosen.kind.charAt(0).toUpperCase() + chosen.kind.slice(1), chosen.room || chosen.subject?.room].filter(Boolean).join(" · ") : status.finished ? `Finished at ${clock(status.endsAtMin ?? 0)}. Time to make it your own.` : "Your schedule will appear here when you add a class."}</p>
       {chosen && <p className="mt-1 text-xs">{clock(chosen.startMin)} to {clock(chosen.endMin)}</p>}
-    </div><div className="relative h-[105px] w-[105px] shrink-0 sm:h-32 sm:w-32" aria-hidden="true">
-      <svg viewBox="0 0 100 100" fill="none"><circle cx="50" cy="50" r="44" stroke="currentColor" opacity=".18" /><circle cx="50" cy="50" r="34" stroke="currentColor" opacity=".3" /><circle cx="50" cy="50" r="23" stroke="currentColor" opacity=".15" /><path d="M50 2v8M50 90v8" stroke="currentColor" opacity=".5" /><g className="dial-marker" transform={`rotate(${progress * 360} 50 50)`}><circle cx="50" cy="6" r="5" fill="var(--gold)" /><circle cx="50" cy="6" r="2.5" fill="var(--hero-ink)" /></g></svg>
-      <div className="absolute inset-0 flex flex-col items-center justify-center"><span className="text-lg font-bold sm:text-xl">{current ? formatDuration(status.currentRemaining) : next && isToday ? formatDuration(status.untilNext) : <Icon name={status.finished ? "check" : "sun"} size={27} />}</span>{(current || (next && isToday)) && <span className="mt-1 text-[10px] text-[var(--hero-dim)]">{current ? "left" : "to go"}</span>}</div>
+    </div><div className="live-dial relative shrink-0">
+      <DayDial items={dial} nowMinutes={nowMin} showCenter={false} showNow={isToday} onHoverItem={showPeek} />
+      {/* inset-0 covers the whole ring, so it must not take the pointer the
+            segments underneath it need. */}
+      <div // The clear centre is 2*(INNER_R - BAND/2) / SIZE of the dial's width, so
+        // the inset that keeps text off the inner band is the rest, halved.
+        className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center px-[26%] text-center [overflow-wrap:anywhere]">
+        {peek
+          ? <><span className="dial-peek-label">{peek.label}</span><span className="mt-0.5 text-[9px] leading-tight text-[var(--hero-dim)]">{clock(peek.from)}-{clock(peek.to)}</span></>
+          : <span className="relative"><span className="text-lg font-bold sm:text-xl">{current ? formatDuration(status.currentRemaining) : next && isToday ? formatDuration(status.untilNext) : <Icon name={status.finished ? "check" : "sun"} size={27} />}</span>{(current || (next && isToday)) && <span className="absolute left-1/2 top-full -translate-x-1/2 whitespace-nowrap text-[10px] leading-tight text-[var(--hero-dim)]">{current ? "left" : "to go"}</span>}</span>}
+      </div>
     </div></div>
     <div className="live-progress" role="progressbar" aria-label="Current class progress" aria-valuemin={0} aria-valuemax={100} aria-valuenow={Math.round(progress * 100)}><div className="live-fill" style={{ transform: `scaleX(${progress})` }} /></div>
     <div className="mt-3 flex flex-wrap justify-between gap-2 text-[11px] text-[var(--hero-dim)]"><span>{current ? "Class in progress" : next ? `Starts ${clock(next.startMin)}` : "A moment for yourself"}</span><span>{current ? `${nowMin - current.startMin} / ${current.endMin - current.startMin} min` : status.endsAtMin !== null ? `Day ends ${clock(status.endsAtMin)}` : "Plan at your own pace"}</span></div>
