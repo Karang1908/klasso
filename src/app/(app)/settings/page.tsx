@@ -108,7 +108,7 @@ export default function SettingsPage() {
 
 
       {/* ----------------------------------------------- notifications */}
-      <SettingsGroup title="Notifications" hint="Reminders, timing and quiet hours">
+      <SettingsGroup title="Notifications" hint="Reminders, timing and quiet hours" tour="reminders">
 
         {push?.needsInstall && (
           <Banner tone="warn">
