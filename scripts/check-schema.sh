@@ -83,7 +83,7 @@ ck "one-off marked twice stays one row" \
 ck "notification_log dedupe_key is unique" \
   "$(Q -c "insert into notification_log (user_id,dedupe_key) values ('$U','k1'),('$U','k1');" >/dev/null 2>&1; echo $?)" "1"
 ck "row-level security is on for every table" \
-  "$(Q -c "select count(*) from pg_tables where schemaname='public' and rowsecurity=false and tablename<>'cron_heartbeat';")" "0"
+  "$(Q -c "select count(*) from pg_tables where schemaname='public' and rowsecurity=false;")" "0"
 ck "end_time must be after start_time" \
   "$(Q -c "insert into timetable_slots (user_id,subject_id,weekday,start_time,end_time) values ('$U','$S',1,'10:00','09:00');" >/dev/null 2>&1; echo $?)" "1"
 
