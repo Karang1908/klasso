@@ -76,7 +76,7 @@ export default function TodayPage() {
 
     <section aria-label="Choose a day">
       <div className="mb-2 flex items-center justify-between"><span className="text-xs font-semibold text-dim">{new Date(`${dateISO}T12:00:00`).toLocaleDateString("en-GB", { month: "long", year: "numeric" })}</span><div className="flex items-center gap-1"><Button size="sm" variant="ghost" aria-label="Previous week" onClick={() => setOffset(offset - 7)}><Icon name="back" size={15} /></Button>{!isToday && <Button size="sm" variant="ghost" onClick={() => setOffset(0)}>Today</Button>}<Button size="sm" variant="ghost" aria-label="Next week" onClick={() => setOffset(offset + 7)}><Icon name="chevron" size={15} /></Button></div></div>
-      <div className="day-strip">{Array.from({ length: 7 }, (_, i) => addDaysISO(weekStart, i)).map((d) => <button key={d} className="day-button" aria-label={formatDateISO(d, "long")} aria-pressed={d === dateISO} onClick={() => setOffset(daysBetweenISO(now.dateISO, d))}><span className="text-[10px] font-semibold uppercase">{WEEKDAY_SHORT[weekdayOfISO(d)]}</span><strong>{Number(d.slice(8))}</strong><span className="h-1 w-1 rounded-full bg-current" style={{ opacity: resolveDay(d, data.slots, data.overrides, subjectsById).length ? .85 : .18 }} /></button>)}</div>
+      <div className="day-strip" data-tour="days">{Array.from({ length: 7 }, (_, i) => addDaysISO(weekStart, i)).map((d) => <button key={d} className="day-button" aria-label={formatDateISO(d, "long")} aria-pressed={d === dateISO} onClick={() => setOffset(daysBetweenISO(now.dateISO, d))}><span className="text-[10px] font-semibold uppercase">{WEEKDAY_SHORT[weekdayOfISO(d)]}</span><strong>{Number(d.slice(8))}</strong><span className="h-1 w-1 rounded-full bg-current" style={{ opacity: resolveDay(d, data.slots, data.overrides, subjectsById).length ? .85 : .18 }} /></button>)}</div>
     </section>
 
     {holiday && <Banner tone="warn"><div className="flex items-center justify-between gap-3"><span>{holiday}</span><Button variant="ghost" size="sm" onClick={() => { const o = data.overrides.find((x) => x.on_date === dateISO && x.kind === "cancel_day"); if (o) void removeOverride(o.id); }}>Restore classes</Button></div></Banner>}
@@ -154,7 +154,7 @@ function LiveClass({ status, nowMin, holiday, isToday, dial }: { status: ReturnT
     }, root);
     return () => ctx.revert();
   }, [progress, reduced]);
-  return <section ref={root} className="live-panel" aria-label="Live class status">
+  return <section ref={root} className="live-panel" data-tour="now" aria-label="Live class status">
     <div className="live-content"><div className="min-w-0 flex-1">
       <span className="live-badge"><span className="live-dot" />{current ? "IN CLASS NOW" : next ? isToday ? "UP NEXT" : "FIRST CLASS" : holiday ? "DAY OFF" : status.finished ? "DONE FOR THE DAY" : "NOTHING SCHEDULED"}</span>
       <h2>{chosen?.subject?.name ?? (holiday ? "A little breathing room." : status.finished ? "College is over." : "The day is yours.")}</h2>
