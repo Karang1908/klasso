@@ -1129,3 +1129,41 @@ button.agenda-title { display: flex; align-items: center; min-height: 44px; marg
   .ob-notif { transition: none; opacity: 1; transform: none; }
   .ob-attend-bar > span, .ob-attend-pill { transition: none; }
 }
+
+/* ── Walkthrough ───────────────────────────────────────────────────────
+   A scrim with a hole in it. The dimming is one enormous spread shadow on
+   the cutout rather than four positioned panels, so the hole can move and
+   resize in a single transition with nothing to keep in sync. */
+.wt { position: fixed; inset: 0; z-index: 90; }
+.wt-scrim, .wt-spot { position: fixed; pointer-events: auto; }
+.wt-scrim { inset: 0; background: rgb(3 14 10 / .72); }
+.wt-spot {
+  border-radius: 18px;
+  box-shadow: 0 0 0 9999px rgb(3 14 10 / .72), inset 0 0 0 2px rgb(var(--glass-tint) / .5);
+  transition: top 220ms cubic-bezier(.22,1,.36,1), left 220ms cubic-bezier(.22,1,.36,1),
+              width 220ms cubic-bezier(.22,1,.36,1), height 220ms cubic-bezier(.22,1,.36,1);
+}
+.wt-card {
+  position: fixed; width: min(330px, calc(100vw - 24px));
+  padding: 18px; border-radius: 20px; color: var(--text);
+  transition: top 220ms cubic-bezier(.22,1,.36,1), left 220ms cubic-bezier(.22,1,.36,1);
+}
+.wt-count { font-size: .6875rem; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: var(--text-faint); }
+.wt-card h2 { margin-top: 8px; font-size: 1.125rem; font-weight: 750; letter-spacing: -.02em; }
+.wt-body { margin-top: 6px; font-size: .875rem; line-height: 1.55; color: var(--text-dim); }
+.wt-acts { display: flex; align-items: center; gap: 8px; margin-top: 16px; }
+.wt-spacer { flex: 1; }
+.wt-skip, .wt-back {
+  min-height: 40px; padding-inline: 12px; border-radius: 999px;
+  font-size: .8125rem; font-weight: 650; color: var(--text-dim);
+}
+.wt-skip:hover, .wt-back:hover { background: var(--surface-2); color: var(--text); }
+.wt-next {
+  display: inline-flex; align-items: center; gap: 6px;
+  min-height: 40px; padding-inline: 18px; border-radius: 999px;
+  background: var(--brand); color: #06120d; font-size: .8125rem; font-weight: 700;
+  transition: filter 160ms, transform 160ms;
+}
+.wt-next:hover { filter: brightness(1.08); }
+.wt-next:active { transform: scale(.97); }
+.wt.is-static .wt-spot, .wt.is-static .wt-card { transition: none; }
