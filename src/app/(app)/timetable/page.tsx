@@ -72,7 +72,7 @@ export default function TimetablePage() {
         value={view}
         onChange={setView}
         options={[{ value: "list", label: "By day" }, { value: "grid", label: "Whole week" }]}
-      /></div><Button variant="primary" className="sm:ml-auto" onClick={() => data.subjects.length === 0 ? setSubjectSheet(true) : setSlotSheet({ open: true, slot: null, weekday: 1 })}><Icon name="plus" size={17} />Add a class</Button></div>
+      /></div><Button variant="primary" className="sm:ml-auto" data-tour="add-class" onClick={() => data.subjects.length === 0 ? setSubjectSheet(true) : setSlotSheet({ open: true, slot: null, weekday: 1 })}><Icon name="plus" size={17} />Add a class</Button></div>
 
       {data.subjects.length === 0 && (
         <Banner tone="info">Start by adding your subjects, then place them on the week.</Banner>
