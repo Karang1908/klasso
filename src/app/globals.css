@@ -1167,3 +1167,27 @@ button.agenda-title { display: flex; align-items: center; min-height: 44px; marg
 .wt-next:hover { filter: brightness(1.08); }
 .wt-next:active { transform: scale(.97); }
 .wt.is-static .wt-spot, .wt.is-static .wt-card { transition: none; }
+
+/* ── Landing FAQ ───────────────────────────────────────────────────────
+   Real prose on a page that is otherwise mostly motion. It is what a search
+   engine can quote and what a visitor scans before signing up, so it stays
+   open to selection and reads as a document, not a widget. */
+.lp-faq { padding: clamp(64px, 10vw, 128px) var(--g); max-width: 52rem; margin-inline: auto; }
+.lp-faq h2 { font-size: clamp(1.9rem, 4.6vw, 2.75rem); font-weight: 780; letter-spacing: -.035em; }
+.lp-faq-list { margin-top: clamp(28px, 5vw, 44px); border-top: 1px solid rgb(255 255 255 / .1); }
+.faq-item { border-bottom: 1px solid rgb(255 255 255 / .1); }
+:root[data-theme="light"] .lp-faq-list, :root[data-theme="light"] .faq-item { border-color: var(--border); }
+.faq-item > summary {
+  display: flex; align-items: center; justify-content: space-between; gap: 16px;
+  padding: 20px 0; cursor: pointer; list-style: none;
+}
+.faq-item > summary::-webkit-details-marker { display: none; }
+.faq-item > summary::after {
+  content: ""; flex: none; width: 11px; height: 11px; margin-right: 4px;
+  border-right: 2px solid var(--text-dim); border-bottom: 2px solid var(--text-dim);
+  transform: rotate(45deg) translate(-2px, -2px); transition: transform 240ms ease;
+}
+.faq-item[open] > summary::after { transform: rotate(225deg) translate(-2px, -2px); }
+.faq-item h3 { font-size: clamp(1rem, 2.2vw, 1.125rem); font-weight: 680; letter-spacing: -.015em; }
+.faq-item > p { padding-bottom: 22px; max-width: 62ch; font-size: .9375rem; line-height: 1.68; color: var(--text-dim); }
+.faq-item > summary:hover h3 { color: var(--brand); }
