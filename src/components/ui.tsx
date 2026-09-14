@@ -276,10 +276,10 @@ export function Confirm({
  * thing, so everything starts closed.
  */
 export function SettingsGroup({
-  title, hint, open = false, children,
-}: { title: ReactNode; hint?: string; open?: boolean; children: ReactNode }) {
+  title, hint, open = false, tour, children,
+}: { title: ReactNode; hint?: string; open?: boolean; tour?: string; children: ReactNode }) {
   return (
-    <details className="settings-group" open={open || undefined}>
+    <details className="settings-group" data-tour={tour} open={open || undefined}>
       <summary>
         <span className="settings-group-head">
           <span className="settings-group-title">{title}</span>
