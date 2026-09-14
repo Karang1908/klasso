@@ -21,7 +21,7 @@
   --sidebar-mark: #ffffff; --sidebar-shadow: 0 18px 40px -28px rgb(12 40 28 / .55);
   --sidebar-avatar-bg: #ffffff; --sidebar-avatar-ink: #1a4c3a;
   --sidebar-sheen: rgb(255 255 255 / .22);
-  --dial-track: #e4ebe6; --dial-tick: #b7c6bd;
+  --dial-track: #e4ebe6; --dial-tick: #b7c6bd; --dial-spent: #d3ded7;
   --dial-class: #2E6C55; --dial-lab: #4E9376; --dial-exam: #B5772A;
   --dial-free: #cfded5; --dial-plan: #6FA98C;
   --dial-now: #EFC873; --dial-now-ring: #1B4E3B;
@@ -45,7 +45,7 @@
   --sidebar-mark: #ffffff; --sidebar-shadow: 0 18px 40px -28px rgb(0 0 0 / .75);
   --sidebar-avatar-bg: #ffffff; --sidebar-avatar-ink: #163a2d;
   --sidebar-sheen: rgb(255 255 255 / .5);
-  --dial-track: #1e2623; --dial-tick: #3b4a43;
+  --dial-track: #1e2623; --dial-tick: #3b4a43; --dial-spent: #283029;
   --dial-class: #5FBF92; --dial-lab: #8FD9B4; --dial-exam: #E0A24D;
   --dial-free: #2a352f; --dial-plan: #49A07A;
   --dial-now: #F2D081; --dial-now-ring: #0d100f;
@@ -71,7 +71,7 @@
   --sidebar-mark: #ffffff; --sidebar-shadow: 0 18px 40px -28px rgb(0 0 0 / .75);
   --sidebar-avatar-bg: #ffffff; --sidebar-avatar-ink: #163a2d;
   --sidebar-sheen: rgb(255 255 255 / .5);
-  --dial-track: #1e2623; --dial-tick: #3b4a43;
+  --dial-track: #1e2623; --dial-tick: #3b4a43; --dial-spent: #283029;
   --dial-class: #5FBF92; --dial-lab: #8FD9B4; --dial-exam: #E0A24D;
   --dial-free: #2a352f; --dial-plan: #49A07A;
   --dial-now: #F2D081; --dial-now-ring: #0d100f;
@@ -240,7 +240,7 @@ h1 { line-height: 1.22; }
 .auth-switch:hover { background: var(--brand-soft); border-color: var(--brand); }
 .auth-switch:active { transform: scale(.985); }
 
-.settings-legal { display: flex; justify-content: center; gap: 10px; margin-top: 26px; font-size: .8125rem; color: var(--text-dim); }
+.settings-legal { display: flex; align-items: center; justify-content: center; gap: 10px; margin-top: 26px; font-size: .8125rem; color: var(--text-dim); }
 .settings-legal a { min-height: 44px; display: inline-flex; align-items: center; color: var(--text-dim); }
 .settings-legal a:hover { color: var(--brand); text-decoration: underline; text-underline-offset: 3px; }
 
@@ -707,7 +707,7 @@ button.agenda-title { display: flex; align-items: center; min-height: 44px; marg
 .syllabus-state.is-done { color: var(--brand); }
 @media (min-width: 800px) { .planning-grid { grid-template-columns: minmax(0, 1fr) minmax(14rem, .4fr); } .syllabus-grid { grid-template-columns: repeat(2,minmax(0,1fr)); } }
 @media (max-width: 500px) { .agenda-row { grid-template-columns: 4rem minmax(0,1fr); gap: 8px; } .agenda-item { gap: 8px; } .agenda-item > .agenda-symbol { display: none; } .plan-types button { flex-direction: column; gap: 5px; font-size: .8125rem; } }
-@media (max-width: 359px) { .app-main { padding-inline: 12px; } .nav-item { font-size: 9px; } .live-content { flex-wrap: wrap; } .date-navigation { gap: 1px; } .date-navigation > .btn { padding-inline: 8px; } }
+@media (max-width: 359px) { .app-main { padding-inline: 12px; } .nav-item { font-size: 9px; } .live-content { flex-wrap: wrap; justify-content: center; } .date-navigation { gap: 1px; } .date-navigation > .btn { padding-inline: 8px; } }
 @media (max-height: 560px) and (min-width: 900px) { .app-sidebar { overflow-y: auto; } .app-sidebar nav { margin-top: 12px; } }
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { scroll-behavior: auto !important; animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; }
@@ -719,6 +719,43 @@ button.agenda-title { display: flex; align-items: center; min-height: 44px; marg
 .oauth-btn:hover:not(:disabled) { background: var(--surface-2); }
 .or-rule { display: flex; align-items: center; gap: .75rem; margin-block: 1.15rem; font-size: .75rem; color: var(--text-dim); }
 .or-rule::before, .or-rule::after { content: ""; flex: 1; height: 1px; background: var(--border); }
+
+
+/* The day ring, on the live panel. Same component as the landing, re-toned:
+   the dial tokens are mixed against the page surface, and --dial-track reads
+   near-black over the hero green. */
+.live-dial { position: relative; width: min(152px, 44vw); height: min(152px, 44vw); }
+/* A shallow well for the face to sit in. The panel's highlight is centred at
+   90% 8%, directly under the dial, so the hour numerals were being read against
+   the brightest pixels on the card. Settling the ground lifts all four at once.
+   An absolutely-positioned ::before paints above static children, so the svg
+   has to be lifted or the well covers the face. Only the svg: the countdown
+   overlay is already absolute and later in the DOM, and making it relative
+   drops it out of the dial entirely. */
+.live-dial::before {
+  content: ""; position: absolute; inset: -16%; border-radius: 50%; pointer-events: none;
+  background: radial-gradient(circle, rgb(5 30 21 / .26) 30%, rgb(5 30 21 / .13) 55%, transparent 74%);
+}
+.live-dial > svg { position: relative; }
+.live-dial .day-dial {
+  width: 100%; height: 100%; overflow: visible;
+  /* Track darker than the panel, not lighter: pale arcs need something to sit
+     against or the whole ring reads as one flat band. */
+  --dial-track: rgb(8 34 25 / .36);
+  --dial-spent: rgb(255 255 255 / .07);
+  --dial-hour-ink: rgb(255 255 255 / .96);
+  --dial-hour-halo: rgb(4 26 18 / .82);
+  --dial-tick: rgb(255 255 255 / .3);
+  --dial-class: #CFF5E2;
+  --dial-lab: #8ADEBC;
+  --dial-exam: #F5C67F;
+  --dial-free: rgb(255 255 255 / .08);
+  --dial-plan: #62C49C;
+  --dial-now: var(--gold);
+  --dial-now-ring: var(--hero-dark);
+}
+@media (min-width: 640px) { .live-dial { width: 176px; height: 176px; } }
+@media (min-width: 1100px) { .live-dial { width: 208px; height: 208px; } }
 
 
 /* ── Liquid glass ──────────────────────────────────────────────────────
@@ -818,7 +855,9 @@ button.agenda-title { display: flex; align-items: center; min-height: 44px; marg
 }
 .lp-hero h1 { font-size: clamp(2.05rem, 5.2vw, 4rem); font-weight: 800; line-height: 1.03; max-width: 22ch; }
 .lp-hero h1 > span { display: block; white-space: nowrap; }
-.word { display: inline-block; overflow: hidden; vertical-align: bottom; }
+/* The mask box is the line box, so descenders (g, y, p) fall outside it and
+   get clipped. Pad the box down and pull the same amount back out of flow. */
+.word { display: inline-block; overflow: hidden; vertical-align: bottom; padding-bottom: .16em; margin-bottom: -.16em; }
 .word-in { display: inline-block; will-change: transform; }
 .hero-sub { margin-top: 22px; max-width: 42ch; font-size: clamp(1rem, 2vw, 1.1875rem); line-height: 1.6; color: var(--text-dim); }
 .lp-actions { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 32px; }
@@ -837,10 +876,29 @@ button.agenda-title { display: flex; align-items: center; min-height: 44px; marg
 
 /* the ring stands on the page, not on a card */
 .hero-stage { display: grid; justify-items: center; transform-style: preserve-3d; }
-.day-dial { width: min(100%, 340px, 44vh); height: auto; overflow: visible; }
-.dial-arc { transition: stroke-width 320ms ease, opacity 320ms ease; }
+.hero-stage .day-dial { width: min(100%, 340px, 44vh); height: auto; overflow: visible; }
+/* Only the wide invisible paths take the pointer. A later block's visible
+   arc otherwise paints over an earlier block's hit path and leaves a dead
+   spot that looks like nothing at all. */
+.dial-arc { transition: stroke-width 320ms ease, opacity 320ms ease; pointer-events: none; }
+.dial-hit { cursor: pointer; }
+.live-dial { touch-action: manipulation; }
+/* A long block title must not grow past the ring it sits inside. */
+.dial-peek-label { font-size: .6875rem; font-weight: 700; line-height: 1.25; text-wrap: balance;
+  display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
 .dial-time { font-size: 38px; font-weight: 800; letter-spacing: -.04em; fill: var(--text); font-variant-numeric: tabular-nums; }
 .dial-caption { font-size: 13px; font-weight: 600; fill: var(--text-dim); }
+/* The numerals are the part that makes the face readable as a clock, so they
+   answer to text contrast, not to tick contrast. The halo is what carries them
+   across the panel's gradient, which runs light exactly where 12 and 3 sit. */
+.dial-hour {
+  font-size: 25px; font-weight: 700; font-variant-numeric: tabular-nums;
+  fill: var(--dial-hour-ink, var(--text-dim));
+  paint-order: stroke;
+  stroke: var(--dial-hour-halo, transparent);
+  stroke-width: 3.6px;
+  stroke-linejoin: round;
+}
 .lp-dial-caption { display: flex; align-items: center; gap: 8px; margin-top: 20px; font-size: .875rem; font-weight: 600; color: var(--text); }
 .lp-dot { width: 9px; height: 9px; border-radius: 50%; background: var(--dial-class); }
 .lp-dot[data-kind="lab"] { background: var(--dial-lab); }
@@ -932,7 +990,7 @@ button.agenda-title { display: flex; align-items: center; min-height: 44px; marg
   .stack-inner { grid-template-columns: auto auto; justify-content: center; }
   .lp-path-body { grid-template-columns: 120px 1fr; gap: 56px; }
   .rp-svg { justify-self: start; position: sticky; top: 22vh; }
-  .day-dial { width: min(100%, 380px, 48vh); }
+  .hero-stage .day-dial { width: min(100%, 380px, 48vh); }
 }
 @media (max-width: 899px) {
   .lp-hero { grid-template-columns: 1fr; }
@@ -951,4 +1009,123 @@ button.agenda-title { display: flex; align-items: center; min-height: 44px; marg
 @media (prefers-reduced-motion: reduce) {
   .word-in { transform: none !important; }
   .dial-arc { transition: none; }
+}
+
+/* ── Onboarding ────────────────────────────────────────────────────────
+   A product shot, not a slideshow. The stage is lit by one key light that
+   walks to a new mark for each slide (GSAP animates --kx/--ky/--warm), a
+   cool fill from the opposite corner, and a grain layer that keeps the
+   large flat gradients from banding on cheap panels. */
+.ob {
+  --kx: 50%; --ky: 18%; --warm: .5;
+  position: relative; isolation: isolate; overflow: hidden;
+  min-height: 100dvh;
+  display: grid; grid-template-rows: auto 1fr auto;
+  gap: clamp(16px, 3vh, 32px);
+  padding: max(18px, env(safe-area-inset-top, 0px)) clamp(20px, 5vw, 56px)
+           max(20px, env(safe-area-inset-bottom, 0px));
+  background: #07100c;
+  color: var(--hero-ink, #f4fff7);
+}
+.ob-key {
+  position: absolute; inset: -30%; z-index: -2; pointer-events: none;
+  background:
+    radial-gradient(42vmax 38vmax at var(--kx) var(--ky),
+      rgb(150 226 188 / calc(.34 + var(--warm) * .16)), transparent 62%),
+    radial-gradient(38vmax 34vmax at calc(100% - var(--kx)) calc(100% - var(--ky)),
+      rgb(36 104 80 / .5), transparent 66%),
+    radial-gradient(60vmax 50vmax at 50% 120%, rgb(12 44 32 / .9), transparent 70%);
+}
+/* Grain, so a full-screen gradient does not band. */
+.ob-grain {
+  position: absolute; inset: 0; z-index: -1; pointer-events: none; opacity: .05;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='3'/%3E%3C/filter%3E%3Crect width='140' height='140' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+.ob-top { display: flex; align-items: center; justify-content: space-between; gap: 16px; }
+.ob-brand { display: inline-flex; align-items: center; gap: 10px; font-size: 1.0625rem; font-weight: 800; letter-spacing: -.03em; }
+.ob-skip {
+  min-height: 44px; padding-inline: 18px; border-radius: 999px;
+  font-size: .875rem; font-weight: 650; color: rgb(244 255 247 / .72);
+  transition: background-color 180ms, color 180ms;
+}
+.ob-skip:hover { background: rgb(255 255 255 / .08); color: var(--hero-ink, #f4fff7); }
+
+.ob-body {
+  display: grid; align-content: center; justify-items: center;
+  gap: clamp(24px, 5vh, 52px); text-align: center; min-height: 0;
+}
+.ob-stage-art { display: grid; place-items: center; width: 100%; min-height: 0; }
+.ob-copy { max-width: 36rem; }
+.ob-copy h1 {
+  font-size: clamp(1.75rem, 6vw, 3.25rem); font-weight: 800;
+  letter-spacing: -.035em; line-height: 1.06; text-wrap: balance;
+}
+.ob-copy p {
+  margin-top: 16px; font-size: clamp(.9375rem, 2.4vw, 1.125rem);
+  line-height: 1.6; color: rgb(220 240 225 / .78); text-wrap: pretty;
+}
+
+/* slide 1 — the ring */
+.ob-ring { width: min(74vw, 300px, 40vh); }
+.ob-ring .day-dial { width: 100%; height: auto; overflow: visible; }
+
+/* slide 2 — reminders stacking in */
+.ob-notifs { display: grid; gap: 10px; width: min(100%, 26rem); text-align: left; }
+.ob-notif {
+  opacity: 0; transform: translateY(14px) scale(.98);
+  transition: opacity 520ms cubic-bezier(.16,1,.3,1), transform 520ms cubic-bezier(.16,1,.3,1);
+}
+.ob-notif[data-in="true"] { opacity: 1; transform: none; }
+
+/* slide 3 — the register */
+.ob-attend { width: min(100%, 25rem); padding: 18px; border-radius: 22px; text-align: left; }
+.ob-attend-row { display: flex; align-items: center; gap: 12px; }
+.ob-attend-dot { flex: none; width: 10px; height: 10px; border-radius: 50%; background: var(--dial-class); }
+.ob-attend-meta { min-width: 0; flex: 1; }
+.ob-attend-meta strong { display: block; font-size: .9375rem; font-weight: 700; }
+.ob-attend-meta p { margin-top: 2px; font-size: .8125rem; color: rgb(220 240 225 / .66); }
+.ob-attend-pill {
+  flex: none; display: inline-flex; align-items: center; gap: 6px;
+  min-height: 34px; padding-inline: 14px; border-radius: 999px;
+  border: 1px solid rgb(255 255 255 / .18); font-size: .8125rem; font-weight: 650;
+  transition: background-color 420ms, color 420ms, border-color 420ms;
+}
+.ob-attend-pill.is-on { background: var(--brand); border-color: transparent; color: #06120d; }
+.ob-attend-bar { height: 5px; margin-top: 16px; border-radius: 8px; overflow: hidden; background: rgb(255 255 255 / .12); }
+.ob-attend-bar > span { display: block; height: 100%; border-radius: inherit; background: var(--brand); transition: width 620ms cubic-bezier(.16,1,.3,1); }
+.ob-attend-foot { display: flex; justify-content: space-between; gap: 12px; margin-top: 10px; font-size: .8125rem; color: rgb(220 240 225 / .66); }
+.ob-attend-foot strong { color: var(--hero-ink, #f4fff7); font-weight: 700; font-variant-numeric: tabular-nums; }
+
+.ob-foot { display: grid; gap: 18px; justify-items: center; }
+.ob-dots { display: flex; gap: 8px; }
+.ob-dot {
+  width: 30px; height: 4px; border-radius: 999px; background: rgb(255 255 255 / .2);
+  transition: background-color 300ms, width 300ms;
+}
+.ob-dot.is-on { width: 44px; background: var(--brand); }
+.ob-acts { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; justify-content: center; }
+.ob-back {
+  display: inline-flex; align-items: center; gap: 6px; min-height: 52px; padding-inline: 20px;
+  border-radius: 999px; font-size: .9375rem; font-weight: 650; color: rgb(244 255 247 / .74);
+}
+.ob-back:hover { background: rgb(255 255 255 / .08); }
+.ob-next {
+  display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+  min-height: 52px; padding-inline: 28px; border-radius: 999px; white-space: nowrap;
+  background: var(--brand); color: #06120d; font-size: .9375rem; font-weight: 700;
+  box-shadow: 0 14px 40px -18px var(--brand);
+  transition: filter 200ms, transform 200ms;
+}
+.ob-next:hover { filter: brightness(1.08); }
+.ob-next:active { transform: scale(.985); }
+
+@media (min-width: 900px) {
+  .ob-body { grid-template-columns: 1fr 1fr; align-items: center; text-align: left; gap: clamp(32px, 5vw, 72px); max-width: 68rem; width: 100%; margin-inline: auto; }
+  .ob-copy { justify-self: start; }
+  .ob-ring { width: min(44vh, 380px); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .ob-notif { transition: none; opacity: 1; transform: none; }
+  .ob-attend-bar > span, .ob-attend-pill { transition: none; }
 }
