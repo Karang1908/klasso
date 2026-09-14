@@ -238,6 +238,12 @@ create table if not exists cron_heartbeat (
 );
 insert into cron_heartbeat(id) values (1) on conflict (id) do nothing;
 
+-- ------------------------------------------------------------ onboarding
+-- Null until the visitor has been through the intro. Kept on the profile
+-- rather than in localStorage so finishing it on a phone also finishes it on
+-- a laptop, and so a reinstall does not replay it.
+alter table profiles add column if not exists onboarded_at timestamptz;
+
 -- ------------------------------------------------- syllabus on exams/events
 -- Free text, one topic per line. Kept on the event itself rather than in its
 -- own table because it is authored and read as a single block; the Planning
@@ -292,6 +298,11 @@ alter table push_subscriptions  enable row level security;
 alter table notification_prefs  enable row level security;
 alter table notification_log    enable row level security;
 alter table study_blocks        enable row level security;
+-- Holds no user data, but PostgREST exposes it to anyone holding the public
+-- anon key, and without RLS that is a writable row on the open internet. RLS
+-- with no policy denies every client; the dispatcher writes it through the
+-- service-role key, which bypasses RLS.
+alter table cron_heartbeat      enable row level security;
 
 do $$
 declare t text;
