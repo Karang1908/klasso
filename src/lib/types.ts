@@ -149,6 +149,8 @@ export type Profile = {
   display_name: string | null;
   timezone: string;
   time_format?: '12' | '24';
+  /** When the intro was completed or skipped. Null means it has not been seen. */
+  onboarded_at?: string | null;
   created_at: string;
 };
 
