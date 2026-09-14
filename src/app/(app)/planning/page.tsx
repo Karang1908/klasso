@@ -51,7 +51,7 @@ function PlanningWorkspace({ initialDate, initialDraft }: { initialDate: string;
   const add = (kind: BlockKind = "study") => setDraft({ kind, on_date: date });
 
   return <div className="page-stack planning-page">
-    <header className="planning-heading"><div><h1 className="page-heading">A plan that makes room.</h1><p className="page-subtitle">Classes, study, and the rest of your life. Together.</p></div><Button variant="primary" onClick={() => add()}><Icon name="plus" size={18} />Add plan</Button></header>
+    <header className="planning-heading"><div><h1 className="page-heading">A plan that makes room.</h1><p className="page-subtitle">Classes, study, and the rest of your life. Together.</p></div><Button variant="primary" data-tour="add-plan" onClick={() => add()}><Icon name="plus" size={18} />Add plan</Button></header>
     <div className="planning-toolbar"><Segmented value={view} onChange={setView} options={[{ value: "schedule", label: "Day plan" }, { value: "syllabus", label: "Exam preparation" }]} />
       <div className="date-navigation"><Button variant="ghost" aria-label="Previous week" onClick={() => setDate(addDaysISO(date, -7))}><Icon name="back" size={18} /></Button><Input type="date" aria-label="Planning date" value={date} onChange={(event) => { if (event.target.value) setDate(event.target.value); }} /><Button variant="ghost" aria-label="Next week" onClick={() => setDate(addDaysISO(date, 7))}><Icon name="chevron" size={18} /></Button><Button variant="secondary" onClick={() => setDate(now.dateISO)}>Today</Button></div>
     </div>
