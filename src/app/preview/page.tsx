@@ -16,6 +16,7 @@ import PlanningPage from "../(app)/planning/page";
 import { LaunchScreen } from "@/components/LaunchScreen";
 import TimetablePage from "../(app)/timetable/page";
 import TodayPage from "../(app)/today/page";
+import WelcomePage from "../welcome/page";
 import { AppContext, type AppContextValue } from "@/lib/store";
 import { localDateISO, toTimeString, addDaysISO } from "@/lib/time";
 import type { Subject, TimetableSlot } from "@/lib/types";
@@ -26,10 +27,10 @@ const today = localDateISO(now);
 const weekday = now.getDay();
 
 const subjects: Subject[] = [
-  ["Data Structures", "DSA", "#497563", "Dr. Rao", "LT-3"],
-  ["Digital Electronics", "DE", "#527d91", "Prof. Iyer", "B-12"],
-  ["Discrete Maths", "DM", "#8a8a4c", "Dr. Menon", "LT-1"],
-  ["Physics Lab", "LAB", "#b38a42", "Ms. Fernandes", "Lab 4"],
+  ["Data Structures", "DSA", "#497563", "Dr. Whitfield", "LT-3"],
+  ["Digital Electronics", "DE", "#527d91", "Prof. Almeida", "B-12"],
+  ["Discrete Maths", "DM", "#8a8a4c", "Dr. Lindqvist", "LT-1"],
+  ["Physics Lab", "LAB", "#b38a42", "Ms. Okonkwo", "Lab 4"],
 ].map(([name, short, color, teacher, room], i) => ({
   id: `s${i}`, user_id: "u", name, short_name: short, color, teacher, room,
   min_attendance: 75, created_at: "",
@@ -108,7 +109,7 @@ const value = {
       { id: "t3", user_id: "u", title: "Submit fee receipt", notes: null, subject_id: null,
         due_date: addDaysISO(today, -1), due_time: null, priority: 1, done: false,
         done_at: null, position: 2, created_at: "" },
-      { id: "t4", user_id: "u", title: "Email Dr. Rao about the lab slot", notes: null,
+      { id: "t4", user_id: "u", title: "Email the lab coordinator about the slot", notes: null,
         subject_id: null, due_date: null, due_time: null, priority: 0, done: true,
         done_at: "", position: 3, created_at: "" },
     ],
@@ -127,7 +128,7 @@ const value = {
         notes: null, done: false, done_at: null, position: 3, created_at: "" },
       { id: "pb5", user_id: "u", title: "Project group sync", kind: "meeting", on_date: today,
         start_time: "16:00:00", end_time: "16:45:00", subject_id: "s0", event_id: null,
-        location: "Library room 2", people: "Aditi, Rohan", notes: null,
+        location: "Library room 2", people: "Sam, Priya", notes: null,
         done: false, done_at: null, position: 4, created_at: "" },
       { id: "pb6", user_id: "u", title: "Football practice", kind: "activity", on_date: today,
         start_time: "21:00:00", end_time: "22:30:00", subject_id: null, event_id: null,
@@ -170,6 +171,7 @@ const SCREENS: Record<string, () => React.ReactElement> = {
   today: TodayPage, timetable: TimetablePage, calendar: CalendarPage,
   tasks: TasksPage, attendance: AttendancePage, settings: SettingsPage,
   planning: PlanningPage,
+  welcome: WelcomePage,
   loading: () => <LaunchScreen inline />,
 };
 
@@ -231,7 +233,11 @@ function Inner() {
   };
   return (
     <PreviewContext.Provider value={true}><AppContext.Provider value={interactive}>
-      <AppShell screen={screen}><Screen /></AppShell>
+      {/* The intro owns the whole viewport and has its own chrome, so it is the
+          one screen that must not be dressed in the app shell. */}
+      {screen === "welcome"
+        ? <Screen />
+        : <AppShell screen={screen}><Screen /></AppShell>}
     </AppContext.Provider></PreviewContext.Provider>
   );
 }
