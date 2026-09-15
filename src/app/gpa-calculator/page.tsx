@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { GpaCalculator } from "@/components/tools/GpaCalculator";
 import { ToolChrome, ToolCta } from "@/components/tools/ToolChrome";
-import { toolBySlug } from "@/lib/tools";
+import { breadcrumb, toolBySlug } from "@/lib/tools";
 
 const tool = toolBySlug("gpa-calculator")!;
 
@@ -46,6 +46,7 @@ export default function Page() {
         dangerouslySetInnerHTML={{ __html: JSON.stringify({
           "@context": "https://schema.org",
           "@graph": [
+            breadcrumb("gpa-calculator"),
             {
               "@type": "WebApplication",
               name: tool.name,
