@@ -7,7 +7,7 @@ import { join } from "node:path";
 
 const out = mkdtempSync(join(tmpdir(), "klasso-test-"));
 execSync(
-  `npx tsc src/lib/schedule.ts src/lib/time.ts src/lib/types.ts src/lib/tasks.ts src/lib/planning.ts src/lib/attendance-math.ts ` +
+  `npx tsc src/lib/schedule.ts src/lib/time.ts src/lib/types.ts src/lib/tasks.ts src/lib/planning.ts src/lib/attendance-math.ts src/lib/grade-math.ts ` +
     `--outDir ${out} --module commonjs --target es2022 --moduleResolution node --skipLibCheck`,
   { stdio: "inherit" },
 );
@@ -18,6 +18,7 @@ const { attendanceBySubject, findGaps, resolveDay, dayStatus, packLanes } = requ
 const { parseTime, weekdayOfISO, zonedNow, daysBetweenISO, toTimeString, timezoneToSync } = require(join(out, "time.js"));
 const { inTaskScope, tasksForDay, sortTasks } = require(join(out, "tasks.js"));
 const { attendance } = require(join(out, "attendance-math.js"));
+const { cgpaToPercent, percentToCgpa, finalNeeded, weightedGpa } = require(join(out, "grade-math.js"));
 const { syllabusTopics, blocksForDay, blockForTopic, examPlans, plannedMinutes, findClashes, blockKind, validatePlan, weekStart } = require(join(out, "planning.js"));
 
 let failed = 0;
@@ -342,6 +343,33 @@ eq("a term with no classes held yet is not failing", attendance(0, 0, 75).meets,
 eq("100% required cannot be recovered after a miss", attendance(49, 50, 100).mustAttend, null);
 eq("attended is capped at held", Number(attendance(99, 50, 75).rate.toFixed(2)), 1);
 eq("negative input clamps instead of throwing", attendance(-5, -5, 75).meets, true);
+
+// --------------------------------------------------------------- grade tools
+eq("8.2 CGPA is 77.9% on the 9.5 formula", cgpaToPercent(8.2, "x9.5"), 77.9);
+eq("8.2 CGPA is 82% on a straight ten-point", cgpaToPercent(8.2, "x10"), 82);
+eq("8.2 CGPA is 74.5% on the minus-0.75 formula", cgpaToPercent(8.2, "minus0.75"), 74.5);
+eq("77.9% back to CGPA round-trips", percentToCgpa(77.9, "x9.5"), 8.2);
+eq("74.5% back to CGPA round-trips", percentToCgpa(74.5, "minus0.75"), 8.2);
+eq("CGPA above the scale clamps to 100%", cgpaToPercent(12, "x10"), 100);
+eq("a CGPA below 0.75 cannot go negative", cgpaToPercent(0.5, "minus0.75"), 0);
+
+// 60 now, final worth 40%, want 75 overall -> (75 - 60*0.6)/0.4 = 97.5
+eq("final needed for 75 from 60 at 40% weight", finalNeeded(60, 40, 75).needed, 97.5);
+eq("...and that is still achievable", finalNeeded(60, 40, 75).achievable, true);
+// 40 now, final worth 30%, want 75 -> (75 - 40*0.7)/0.3 = 156.7
+eq("an out-of-reach target is reported, not hidden", finalNeeded(40, 30, 75).achievable, false);
+eq("...with the honest number", finalNeeded(40, 30, 75).needed, 156.67);
+// 90 now, final worth 20%, want 75 -> (75 - 90*0.8)/0.2 = 15
+eq("already-safe still needs a mark", finalNeeded(90, 20, 75).needed, 15);
+eq("a target already banked is flagged", finalNeeded(95, 10, 75).secured, true);
+eq("a final worth nothing cannot change anything", finalNeeded(60, 0, 75).achievable, false);
+
+eq("credit-weighted gpa", weightedGpa([{ credits: 4, points: 9 }, { credits: 2, points: 6 }]).gpa, 8);
+eq("...counts the credits", weightedGpa([{ credits: 4, points: 9 }, { credits: 2, points: 6 }]).credits, 6);
+eq("zero-credit rows are ignored, not counted as zero",
+  weightedGpa([{ credits: 4, points: 9 }, { credits: 0, points: 0 }]).gpa, 9);
+eq("an empty form is 0, not NaN", weightedGpa([]).gpa, 0);
+eq("points above the scale clamp", weightedGpa([{ credits: 1, points: 99 }], 10).gpa, 10);
 
 console.log(failed === 0 ? "\nAll checks passed." : `\n${failed} check(s) FAILED.`);
 process.exit(failed === 0 ? 0 : 1);
