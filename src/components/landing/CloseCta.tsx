@@ -26,6 +26,17 @@ export function CloseCta() {
           <Link href="/login" className="lp-cta">Create your account<Icon name="arrow" size={18} /></Link>
           <Link href="/preview" className="lp-cta-ghost">Try the live demo</Link>
         </div>
+        {/* A crawler finds pages through links, not through the sitemap alone.
+            Without this the calculator is an orphan: indexed slowly, and
+            carrying none of this page's standing. */}
+        <p className="lp-tools">
+          Free calculators, no account needed:{" "}
+          <Link href="/attendance-calculator">attendance</Link>,{" "}
+          <Link href="/cgpa-calculator">CGPA to percentage</Link>,{" "}
+          <Link href="/gpa-calculator">GPA</Link> and{" "}
+          <Link href="/final-grade-calculator">final grade</Link>.{" "}
+          <Link href="/tools">See all</Link>.
+        </p>
       </div>
     </section>
   );
