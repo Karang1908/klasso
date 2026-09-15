@@ -7,7 +7,7 @@ import { join } from "node:path";
 
 const out = mkdtempSync(join(tmpdir(), "klasso-test-"));
 execSync(
-  `npx tsc src/lib/schedule.ts src/lib/time.ts src/lib/types.ts src/lib/tasks.ts src/lib/planning.ts ` +
+  `npx tsc src/lib/schedule.ts src/lib/time.ts src/lib/types.ts src/lib/tasks.ts src/lib/planning.ts src/lib/attendance-math.ts ` +
     `--outDir ${out} --module commonjs --target es2022 --moduleResolution node --skipLibCheck`,
   { stdio: "inherit" },
 );
@@ -17,6 +17,7 @@ const require = createRequire(import.meta.url);
 const { attendanceBySubject, findGaps, resolveDay, dayStatus, packLanes } = require(join(out, "schedule.js"));
 const { parseTime, weekdayOfISO, zonedNow, daysBetweenISO, toTimeString, timezoneToSync } = require(join(out, "time.js"));
 const { inTaskScope, tasksForDay, sortTasks } = require(join(out, "tasks.js"));
+const { attendance } = require(join(out, "attendance-math.js"));
 const { syllabusTopics, blocksForDay, blockForTopic, examPlans, plannedMinutes, findClashes, blockKind, validatePlan, weekStart } = require(join(out, "planning.js"));
 
 let failed = 0;
@@ -323,6 +324,24 @@ eq("a profile with no zone yet is synced",
   timezoneToSync(null, "Europe/London", null), "Europe/London");
 eq("Chrome's Calcutta alias is treated as its own zone",
   timezoneToSync("Asia/Kolkata", "Asia/Calcutta", null), "Asia/Calcutta");
+
+// ------------------------------------------------------- attendance calculator
+// The public calculator answers "how many can I miss" with an integer, so the
+// boundaries are the whole product: one off either way tells a student they
+// are safe when they are not.
+eq("40/50 at 75% meets the requirement", attendance(40, 50, 75).meets, true);
+eq("40/50 is 80%", Number(attendance(40, 50, 75).rate.toFixed(4)), 0.8);
+eq("40/50 at 75% can miss 3 more", attendance(40, 50, 75).canMiss, 3);
+eq("...missing a 4th breaks it", attendance(40, 54, 75).meets, false);
+eq("30/50 at 75% is short", attendance(30, 50, 75).meets, false);
+eq("30/50 at 75% must attend 30 in a row", attendance(30, 50, 75).mustAttend, 30);
+eq("...30 more gets there", attendance(60, 80, 75).meets, true);
+eq("...29 does not", attendance(59, 79, 75).meets, false);
+eq("exactly on the line counts as meeting it", attendance(75, 100, 75).meets, true);
+eq("a term with no classes held yet is not failing", attendance(0, 0, 75).meets, true);
+eq("100% required cannot be recovered after a miss", attendance(49, 50, 100).mustAttend, null);
+eq("attended is capped at held", Number(attendance(99, 50, 75).rate.toFixed(2)), 1);
+eq("negative input clamps instead of throwing", attendance(-5, -5, 75).meets, true);
 
 console.log(failed === 0 ? "\nAll checks passed." : `\n${failed} check(s) FAILED.`);
 process.exit(failed === 0 ? 0 : 1);
