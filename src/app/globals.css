@@ -1197,35 +1197,31 @@ button.agenda-title { display: flex; align-items: center; min-height: 44px; marg
    it is used, so it keeps a measure and a proper type hierarchy rather
    than being laid out like an app screen. */
 .tool { display: block; }
-.tool-head { max-width: 46rem; margin-inline: auto; padding: calc(116px + env(safe-area-inset-top, 0px)) var(--g) 0; text-align: center; }
+.tool-head { max-width: 46rem; margin-inline: auto; padding: calc(92px + env(safe-area-inset-top, 0px)) var(--g) 0; text-align: center; }
 .tool-head h1 { font-size: clamp(1.9rem, 5vw, 3rem); font-weight: 800; letter-spacing: -.035em; line-height: 1.06; }
 .tool-head p { margin-top: 16px; font-size: clamp(.9375rem, 2vw, 1.0625rem); line-height: 1.62; color: var(--text-dim); }
 
-.ac { display: grid; gap: 16px; max-width: 46rem; margin: clamp(28px, 5vw, 44px) auto 0; padding-inline: var(--g); }
-.ac-inputs { display: grid; gap: 18px; padding: 22px; border-radius: 22px; }
+.ac { display: grid; gap: 14px; max-width: 46rem; margin: clamp(22px, 4vw, 40px) auto 0; padding-inline: var(--g); }
+.ac-inputs { display: grid; gap: 14px; padding: 18px; border-radius: 22px; grid-template-columns: 1fr 1fr; }
 .ac-field { display: grid; gap: 8px; }
 .ac-field > span { font-size: .8125rem; font-weight: 650; color: var(--text-dim); }
 .ac-field input {
-  width: 100%; min-height: 52px; padding-inline: 14px; border-radius: 14px;
+  width: 100%; min-height: 48px; padding-inline: 14px; border-radius: 14px;
   border: 1px solid var(--border); background: var(--surface);
   font-size: 1.125rem; font-weight: 700; color: var(--text); font-variant-numeric: tabular-nums;
 }
 .ac-field input:focus-visible { outline: 2px solid var(--brand); outline-offset: 2px; }
 .ac-presets { display: flex; flex-wrap: wrap; gap: 8px; }
 .ac-preset {
-  min-height: 44px; padding-inline: 16px; border-radius: 999px;
+  min-height: 44px; padding-inline: 14px; border-radius: 999px;
   border: 1px solid var(--border); font-size: .875rem; font-weight: 650; color: var(--text-dim);
   transition: background-color 160ms, color 160ms, border-color 160ms;
 }
 .ac-preset:hover { color: var(--text); }
 .ac-preset.is-on { background: var(--brand); border-color: transparent; color: #06120d; }
 
-.ac-out { padding: 24px; border-radius: 22px; text-align: center; }
-.ac-rate { display: grid; gap: 4px; }
-.ac-rate strong { font-size: clamp(2.5rem, 9vw, 3.75rem); font-weight: 800; letter-spacing: -.04em; font-variant-numeric: tabular-nums; color: var(--brand); }
-.ac-rate[data-ok="false"] strong { color: var(--dial-exam); }
-.ac-rate span { font-size: .8125rem; color: var(--text-dim); }
-.ac-verdict { margin-top: 14px; margin-inline: auto; max-width: 40ch; font-size: 1rem; line-height: 1.55; font-weight: 600; }
+.ac-out { padding: 22px; border-radius: 22px; text-align: center; }
+.ac-verdict { margin-top: 16px; margin-inline: auto; max-width: 40ch; font-size: 1rem; line-height: 1.55; font-weight: 600; }
 .ac-verdict[data-ok="false"] { color: var(--dial-exam); }
 .ac-cta {
   display: inline-flex; align-items: center; gap: 8px; margin-top: 20px;
@@ -1246,4 +1242,113 @@ button.agenda-title { display: flex; align-items: center; min-height: 44px; marg
 .tool-qa dd { margin-top: 8px; font-size: .9375rem; line-height: 1.68; color: var(--text-dim); }
 .tool-cta { display: grid; gap: 14px; justify-items: center; margin-top: 44px; padding: 28px; border-radius: 24px; text-align: center; }
 .tool-cta h2 { margin-top: 0; font-size: 1.35rem; }
-@media (min-width: 620px) { .ac-inputs { grid-template-columns: 1fr 1fr; } .ac-field:last-child { grid-column: 1 / -1; } }
+.ac-field-wide { grid-column: 1 / -1; }
+
+.lp-tools { margin-top: 26px; font-size: .875rem; color: var(--text-faint); }
+.lp-tools a { color: var(--text-dim); text-decoration: underline; text-underline-offset: 3px; }
+.lp-tools a:hover { color: var(--brand); }
+
+/* the calculator's gauge */
+.ac-gauge { position: relative; width: min(172px, 46vw); margin-inline: auto; }
+.ac-gauge svg { display: block; width: 100%; height: auto; overflow: visible; }
+.ac-track { fill: none; stroke: var(--surface-2); stroke-width: 15; stroke-linecap: round; }
+.ac-fill {
+  fill: none; stroke: var(--brand); stroke-width: 15; stroke-linecap: round;
+  transition: d 420ms cubic-bezier(.22,1,.36,1);
+}
+.ac-gauge[data-ok="false"] .ac-fill { stroke: var(--dial-exam); }
+.ac-mark { fill: var(--text); stroke: var(--surface); stroke-width: 3; }
+.ac-readout {
+  position: absolute; inset: 0; display: grid; align-content: center; justify-items: center;
+  pointer-events: none;
+}
+.ac-readout strong {
+  font-size: clamp(2.25rem, 8vw, 3rem); font-weight: 800; letter-spacing: -.04em;
+  line-height: 1; font-variant-numeric: tabular-nums; color: var(--brand);
+}
+.ac-readout strong span { font-size: .5em; margin-left: 2px; }
+.ac-gauge[data-ok="false"] + .ac-verdict, .ac-gauge[data-ok="false"] .ac-readout strong { color: var(--dial-exam); }
+.ac-sub { margin-top: 6px; font-size: .75rem; color: var(--text-dim); }
+
+/* Type any requirement. Looks like the presets it sits among, but it is the
+   field they all write into. */
+/* Dashed while it merely mirrors a preset, so it reads as a field to type in
+   rather than a seventh option showing a duplicate number. */
+.ac-custom {
+  display: inline-flex; align-items: center; gap: 1px;
+  min-height: 44px; padding-inline: 12px; border-radius: 999px;
+  border: 1px dashed var(--text-faint); color: var(--text-dim);
+  transition: background-color 160ms, color 160ms, border-color 160ms;
+}
+.ac-custom::before {
+  content: "Other"; margin-right: 8px; font-size: .75rem; font-weight: 650;
+  opacity: .75; letter-spacing: .01em;
+}
+.ac-custom:hover { color: var(--text); border-color: var(--text-dim); }
+.ac-custom:focus-within { border-color: var(--brand); color: var(--text); }
+.ac-custom.is-on { background: var(--brand); border-style: solid; border-color: transparent; color: #06120d; }
+.ac-custom.is-on::before { opacity: .62; }
+.ac-custom input {
+  width: 3.1ch; min-height: 0; padding: 0; border: 0; background: none;
+  font-size: .875rem; font-weight: 650; color: inherit; text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+.ac-custom input:focus-visible { outline: none; }
+/* the spinners fight the pill shape and are useless at this size */
+.ac-custom input::-webkit-outer-spin-button,
+.ac-custom input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+.ac-custom input[type=number] { -moz-appearance: textfield; appearance: textfield; }
+.ac-custom span { font-size: .875rem; font-weight: 650; }
+
+/* ── Tools hub and shared tool controls ────────────────────────────────── */
+.tool-grid {
+  display: grid; gap: 14px; max-width: 46rem; margin: clamp(22px, 4vw, 40px) auto 0;
+  padding-inline: var(--g);
+}
+.tool-card { display: grid; gap: 6px; padding: 22px; border-radius: 22px; transition: transform 200ms, filter 200ms; }
+.tool-card:hover { transform: translateY(-2px); filter: brightness(1.06); }
+.tool-card h2 { font-size: 1.125rem; font-weight: 720; letter-spacing: -.02em; }
+.tool-card p { font-size: .9375rem; line-height: 1.55; color: var(--text-dim); }
+.tool-card-go { margin-top: 6px; font-size: .8125rem; font-weight: 700; color: var(--brand); }
+
+.tool-related { max-width: 44rem; margin-inline: auto; padding: 0 var(--g) clamp(64px, 10vw, 110px); }
+.tool-related h2 { font-size: 1.125rem; font-weight: 720; letter-spacing: -.02em; }
+.tool-related ul { margin-top: 14px; display: grid; gap: 2px; }
+.tool-related a { display: grid; gap: 2px; padding: 14px 0; border-bottom: 1px solid rgb(255 255 255 / .1); }
+:root[data-theme="light"] .tool-related a { border-color: var(--border); }
+.tool-related a strong { font-size: .9375rem; font-weight: 680; }
+.tool-related a span { font-size: .8125rem; line-height: 1.5; color: var(--text-dim); }
+.tool-related a:hover strong { color: var(--brand); }
+.tool-related-hub { margin-top: 16px; font-size: .875rem; }
+.tool-related-hub a { color: var(--text-dim); text-decoration: underline; text-underline-offset: 3px; padding: 0; border: 0; }
+.tool-related-hub a:hover { color: var(--brand); }
+
+/* a formula list reads better stacked than wrapped into pills */
+.ac-presets-stack { flex-direction: column; align-items: stretch; }
+.ac-presets-stack .ac-preset { justify-content: flex-start; text-align: left; }
+.ac-hint { margin-top: 8px; font-size: .75rem; line-height: 1.5; color: var(--text-faint); }
+/* the CGPA and GPA readouts sit in flow rather than inside a gauge */
+.ac-readout-flow { position: static; display: grid; gap: 4px; }
+.ac-readout-flow strong { color: var(--brand); }
+.ac-readout-flow[data-ok="false"] strong { color: var(--dial-exam); }
+
+/* GPA rows */
+.gpa-rows { display: grid; gap: 8px; }
+.gpa-head, .gpa-row { display: grid; grid-template-columns: 1fr 1fr 44px; gap: 8px; align-items: center; }
+.gpa-head span { font-size: .6875rem; font-weight: 650; letter-spacing: .04em; text-transform: uppercase; color: var(--text-faint); }
+.gpa-row input {
+  width: 100%; min-height: 46px; padding-inline: 12px; border-radius: 12px;
+  border: 1px solid var(--border); background: var(--surface);
+  font-size: 1rem; font-weight: 650; color: var(--text); font-variant-numeric: tabular-nums;
+}
+.gpa-row input:focus-visible { outline: 2px solid var(--brand); outline-offset: 2px; }
+.gpa-del { display: grid; place-items: center; min-height: 44px; border-radius: 12px; color: var(--text-faint); }
+.gpa-del:hover:not(:disabled) { background: var(--surface-2); color: var(--danger, #c2564b); }
+.gpa-del:disabled { opacity: .3; pointer-events: none; }
+.gpa-add {
+  display: inline-flex; align-items: center; gap: 7px; margin-top: 12px;
+  min-height: 44px; padding-inline: 16px; border-radius: 999px;
+  border: 1px dashed var(--text-faint); font-size: .875rem; font-weight: 650; color: var(--text-dim);
+}
+.gpa-add:hover { color: var(--text); border-color: var(--text-dim); }
+@media (min-width: 620px) { .tool-grid { grid-template-columns: 1fr 1fr; } }
