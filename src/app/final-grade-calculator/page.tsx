@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { FinalGradeCalculator } from "@/components/tools/FinalGradeCalculator";
 import { ToolChrome, ToolCta } from "@/components/tools/ToolChrome";
-import { toolBySlug } from "@/lib/tools";
+import { breadcrumb, toolBySlug } from "@/lib/tools";
 
 const tool = toolBySlug("final-grade-calculator")!;
 
@@ -46,6 +46,7 @@ export default function Page() {
         dangerouslySetInnerHTML={{ __html: JSON.stringify({
           "@context": "https://schema.org",
           "@graph": [
+            breadcrumb("final-grade-calculator"),
             {
               "@type": "WebApplication",
               name: tool.name,
