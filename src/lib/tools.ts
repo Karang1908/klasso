@@ -71,3 +71,27 @@ export const TOOLS: Tool[] = [
 
 export const toolBySlug = (slug: string) => TOOLS.find((t) => t.slug === slug);
 export const otherTools = (slug: string) => TOOLS.filter((t) => t.slug !== slug);
+
+/**
+ * Breadcrumb graph node. Google renders this as the trail under a search
+ * result in place of a bare URL, and it is how the hub's standing is
+ * communicated to each tool beneath it.
+ */
+export function breadcrumb(slug?: string) {
+  const base = "https://www.klasso.me";
+  const items: { name: string; url: string }[] = [
+    { name: "Klasso", url: base },
+    { name: "Calculators", url: `${base}/tools` },
+  ];
+  const tool = slug ? toolBySlug(slug) : undefined;
+  if (tool) items.push({ name: tool.name, url: `${base}/${tool.slug}` });
+  return {
+    "@type": "BreadcrumbList",
+    itemListElement: items.map((item, i) => ({
+      "@type": "ListItem",
+      position: i + 1,
+      name: item.name,
+      item: item.url,
+    })),
+  };
+}
