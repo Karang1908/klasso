@@ -1191,3 +1191,59 @@ button.agenda-title { display: flex; align-items: center; min-height: 44px; marg
 .faq-item h3 { font-size: clamp(1rem, 2.2vw, 1.125rem); font-weight: 680; letter-spacing: -.015em; }
 .faq-item > p { padding-bottom: 22px; max-width: 62ch; font-size: .9375rem; line-height: 1.68; color: var(--text-dim); }
 .faq-item > summary:hover h3 { color: var(--brand); }
+
+/* ── Tool page ─────────────────────────────────────────────────────────
+   A document that happens to contain a calculator. It is read as much as
+   it is used, so it keeps a measure and a proper type hierarchy rather
+   than being laid out like an app screen. */
+.tool { display: block; }
+.tool-head { max-width: 46rem; margin-inline: auto; padding: calc(116px + env(safe-area-inset-top, 0px)) var(--g) 0; text-align: center; }
+.tool-head h1 { font-size: clamp(1.9rem, 5vw, 3rem); font-weight: 800; letter-spacing: -.035em; line-height: 1.06; }
+.tool-head p { margin-top: 16px; font-size: clamp(.9375rem, 2vw, 1.0625rem); line-height: 1.62; color: var(--text-dim); }
+
+.ac { display: grid; gap: 16px; max-width: 46rem; margin: clamp(28px, 5vw, 44px) auto 0; padding-inline: var(--g); }
+.ac-inputs { display: grid; gap: 18px; padding: 22px; border-radius: 22px; }
+.ac-field { display: grid; gap: 8px; }
+.ac-field > span { font-size: .8125rem; font-weight: 650; color: var(--text-dim); }
+.ac-field input {
+  width: 100%; min-height: 52px; padding-inline: 14px; border-radius: 14px;
+  border: 1px solid var(--border); background: var(--surface);
+  font-size: 1.125rem; font-weight: 700; color: var(--text); font-variant-numeric: tabular-nums;
+}
+.ac-field input:focus-visible { outline: 2px solid var(--brand); outline-offset: 2px; }
+.ac-presets { display: flex; flex-wrap: wrap; gap: 8px; }
+.ac-preset {
+  min-height: 44px; padding-inline: 16px; border-radius: 999px;
+  border: 1px solid var(--border); font-size: .875rem; font-weight: 650; color: var(--text-dim);
+  transition: background-color 160ms, color 160ms, border-color 160ms;
+}
+.ac-preset:hover { color: var(--text); }
+.ac-preset.is-on { background: var(--brand); border-color: transparent; color: #06120d; }
+
+.ac-out { padding: 24px; border-radius: 22px; text-align: center; }
+.ac-rate { display: grid; gap: 4px; }
+.ac-rate strong { font-size: clamp(2.5rem, 9vw, 3.75rem); font-weight: 800; letter-spacing: -.04em; font-variant-numeric: tabular-nums; color: var(--brand); }
+.ac-rate[data-ok="false"] strong { color: var(--dial-exam); }
+.ac-rate span { font-size: .8125rem; color: var(--text-dim); }
+.ac-verdict { margin-top: 14px; margin-inline: auto; max-width: 40ch; font-size: 1rem; line-height: 1.55; font-weight: 600; }
+.ac-verdict[data-ok="false"] { color: var(--dial-exam); }
+.ac-cta {
+  display: inline-flex; align-items: center; gap: 8px; margin-top: 20px;
+  min-height: 50px; padding-inline: 24px; border-radius: 999px;
+  background: var(--brand); color: #06120d; font-size: .9375rem; font-weight: 700;
+}
+.ac-cta:hover { filter: brightness(1.08); }
+.ac-note { margin-top: 12px; font-size: .8125rem; color: var(--text-faint); }
+
+.tool-prose { max-width: 44rem; margin-inline: auto; padding: clamp(48px, 8vw, 88px) var(--g) clamp(64px, 10vw, 120px); }
+.tool-prose h2 { margin-top: 40px; font-size: clamp(1.35rem, 3.4vw, 1.75rem); font-weight: 760; letter-spacing: -.025em; }
+.tool-prose h2:first-child { margin-top: 0; }
+.tool-prose p { margin-top: 14px; font-size: 1rem; line-height: 1.72; color: var(--text-dim); }
+.tool-qa { margin-top: 20px; }
+.tool-qa > div { padding: 18px 0; border-bottom: 1px solid rgb(255 255 255 / .1); }
+:root[data-theme="light"] .tool-qa > div { border-color: var(--border); }
+.tool-qa dt { font-size: 1rem; font-weight: 700; letter-spacing: -.015em; }
+.tool-qa dd { margin-top: 8px; font-size: .9375rem; line-height: 1.68; color: var(--text-dim); }
+.tool-cta { display: grid; gap: 14px; justify-items: center; margin-top: 44px; padding: 28px; border-radius: 24px; text-align: center; }
+.tool-cta h2 { margin-top: 0; font-size: 1.35rem; }
+@media (min-width: 620px) { .ac-inputs { grid-template-columns: 1fr 1fr; } .ac-field:last-child { grid-column: 1 / -1; } }
