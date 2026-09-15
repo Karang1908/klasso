@@ -19,7 +19,9 @@ function Words({ text, className }: { text: string; className?: string }) {
     <span className={className}>
       {text.split(" ").map((word, i, all) => (
         <span key={`${word}-${i}`}>
-          <span className="word"><span className="word-in">{word}</span></span>
+          <span className="word">
+            <span className="word-in" style={{ "--i": i } as React.CSSProperties}>{word}</span>
+          </span>
           {i < all.length - 1 ? " " : null}
         </span>
       ))}
@@ -51,16 +53,13 @@ export function Hero() {
   }, [reduced, paused]);
 
   useGsapScope(scope, () => {
-    // One authored entrance: the headline rises word by word, everything else
-    // follows it. Nothing here loops.
-    gsap.set(".word-in", { yPercent: 118 });
-    gsap.timeline({ defaults: { ease: "expo.out" } })
-      .to(".word-in", { yPercent: 0, duration: 1.15, stagger: 0.055 })
-      .from(".hero-sub", { y: 18, opacity: 0, duration: 0.8 }, "-=0.72")
-      .from(".hero-act > *", { y: 16, opacity: 0, duration: 0.7, stagger: 0.08 }, "-=0.6")
-      .from(".hero-stage", { scale: 0.92, opacity: 0, duration: 1.2 }, "-=1.05");
-
-    // The ring drifts on scroll so the hero has depth without parallaxing text.
+    // The entrance is CSS (see .word-in and friends in globals.css), not GSAP.
+    // It used to be a gsap.from() that set opacity to 0, which meant the
+    // headline stayed invisible until 1.2MB of JavaScript had downloaded and
+    // run: measured LCP was 2.79s against Google's 2.5s bar, on a page whose
+    // first paint was 0.94s. A CSS animation starts at first paint instead.
+    //
+    // GSAP keeps the scroll choreography, which genuinely needs it.
     gsap.to(".hero-stage", {
       yPercent: -14, rotateX: 14, scale: 0.94, ease: "none",
       scrollTrigger: { trigger: scope.current, start: "top top", end: "bottom top", scrub: 0.6 },
