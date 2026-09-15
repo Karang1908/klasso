@@ -24,7 +24,7 @@ export const FAQS: { q: string; a: string }[] = [
   },
   {
     q: "Does it track my attendance percentage?",
-    a: "Yes. Mark yourself present or absent in one tap as each class happens, and Klasso keeps a running percentage for every subject. You can set the minimum attendance your course requires per subject and see how much room you have left.",
+    a: "Yes. Mark yourself present or absent in one tap as each class happens, and Klasso keeps a running percentage for every subject. You can set the minimum attendance your course requires per subject and see how much room you have left. If you only want the arithmetic, the free attendance percentage calculator works it out without an account.",
   },
   {
     q: "Does it work on iPhone and Android?",
