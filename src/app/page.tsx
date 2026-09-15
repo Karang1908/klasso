@@ -5,6 +5,7 @@ import { PhoneStack } from "@/components/landing/PhoneStack";
 import { ReminderPath } from "@/components/landing/ReminderPath";
 import { CloseCta } from "@/components/landing/CloseCta";
 import { Faq } from "@/components/landing/Faq";
+import { Tools } from "@/components/landing/Tools";
 import { FAQS } from "@/components/landing/faq-data";
 import { SignedInRedirect } from "@/components/landing/SignedInRedirect";
 import { LandingNav } from "@/components/landing/LandingNav";
@@ -32,6 +33,7 @@ export default function Landing() {
         <DayPan />
         <PhoneStack />
         <ReminderPath />
+        <Tools />
         <Faq />
         <CloseCta />
       </main>
