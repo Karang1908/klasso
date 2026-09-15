@@ -4,6 +4,23 @@ import { LandingNav } from "../landing/LandingNav";
 import { BrandMark } from "../icons";
 import { otherTools } from "@/lib/tools";
 
+/**
+ * Visible trail, matching the BreadcrumbList each page declares. Structured
+ * data is meant to describe something a visitor can actually see, so a page
+ * that emits the schema without showing the trail is misrepresenting itself.
+ */
+export function Crumbs({ here }: { here?: string }) {
+  return (
+    <nav className="tool-crumbs" aria-label="Breadcrumb">
+      <Link href="/">Klasso</Link>
+      <span aria-hidden="true">/</span>
+      {here
+        ? <><Link href="/tools">Calculators</Link><span aria-hidden="true">/</span><span aria-current="page">{here}</span></>
+        : <span aria-current="page">Calculators</span>}
+    </nav>
+  );
+}
+
 /** Shared page furniture, so four tools cannot drift into four designs. */
 export function ToolChrome({
   slug, heading, intro, children,
@@ -11,6 +28,7 @@ export function ToolChrome({
   return (
     <main className="lp tool">
       <LandingNav />
+      <Crumbs here={heading} />
       <header className="tool-head">
         <h1>{heading}</h1>
         <p>{intro}</p>
