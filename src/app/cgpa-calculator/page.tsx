@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { CgpaCalculator } from "@/components/tools/CgpaCalculator";
 import { ToolChrome, ToolCta } from "@/components/tools/ToolChrome";
-import { toolBySlug } from "@/lib/tools";
+import { breadcrumb, toolBySlug } from "@/lib/tools";
 
 const tool = toolBySlug("cgpa-calculator")!;
 
@@ -47,6 +47,7 @@ export default function Page() {
         dangerouslySetInnerHTML={{ __html: JSON.stringify({
           "@context": "https://schema.org",
           "@graph": [
+            breadcrumb("cgpa-calculator"),
             {
               "@type": "WebApplication",
               name: tool.name,
