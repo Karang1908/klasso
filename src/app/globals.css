@@ -1352,3 +1352,47 @@ button.agenda-title { display: flex; align-items: center; min-height: 44px; marg
 }
 .gpa-add:hover { color: var(--text); border-color: var(--text-dim); }
 @media (min-width: 620px) { .tool-grid { grid-template-columns: 1fr 1fr; } }
+
+/* ── Landing: the calculators ──────────────────────────────────────────
+   A section, not a footnote. These are the only part of the site a visitor
+   can use before trusting us with anything, so they get real estate. */
+.lp-toolset { padding: clamp(64px, 10vw, 128px) var(--g); max-width: 66rem; margin-inline: auto; }
+.lpt-head { max-width: 40rem; }
+.lpt-head h2 { font-size: clamp(1.9rem, 4.6vw, 2.75rem); font-weight: 780; letter-spacing: -.035em; line-height: 1.06; }
+.lpt-head p { margin-top: 14px; font-size: clamp(.9375rem, 2vw, 1.0625rem); line-height: 1.6; color: var(--text-dim); }
+.lpt-grid { display: grid; gap: 12px; margin-top: clamp(28px, 5vw, 44px); }
+/* Column, not grid: the blurbs differ in length, and "Open" drifting to a
+   different height in every card reads as four unrelated boxes. */
+.lpt-card {
+  display: flex; flex-direction: column; gap: 6px;
+  padding: 22px; border-radius: 22px; will-change: transform;
+  transition: transform 220ms cubic-bezier(.22,1,.36,1), filter 220ms;
+}
+.lpt-card:hover { transform: translateY(-3px); filter: brightness(1.07); }
+.lpt-card:active { transform: translateY(-1px); }
+.lpt-card h3 { font-size: 1.0625rem; font-weight: 720; letter-spacing: -.02em; text-wrap: balance; }
+.lpt-card p { font-size: .875rem; line-height: 1.55; color: var(--text-dim); }
+.lpt-go { display: inline-flex; align-items: center; gap: 6px; margin-top: auto; padding-top: 14px; font-size: .8125rem; font-weight: 700; color: var(--brand); }
+.lpt-all {
+  display: inline-flex; align-items: center; gap: 8px; margin-top: 28px;
+  min-height: 48px; padding-inline: 22px; border-radius: 999px;
+  border: 1px solid rgb(255 255 255 / .16); font-size: .9375rem; font-weight: 650; color: var(--text);
+  transition: background-color 200ms;
+}
+.lpt-all:hover { background: rgb(255 255 255 / .07); }
+:root[data-theme="light"] .lpt-all { border-color: var(--border); }
+:root[data-theme="light"] .lpt-all:hover { background: var(--surface-2); }
+@media (min-width: 640px) { .lpt-grid { grid-template-columns: 1fr 1fr; } }
+@media (min-width: 1040px) { .lpt-grid { grid-template-columns: repeat(4, 1fr); } }
+
+.tool-crumbs {
+  display: flex; align-items: center; gap: 8px; flex-wrap: wrap;
+  max-width: 46rem; margin-inline: auto;
+  padding: calc(84px + env(safe-area-inset-top, 0px)) var(--g) 0;
+  font-size: .8125rem; color: var(--text-faint);
+}
+.tool-crumbs a { color: var(--text-dim); }
+.tool-crumbs a:hover { color: var(--brand); }
+/* the trail takes the space the head used to reserve for the nav */
+.tool-crumbs + .tool-head { padding-top: 14px; }
+.tool-prose strong { color: var(--text); font-weight: 700; }
