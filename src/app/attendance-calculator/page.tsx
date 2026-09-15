@@ -3,7 +3,8 @@ import Link from "next/link";
 import { AttendanceCalculator } from "@/components/AttendanceCalculator";
 import { LandingNav } from "@/components/landing/LandingNav";
 import { BrandMark } from "@/components/icons";
-import { RelatedTools } from "@/components/tools/ToolChrome";
+import { breadcrumb } from "@/lib/tools";
+import { Crumbs, RelatedTools } from "@/components/tools/ToolChrome";
 
 /**
  * A tool page, not a landing page dressed as one.
@@ -59,6 +60,7 @@ export default function AttendanceCalculatorPage() {
     <>
       <main className="lp tool">
         <LandingNav />
+        <Crumbs here="Attendance percentage calculator" />
 
         <header className="tool-head">
           <h1>Attendance percentage calculator</h1>
@@ -117,6 +119,7 @@ export default function AttendanceCalculatorPage() {
         dangerouslySetInnerHTML={{ __html: JSON.stringify({
           "@context": "https://schema.org",
           "@graph": [
+            breadcrumb("attendance-calculator"),
             {
               "@type": "WebApplication",
               name: "Attendance Percentage Calculator",
