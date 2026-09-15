@@ -3,6 +3,7 @@ import Link from "next/link";
 import { AttendanceCalculator } from "@/components/AttendanceCalculator";
 import { LandingNav } from "@/components/landing/LandingNav";
 import { BrandMark } from "@/components/icons";
+import { RelatedTools } from "@/components/tools/ToolChrome";
 
 /**
  * A tool page, not a landing page dressed as one.
@@ -62,9 +63,8 @@ export default function AttendanceCalculatorPage() {
         <header className="tool-head">
           <h1>Attendance percentage calculator</h1>
           <p>
-            Work out where you stand, how many classes you can still afford to miss, and
-            how many you need to attend to get back above the line. Works for school,
-            college and university, at whatever percentage your course requires.
+            See your percentage, how many classes you can still miss, and how many you
+            need to attend to recover. For school, college or university.
           </p>
         </header>
 
@@ -109,6 +109,7 @@ export default function AttendanceCalculatorPage() {
             <Link href="/login" className="lp-cta">Create your account</Link>
           </aside>
         </section>
+        <RelatedTools slug="attendance-calculator" />
       </main>
 
       <script
